@@ -13,8 +13,9 @@ export interface GameConfig {
 
 // ─────────────────────────────────────────────────────────────────────────────
 // GAME LAUNCHER CONFIG
-// Replace the externalUrl values with your actual Replit game URLs.
-// Each URL should be the full address, e.g. https://my-game.replit.app
+// Fill in each externalUrl with the full Replit URL for that game.
+// Example: "https://my-game.replit.app"
+// Leave blank ("") to show "url pending" on the card until the URL is ready.
 // ─────────────────────────────────────────────────────────────────────────────
 export const GAMES_CONFIG: GameConfig[] = [
   {
@@ -22,7 +23,7 @@ export const GAMES_CONFIG: GameConfig[] = [
     title: "Flash",
     titleAr: "فلاش",
     route: "/flash",
-    externalUrl: "PASTE_URL_HERE",
+    externalUrl: "", // 👈 paste Flash URL here
     status: "active",
     description: "Lightning fast party game.",
     descriptionAr: "لعبة حفلات سريعة البرق.",
@@ -32,7 +33,7 @@ export const GAMES_CONFIG: GameConfig[] = [
     title: "Yes / No",
     titleAr: "نعم / لا",
     route: "/yesno",
-    externalUrl: "PASTE_URL_HERE",
+    externalUrl: "", // 👈 paste Yes/No URL here
     status: "active",
     description: "One question. Two answers. Infinite awkwardness.",
     descriptionAr: "سؤال واحد. إجابتان. إحراج لا نهاية له.",
@@ -42,7 +43,7 @@ export const GAMES_CONFIG: GameConfig[] = [
     title: "Bomb",
     titleAr: "القنبلة",
     route: "/bomb",
-    externalUrl: "PASTE_URL_HERE",
+    externalUrl: "", // 👈 paste Bomb URL here
     status: "active",
     description: "Pass the bomb before it explodes. Categories. Speed.",
     descriptionAr: "مرر القنبلة قبل أن تنفجر. فئات. سرعة.",
@@ -52,7 +53,7 @@ export const GAMES_CONFIG: GameConfig[] = [
     title: "Bomb 2 Mobile",
     titleAr: "القنبلة 2 موبايل",
     route: "/bomb2mobile",
-    externalUrl: "PASTE_URL_HERE",
+    externalUrl: "", // 👈 paste Bomb 2 Mobile URL here
     status: "active",
     description: "Mobile-optimized bomb round.",
     descriptionAr: "جولة القنبلة للجوال.",
@@ -62,7 +63,7 @@ export const GAMES_CONFIG: GameConfig[] = [
     title: "Forehead",
     titleAr: "الجبهة",
     route: "/forehead",
-    externalUrl: "PASTE_URL_HERE",
+    externalUrl: "", // 👈 paste Forehead URL here
     status: "active",
     description: "Who am I? Hold it to your forehead and find out.",
     descriptionAr: "من أنا؟ ضعها على جبهتك واكتشف.",
@@ -72,7 +73,7 @@ export const GAMES_CONFIG: GameConfig[] = [
     title: "Charades",
     titleAr: "الشرادة",
     route: "/charades",
-    externalUrl: "PASTE_URL_HERE",
+    externalUrl: "", // 👈 paste Charades URL here
     status: "active",
     description: "Act it out. No words allowed.",
     descriptionAr: "مثّلها. لا كلمات مسموحة.",
@@ -82,7 +83,7 @@ export const GAMES_CONFIG: GameConfig[] = [
     title: "Guess the Character",
     titleAr: "خمّن الشخصية",
     route: "/guessthecharacter",
-    externalUrl: "PASTE_URL_HERE",
+    externalUrl: "", // 👈 paste Guess the Character URL here
     status: "active",
     description: "Famous faces, mystery rounds.",
     descriptionAr: "وجوه مشهورة، جولات غامضة.",
@@ -92,7 +93,7 @@ export const GAMES_CONFIG: GameConfig[] = [
     title: "Tfadhloon",
     titleAr: "تفضلون",
     route: "/tfadhloon",
-    externalUrl: "PASTE_URL_HERE",
+    externalUrl: "", // 👈 paste Tfadhloon URL here
     status: "active",
     description: "The ultimate party icebreaker — vote, reveal, chaos.",
     descriptionAr: "لعبة الحفلات المثالية — صوّت، اكشف، فوضى.",
