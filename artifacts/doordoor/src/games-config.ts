@@ -83,7 +83,7 @@ export const GAMES_CONFIG: GameConfig[] = [
     title: "Forehead",
     titleAr: "الجبهة",
     route: "/forehead",
-    externalUrl: "", // 👈 paste Forehead URL here
+    externalUrl: "https://forehead-game.replit.app/forehead", // 👈 paste Forehead URL here
     status: "active",
     description: "Who am I? Hold it to your forehead and find out.",
     descriptionAr: "من أنا؟ ضعها على جبهتك واكتشف.",
@@ -93,7 +93,7 @@ export const GAMES_CONFIG: GameConfig[] = [
     title: "Guess the Character",
     titleAr: "خمّن الشخصية",
     route: "/guessthecharacter",
-    externalUrl: "", // 👈 paste Guess the Character URL here
+    externalUrl: "https://forehead-game.replit.app/character", // 👈 paste Guess the Character URL here
     status: "active",
     description: "Famous faces, mystery rounds.",
     descriptionAr: "وجوه مشهورة، جولات غامضة.",
@@ -103,7 +103,7 @@ export const GAMES_CONFIG: GameConfig[] = [
     title: "Charades",
     titleAr: "الشرادة",
     route: "/charades",
-    externalUrl: "", // 👈 paste Charades URL here
+    externalUrl: "https://forehead-game.replit.app/charades", // 👈 paste Charades URL here
     status: "active",
     description: "Act it out. No words allowed.",
     descriptionAr: "مثّلها. لا كلمات مسموحة.",
