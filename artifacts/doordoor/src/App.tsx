@@ -31,14 +31,15 @@ function Router() {
         <Route path="/admin/dashboard" component={AdminDashboard} />
 
         {/* Game launcher routes */}
+        <Route path="/tfadhloon" component={GameLauncher} />
+        <Route path="/aljasoos" component={GameLauncher} />
         <Route path="/flash" component={GameLauncher} />
         <Route path="/yesno" component={GameLauncher} />
         <Route path="/bomb" component={GameLauncher} />
-        <Route path="/bomb2mobile" component={GameLauncher} />
+        <Route path="/reactor" component={GameLauncher} />
         <Route path="/forehead" component={GameLauncher} />
-        <Route path="/charades" component={GameLauncher} />
         <Route path="/guessthecharacter" component={GameLauncher} />
-        <Route path="/tfadhloon" component={GameLauncher} />
+        <Route path="/charades" component={GameLauncher} />
 
         <Route component={NotFound} />
       </Switch>

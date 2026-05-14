@@ -19,6 +19,26 @@ export interface GameConfig {
 // ─────────────────────────────────────────────────────────────────────────────
 export const GAMES_CONFIG: GameConfig[] = [
   {
+    id: "tfadhloon",
+    title: "Tfadhloon",
+    titleAr: "تفضلون",
+    route: "/tfadhloon",
+    externalUrl: "", // 👈 paste Tfadhloon URL here
+    status: "active",
+    description: "The ultimate party icebreaker — vote, reveal, chaos.",
+    descriptionAr: "لعبة الحفلات المثالية — صوّت، اكشف، فوضى.",
+  },
+  {
+    id: "aljasoos",
+    title: "Aljasoos",
+    titleAr: "الجاسوس",
+    route: "/aljasoos",
+    externalUrl: "", // 👈 paste Aljasoos URL here
+    status: "active",
+    description: "Find the spy before they find you.",
+    descriptionAr: "اكشف الجاسوس قبل أن يكشفك.",
+  },
+  {
     id: "flash",
     title: "Flash",
     titleAr: "فلاش",
@@ -49,14 +69,14 @@ export const GAMES_CONFIG: GameConfig[] = [
     descriptionAr: "مرر القنبلة قبل أن تنفجر. فئات. سرعة.",
   },
   {
-    id: "bomb2mobile",
-    title: "Bomb 2 Mobile",
-    titleAr: "القنبلة 2 موبايل",
-    route: "/bomb2mobile",
-    externalUrl: "", // 👈 paste Bomb 2 Mobile URL here
+    id: "reactor",
+    title: "Reactor",
+    titleAr: "المفاعل",
+    route: "/reactor",
+    externalUrl: "", // 👈 paste Reactor URL here
     status: "active",
-    description: "Mobile-optimized bomb round.",
-    descriptionAr: "جولة القنبلة للجوال.",
+    description: "React fast or face the consequences.",
+    descriptionAr: "تصرف بسرعة أو تواجه العواقب.",
   },
   {
     id: "forehead",
@@ -69,16 +89,6 @@ export const GAMES_CONFIG: GameConfig[] = [
     descriptionAr: "من أنا؟ ضعها على جبهتك واكتشف.",
   },
   {
-    id: "charades",
-    title: "Charades",
-    titleAr: "الشرادة",
-    route: "/charades",
-    externalUrl: "", // 👈 paste Charades URL here
-    status: "active",
-    description: "Act it out. No words allowed.",
-    descriptionAr: "مثّلها. لا كلمات مسموحة.",
-  },
-  {
     id: "guessthecharacter",
     title: "Guess the Character",
     titleAr: "خمّن الشخصية",
@@ -89,14 +99,14 @@ export const GAMES_CONFIG: GameConfig[] = [
     descriptionAr: "وجوه مشهورة، جولات غامضة.",
   },
   {
-    id: "tfadhloon",
-    title: "Tfadhloon",
-    titleAr: "تفضلون",
-    route: "/tfadhloon",
-    externalUrl: "", // 👈 paste Tfadhloon URL here
+    id: "charades",
+    title: "Charades",
+    titleAr: "الشرادة",
+    route: "/charades",
+    externalUrl: "", // 👈 paste Charades URL here
     status: "active",
-    description: "The ultimate party icebreaker — vote, reveal, chaos.",
-    descriptionAr: "لعبة الحفلات المثالية — صوّت، اكشف، فوضى.",
+    description: "Act it out. No words allowed.",
+    descriptionAr: "مثّلها. لا كلمات مسموحة.",
   },
 ];
 
