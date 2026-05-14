@@ -1,22 +1,30 @@
 openapi: 3.1.0
 info:
-  # Do not change the title, if the title changes, the import paths will be broken
   title: Api
   version: 0.1.0
-  description: API specification
+  description: DoorDoor.games API specification
 servers:
   - url: /api
     description: Base API path
 tags:
   - name: health
     description: Health operations
+  - name: games
+    description: Game management
+  - name: rooms
+    description: Room/lobby management
+  - name: hosts
+    description: Host authentication
+  - name: checkout
+    description: Payment and promo codes
+  - name: admin
+    description: Admin operations
 paths:
   /healthz:
     get:
       operationId: healthCheck
       tags: [health]
       summary: Health check
-      description: Returns server health status
       responses:
         "200":
           description: Healthy
@@ -24,13 +32,647 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/HealthStatus"
+
+  /games:
+    get:
+      operationId: listGames
+      tags: [games]
+      summary: List all games
+      responses:
+        "200":
+          description: List of games
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Game"
+    post:
+      operationId: createGame
+      tags: [games]
+      summary: Create a game (admin)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/GameInput"
+      responses:
+        "201":
+          description: Game created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Game"
+
+  /games/{id}:
+    get:
+      operationId: getGame
+      tags: [games]
+      summary: Get game by ID
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Game
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Game"
+        "404":
+          description: Not found
+    patch:
+      operationId: updateGame
+      tags: [games]
+      summary: Update a game (admin)
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/GameUpdate"
+      responses:
+        "200":
+          description: Updated game
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Game"
+    delete:
+      operationId: deleteGame
+      tags: [games]
+      summary: Delete a game (admin)
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "204":
+          description: Deleted
+
+  /rooms:
+    get:
+      operationId: listRooms
+      tags: [rooms]
+      summary: List all active rooms (admin)
+      responses:
+        "200":
+          description: List of rooms
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Room"
+    post:
+      operationId: createRoom
+      tags: [rooms]
+      summary: Create a new room (host)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/RoomInput"
+      responses:
+        "201":
+          description: Room created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Room"
+
+  /rooms/{code}:
+    get:
+      operationId: getRoom
+      tags: [rooms]
+      summary: Get room by code
+      parameters:
+        - name: code
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Room
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Room"
+        "404":
+          description: Not found
+    delete:
+      operationId: closeRoom
+      tags: [rooms]
+      summary: Close/delete a room
+      parameters:
+        - name: code
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "204":
+          description: Closed
+
+  /rooms/{code}/game:
+    patch:
+      operationId: switchRoomGame
+      tags: [rooms]
+      summary: Switch the active game in a lobby without closing the room
+      parameters:
+        - name: code
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/RoomGameSwitch"
+      responses:
+        "200":
+          description: Updated room
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Room"
+
+  /rooms/{code}/join:
+    post:
+      operationId: joinRoom
+      tags: [rooms]
+      summary: Guest joins a room with nickname
+      parameters:
+        - name: code
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/GuestJoin"
+      responses:
+        "200":
+          description: Joined successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Room"
+        "404":
+          description: Room not found
+
+  /hosts/request-otp:
+    post:
+      operationId: requestOtp
+      tags: [hosts]
+      summary: Request OTP for phone number (simulated)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/OtpRequest"
+      responses:
+        "200":
+          description: OTP sent (simulated)
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/OtpRequestResult"
+
+  /hosts/verify-otp:
+    post:
+      operationId: verifyOtp
+      tags: [hosts]
+      summary: Verify OTP and create host session (simulated - always succeeds)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/OtpVerify"
+      responses:
+        "200":
+          description: Session created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HostSession"
+
+  /hosts/session:
+    get:
+      operationId: getHostSession
+      tags: [hosts]
+      summary: Get current host session status
+      responses:
+        "200":
+          description: Session info
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HostSession"
+
+  /checkout/validate-promo:
+    post:
+      operationId: validatePromo
+      tags: [checkout]
+      summary: Validate a promo code
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/PromoValidate"
+      responses:
+        "200":
+          description: Promo result
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PromoResult"
+
+  /checkout/pay:
+    post:
+      operationId: processPayment
+      tags: [checkout]
+      summary: Process payment or apply promo for 3-hour host pass
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/PaymentRequest"
+      responses:
+        "200":
+          description: Payment result
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PaymentResult"
+
+  /admin/login:
+    post:
+      operationId: adminLogin
+      tags: [admin]
+      summary: Admin login
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/AdminCredentials"
+      responses:
+        "200":
+          description: Admin token
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AdminSession"
+        "401":
+          description: Invalid credentials
+
+  /admin/stats:
+    get:
+      operationId: getAdminStats
+      tags: [admin]
+      summary: Platform-wide stats for admin dashboard
+      responses:
+        "200":
+          description: Stats
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AdminStats"
+
+  /admin/promo-codes:
+    get:
+      operationId: listPromoCodes
+      tags: [admin]
+      summary: List all promo codes
+      responses:
+        "200":
+          description: Promo codes
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/PromoCode"
+    post:
+      operationId: createPromoCode
+      tags: [admin]
+      summary: Create a promo code
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/PromoCodeInput"
+      responses:
+        "201":
+          description: Created promo code
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PromoCode"
+
+  /admin/promo-codes/{code}:
+    delete:
+      operationId: deletePromoCode
+      tags: [admin]
+      summary: Delete a promo code
+      parameters:
+        - name: code
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "204":
+          description: Deleted
+
 components:
   schemas:
     HealthStatus:
       type: object
+      required: [status]
       properties:
         status:
           type: string
-      required:
-        - status
 
+    Game:
+      type: object
+      required: [id, slug, title, titleAr, status, visible, pricingText]
+      properties:
+        id:
+          type: string
+        slug:
+          type: string
+        title:
+          type: string
+        titleAr:
+          type: string
+        description:
+          type: ["string", "null"]
+        descriptionAr:
+          type: ["string", "null"]
+        logoUrl:
+          type: ["string", "null"]
+        status:
+          type: string
+          enum: [active, coming_soon]
+        visible:
+          type: boolean
+        pricingText:
+          type: ["string", "null"]
+        route:
+          type: ["string", "null"]
+        createdAt:
+          type: string
+
+    GameInput:
+      type: object
+      required: [slug, title, titleAr, status]
+      properties:
+        slug:
+          type: string
+        title:
+          type: string
+        titleAr:
+          type: string
+        description:
+          type: string
+        descriptionAr:
+          type: string
+        logoUrl:
+          type: string
+        status:
+          type: string
+          enum: [active, coming_soon]
+        visible:
+          type: boolean
+        pricingText:
+          type: string
+        route:
+          type: string
+
+    GameUpdate:
+      type: object
+      properties:
+        title:
+          type: string
+        titleAr:
+          type: string
+        description:
+          type: string
+        descriptionAr:
+          type: string
+        logoUrl:
+          type: string
+        status:
+          type: string
+          enum: [active, coming_soon]
+        visible:
+          type: boolean
+        pricingText:
+          type: string
+        route:
+          type: string
+
+    Room:
+      type: object
+      required: [id, code, hostPhone, activeGameId, guests, createdAt, expiresAt, open]
+      properties:
+        id:
+          type: string
+        code:
+          type: string
+        hostPhone:
+          type: string
+        activeGameId:
+          type: string
+        activeGame:
+          $ref: "#/components/schemas/Game"
+        guests:
+          type: array
+          items:
+            type: string
+        createdAt:
+          type: string
+        expiresAt:
+          type: string
+        open:
+          type: boolean
+
+    RoomInput:
+      type: object
+      required: [hostPhone, gameId]
+      properties:
+        hostPhone:
+          type: string
+        gameId:
+          type: string
+
+    RoomGameSwitch:
+      type: object
+      required: [gameId]
+      properties:
+        gameId:
+          type: string
+
+    GuestJoin:
+      type: object
+      required: [nickname]
+      properties:
+        nickname:
+          type: string
+
+    OtpRequest:
+      type: object
+      required: [phone]
+      properties:
+        phone:
+          type: string
+
+    OtpRequestResult:
+      type: object
+      required: [success, message]
+      properties:
+        success:
+          type: boolean
+        message:
+          type: string
+
+    OtpVerify:
+      type: object
+      required: [phone, otp]
+      properties:
+        phone:
+          type: string
+        otp:
+          type: string
+
+    HostSession:
+      type: object
+      required: [phone, active, expiresAt]
+      properties:
+        phone:
+          type: string
+        active:
+          type: boolean
+        expiresAt:
+          type: ["string", "null"]
+
+    PromoValidate:
+      type: object
+      required: [code]
+      properties:
+        code:
+          type: string
+
+    PromoResult:
+      type: object
+      required: [valid, free]
+      properties:
+        valid:
+          type: boolean
+        free:
+          type: boolean
+        message:
+          type: string
+
+    PaymentRequest:
+      type: object
+      required: [phone]
+      properties:
+        phone:
+          type: string
+        promoCode:
+          type: string
+
+    PaymentResult:
+      type: object
+      required: [success, free, message]
+      properties:
+        success:
+          type: boolean
+        free:
+          type: boolean
+        message:
+          type: string
+        expiresAt:
+          type: string
+
+    AdminCredentials:
+      type: object
+      required: [username, password]
+      properties:
+        username:
+          type: string
+        password:
+          type: string
+
+    AdminSession:
+      type: object
+      required: [token, success]
+      properties:
+        token:
+          type: string
+        success:
+          type: boolean
+
+    AdminStats:
+      type: object
+      required: [totalGames, activeGames, activeRooms, totalGuests]
+      properties:
+        totalGames:
+          type: integer
+        activeGames:
+          type: integer
+        activeRooms:
+          type: integer
+        totalGuests:
+          type: integer
+
+    PromoCode:
+      type: object
+      required: [id, code, active]
+      properties:
+        id:
+          type: string
+        code:
+          type: string
+        active:
+          type: boolean
+        usageCount:
+          type: integer
+        createdAt:
+          type: string
+
+    PromoCodeInput:
+      type: object
+      required: [code]
+      properties:
+        code:
+          type: string
+        active:
+          type: boolean

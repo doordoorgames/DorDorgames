@@ -1,0 +1,198 @@
+Create a new production-ready mobile-first web platform called DoorDoor.games.
+
+This is NOT a simple website with links.
+This should feel like a unified dystopian 90s anime arcade gaming platform / operating system.
+
+VISUAL DIRECTION:
+
+* Portrait-first design
+* Designed mainly for phones and TikTok-style usage
+* 90s anime + cyber arcade + dystopian digital playground aesthetic
+* Pixel fonts mixed with thick Arabic fonts
+* Neon magenta, purple, black, teal, acid green
+* CRT monitor feel
+* Slight scanlines and grain
+* Animated UI glow
+* Main interface centered in a controlled invisible frame
+* No modern rounded “corporate” UI
+* No soft Apple-style design
+* UI should feel like an underground multiplayer arcade network
+
+CORE PLATFORM STRUCTURE:
+Homepage:
+
+* Grid of game cards similar to arcade cartridges
+* Each game has:
+    * logo
+    * title
+    * status
+    * Play button
+    * Coming Soon state support
+* Bilingual Arabic + English support
+* Smooth animated transitions between screens
+* Dynamic animated background
+* Ambient UI sound support architecture
+
+Games are NOT built inside one giant page.
+Platform should support modular game links/routes.
+
+Example:
+
+* doordoor.games/tfadhloon
+* doordoor.games/bomb
+* doordoor.games/yesno
+
+HOST ACCOUNT SYSTEM:
+Only hosts register.
+Guests DO NOT need accounts.
+
+Host registration:
+
+* Phone number field
+* OTP architecture placeholder for future Twilio integration
+* For now simulate successful OTP verification
+* Store host session locally
+
+ADMIN PANEL:
+Route:
+doordoor.games/admin
+
+Temporary admin login:
+Username: admin
+Password: admin999
+
+Admin panel should allow:
+
+* Add/edit/remove games
+* Upload logos/images
+* Toggle “coming soon”
+* Change pricing text
+* View active lobbies
+* Force close rooms
+* Upload Excel/CSV content files for games
+* Manage free promo codes
+* Toggle game visibility
+
+PAYMENT SYSTEM:
+For now create a FAKE payment/test payment flow only.
+
+Pricing:
+2 KD = 3 hour host access pass
+
+At checkout:
+
+* User enters phone number
+* User sees promo code field
+
+Promo code:
+DOORDOOR
+
+If promo code entered:
+
+* unlock free 3-hour pass
+* no payment required
+
+Otherwise:
+
+* simulate successful payment
+* future-ready architecture for MyFatoorah/Tap integration later
+
+HOST FLOW:
+Host logs in
+→ clicks START FUN
+→ chooses a game
+→ creates disposable room
+
+Room behavior:
+
+* Temporary disposable rooms
+* Random room code generated
+* QR code generated
+* Guests join free with:
+    * QR code
+    * room code
+    * nickname only
+
+IMPORTANT:
+Host can start a NEW GAME inside same lobby session without creating an entirely new room.
+
+Meaning:
+Party continuity system.
+
+Example:
+Lobby remains alive while switching:
+
+* Tfadhloon
+* Bomb
+* Yes/No
+* etc.
+
+This is VERY important.
+
+GUEST EXPERIENCE:
+Guests:
+
+* no registration
+* no accounts
+* no passwords
+* enter nickname only
+* optimized for extremely fast joining
+
+TECH REQUIREMENTS:
+
+* Mobile-first responsive
+* Portrait optimized
+* Replit-compatible
+* Clean modular architecture
+* Avoid breaking all games when editing one game
+* Prepare architecture for future scaling
+
+DO NOT:
+
+* use Firebase
+* use Supabase
+* use overly enterprise architecture
+* use complex authentication systems yet
+* use ugly default component libraries
+
+USE:
+
+* lightweight local JSON/file storage for now
+* CSV/Excel upload support
+* modular routing
+* reusable UI components
+* reusable room session system
+
+HOMEPAGE FEELING:
+Should feel like:
+
+* anime hacker arcade
+* multiplayer underground gaming network
+* Toonami meets cyber majlis
+* late 90s/early 2000s anime interface
+* dramatic transitions
+* digital world atmosphere
+
+Add:
+
+* subtle motion
+* CRT flicker
+* animated UI borders
+* loading transitions
+* game cartridge hover effects
+* ambient dystopian atmosphere
+
+Generate:
+
+* full frontend
+* backend architecture
+* modular file structure
+* admin panel
+* fake payment system
+* promo code system
+* room system
+* QR join system
+* reusable lobby system
+* clean deployment-ready architecture
+
+The project should feel like a REAL gaming platform/company, not a student project.
