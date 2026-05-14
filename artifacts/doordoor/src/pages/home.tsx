@@ -1,5 +1,4 @@
 import { Layout } from "@/components/layout";
-import { Link } from "wouter";
 import { motion } from "framer-motion";
 import { GAMES_CONFIG } from "@/games-config";
 
@@ -33,10 +32,30 @@ export default function Home() {
         <div className="grid grid-cols-1 gap-4">
           {GAMES_CONFIG.map((game, i) => {
             const isComingSoon = game.status === "coming_soon";
-            const hasUrl =
-              game.externalUrl &&
-              game.externalUrl !== "PASTE_URL_HERE" &&
-              game.externalUrl.startsWith("http");
+            const hasUrl = game.externalUrl && game.externalUrl.startsWith("http");
+
+            if (isComingSoon || !hasUrl) {
+              return (
+                <motion.div
+                  key={game.id}
+                  custom={i}
+                  variants={cardVariants}
+                  initial="hidden"
+                  animate="visible"
+                  data-testid={`card-game-${game.id}`}
+                >
+                  <div className="relative border-2 border-muted p-4 bg-background opacity-50 cursor-not-allowed">
+                    <GameCardInner game={game} />
+                    <div className="absolute inset-0 flex items-center justify-center bg-background/60">
+                      <span className="font-mono text-muted-foreground text-xs">
+                        COMING SOON &nbsp;/&nbsp;
+                        <span className="arabic-text">قريباً</span>
+                      </span>
+                    </div>
+                  </div>
+                </motion.div>
+              );
+            }
 
             return (
               <motion.div
@@ -47,26 +66,12 @@ export default function Home() {
                 animate="visible"
                 data-testid={`card-game-${game.id}`}
               >
-                {isComingSoon ? (
-                  /* Coming Soon — not clickable */
-                  <div className="relative border-2 border-muted p-4 bg-background opacity-60">
-                    <div className="absolute inset-0 z-10 bg-background/70 flex items-center justify-center border-2 border-dashed border-muted">
-                      <span className="font-mono text-muted-foreground text-xs text-center">
-                        COMING SOON
-                        <br />
-                        <span className="arabic-text block mt-2">قريباً</span>
-                      </span>
-                    </div>
-                    <GameCardInner game={game} hasUrl={false} />
-                  </div>
-                ) : (
-                  /* Active — link to launcher route */
-                  <Link href={game.route}>
-                    <div className="relative border-2 border-primary hover:border-accent hover:shadow-[0_0_18px_rgba(0,255,65,0.45)] p-4 transition-all duration-200 transform hover:scale-[1.02] bg-background cursor-pointer">
-                      <GameCardInner game={game} hasUrl={hasUrl} />
-                    </div>
-                  </Link>
-                )}
+                <a
+                  href={game.externalUrl}
+                  className="block border-2 border-primary hover:border-accent hover:shadow-[0_0_18px_rgba(0,255,65,0.45)] p-4 transition-all duration-200 transform hover:scale-[1.02] bg-background cursor-pointer"
+                >
+                  <GameCardInner game={game} />
+                </a>
               </motion.div>
             );
           })}
@@ -78,14 +83,11 @@ export default function Home() {
 
 function GameCardInner({
   game,
-  hasUrl,
 }: {
   game: (typeof GAMES_CONFIG)[number];
-  hasUrl: boolean | undefined;
 }) {
   return (
     <div className="flex items-center gap-4">
-      {/* Logo placeholder */}
       <div className="w-14 h-14 bg-muted border border-border flex items-center justify-center flex-shrink-0">
         <span className="font-mono text-[10px] text-muted-foreground text-center leading-tight px-1 uppercase">
           {game.title.slice(0, 3)}
@@ -96,22 +98,12 @@ function GameCardInner({
         <h3 className="font-mono text-sm text-foreground mb-0.5 truncate uppercase tracking-wide">
           {game.title}
         </h3>
-        <p
-          className="arabic-text text-sm text-muted-foreground mb-2 truncate"
-          dir="rtl"
-        >
+        <p className="arabic-text text-sm text-muted-foreground mb-2 truncate" dir="rtl">
           {game.titleAr}
         </p>
-        <div className="flex items-center gap-2">
-          <span className="inline-block px-2 py-0.5 bg-primary/20 text-primary text-[9px] font-mono border border-primary/50 uppercase">
-            ACTIVE
-          </span>
-          {!hasUrl && (
-            <span className="text-[9px] font-mono text-muted-foreground/50">
-              url pending
-            </span>
-          )}
-        </div>
+        <span className="inline-block px-2 py-0.5 bg-primary/20 text-primary text-[9px] font-mono border border-primary/50 uppercase">
+          ACTIVE
+        </span>
       </div>
 
       <div className="text-muted-foreground/40 font-mono text-xs flex-shrink-0">
