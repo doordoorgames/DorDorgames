@@ -12,6 +12,7 @@ import HostDashboard from "@/pages/host-dashboard";
 import RoomView from "@/pages/room";
 import AdminLogin from "@/pages/admin";
 import AdminDashboard from "@/pages/admin-dashboard";
+import GameLauncher from "@/pages/game-launcher";
 
 const queryClient = new QueryClient();
 
@@ -19,6 +20,7 @@ function Router() {
   return (
     <AnimatePresence mode="wait">
       <Switch>
+        {/* Platform routes */}
         <Route path="/" component={Home} />
         <Route path="/join" component={Join} />
         <Route path="/join/:code" component={Join} />
@@ -27,6 +29,17 @@ function Router() {
         <Route path="/room/:code" component={RoomView} />
         <Route path="/admin" component={AdminLogin} />
         <Route path="/admin/dashboard" component={AdminDashboard} />
+
+        {/* Game launcher routes */}
+        <Route path="/flash" component={GameLauncher} />
+        <Route path="/yesno" component={GameLauncher} />
+        <Route path="/bomb" component={GameLauncher} />
+        <Route path="/bomb2mobile" component={GameLauncher} />
+        <Route path="/forehead" component={GameLauncher} />
+        <Route path="/charades" component={GameLauncher} />
+        <Route path="/guessthecharacter" component={GameLauncher} />
+        <Route path="/tfadhloon" component={GameLauncher} />
+
         <Route component={NotFound} />
       </Switch>
     </AnimatePresence>
