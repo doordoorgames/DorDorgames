@@ -118,9 +118,10 @@ function HeroSection() {
           inset: 0,
           display: "flex",
           flexDirection: "column",
-          alignItems: "center",
+          alignItems: "flex-start",
           justifyContent: "flex-end",
           paddingBottom: "20px",
+          paddingLeft: "18px",
           zIndex: 10,
         }}
       >
@@ -135,24 +136,12 @@ function HeroSection() {
             src="/images/logo.png"
             alt="dordor.games"
             style={{
-              width: "180px",
+              width: "160px",
               height: "auto",
               filter:
-                "drop-shadow(0 0 12px rgba(255,0,255,0.7)) drop-shadow(0 0 30px rgba(255,0,255,0.35)) brightness(1.1) invert(1)",
+                "drop-shadow(0 0 10px rgba(255,0,255,0.5)) drop-shadow(0 0 24px rgba(255,0,255,0.25))",
             }}
           />
-          <div
-            style={{
-              fontFamily: "var(--font-sans)",
-              fontSize: "9px",
-              letterSpacing: "0.4em",
-              color: "rgba(0,220,255,0.6)",
-              marginTop: "4px",
-              textTransform: "uppercase",
-            }}
-          >
-            ゲームを始めよう · Underground Gaming
-          </div>
         </motion.div>
 
       </div>
@@ -296,23 +285,6 @@ function GameCard({
         </>
       )}
 
-      {/* Scan-line shimmer on active */}
-      {!isComingSoon && (
-        <div
-          style={{
-            position: "absolute",
-            inset: 0,
-            background: `repeating-linear-gradient(
-              0deg,
-              transparent,
-              transparent 3px,
-              rgba(0,0,0,0.08) 3px,
-              rgba(0,0,0,0.08) 4px
-            )`,
-            pointerEvents: "none",
-          }}
-        />
-      )}
 
       {/* Game info */}
       <div
