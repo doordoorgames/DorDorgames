@@ -124,34 +124,30 @@ function HeroSection() {
           zIndex: 10,
         }}
       >
-        {/* Logo */}
+        {/* Logo image */}
         <motion.div
           initial={{ opacity: 0, y: -10 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8, ease: "easeOut" }}
-          style={{ textAlign: "center", marginBottom: "10px" }}
+          style={{ textAlign: "center", marginBottom: "6px" }}
         >
-          <div
-            className="animate-neon-flicker"
+          <img
+            src="/images/logo.png"
+            alt="dordor.games"
             style={{
-              fontFamily: "var(--font-sans)",
-              fontSize: "34px",
-              letterSpacing: "0.08em",
-              color: "#ff00ff",
-              textShadow:
-                "0 0 15px #ff00ff, 0 0 35px #ff00ff66, 0 0 70px #ff00ff33",
-              lineHeight: 1,
+              width: "180px",
+              height: "auto",
+              filter:
+                "drop-shadow(0 0 12px rgba(255,0,255,0.7)) drop-shadow(0 0 30px rgba(255,0,255,0.35)) brightness(1.1) invert(1)",
             }}
-          >
-            dordor.games
-          </div>
+          />
           <div
             style={{
               fontFamily: "var(--font-sans)",
               fontSize: "9px",
               letterSpacing: "0.4em",
               color: "rgba(0,220,255,0.6)",
-              marginTop: "5px",
+              marginTop: "4px",
               textTransform: "uppercase",
             }}
           >
