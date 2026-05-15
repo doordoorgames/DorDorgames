@@ -46,16 +46,23 @@ function HeroSection() {
         flexShrink: 0,
       }}
     >
-      {/* Anime city silhouette image */}
-      <div
+      {/* Looping video background */}
+      <video
+        autoPlay
+        loop
+        muted
+        playsInline
         style={{
           position: "absolute",
           inset: 0,
-          backgroundImage: "url('/images/hero-silhouette.png')",
-          backgroundSize: "cover",
-          backgroundPosition: "center top",
+          width: "100%",
+          height: "100%",
+          objectFit: "cover",
+          objectPosition: "center top",
         }}
-      />
+      >
+        <source src="/videos/hero-bg.mp4" type="video/mp4" />
+      </video>
 
       {/* Bottom gradient fade into app background */}
       <div
