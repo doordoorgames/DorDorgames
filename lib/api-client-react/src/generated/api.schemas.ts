@@ -33,6 +33,8 @@ export interface Game {
   pricingText: string | null;
   /** @nullable */
   route?: string | null;
+  /** @nullable */
+  externalUrl?: string | null;
   createdAt?: string;
 }
 
@@ -55,6 +57,7 @@ export interface GameInput {
   visible?: boolean;
   pricingText?: string;
   route?: string;
+  externalUrl?: string;
 }
 
 export type GameUpdateStatus =
@@ -75,6 +78,7 @@ export interface GameUpdate {
   visible?: boolean;
   pricingText?: string;
   route?: string;
+  externalUrl?: string;
 }
 
 export interface Room {

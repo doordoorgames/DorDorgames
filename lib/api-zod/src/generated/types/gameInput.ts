@@ -18,4 +18,5 @@ export interface GameInput {
   visible?: boolean;
   pricingText?: string;
   route?: string;
+  externalUrl?: string;
 }

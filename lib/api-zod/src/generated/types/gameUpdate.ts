@@ -17,4 +17,5 @@ export interface GameUpdate {
   visible?: boolean;
   pricingText?: string;
   route?: string;
+  externalUrl?: string;
 }

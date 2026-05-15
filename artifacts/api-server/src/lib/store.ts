@@ -57,6 +57,7 @@ export interface Game {
   visible: boolean;
   pricingText: string | null;
   route: string | null;
+  externalUrl: string | null;
   createdAt: string;
 }
 
@@ -84,10 +85,15 @@ const BUILT_IN_PROMO_CODES = ["DOORDOOR"];
 export const store = {
   games: {
     list(): Game[] {
-      return readJson<Game[]>("games.json", getDefaultGames());
+      const games = readJson<Game[]>("games.json", getDefaultGames());
+      // Backward-compat: ensure externalUrl exists on old records
+      return games.map((g) => ({ externalUrl: null, ...g }));
     },
     get(id: string): Game | undefined {
       return this.list().find((g) => g.id === id);
+    },
+    getBySlug(slug: string): Game | undefined {
+      return this.list().find((g) => g.slug === slug);
     },
     create(input: Omit<Game, "id" | "createdAt">): Game {
       const games = this.list();
@@ -101,7 +107,9 @@ export const store = {
       return game;
     },
     update(id: string, updates: Partial<Omit<Game, "id" | "createdAt">>): Game | undefined {
-      const games = this.list();
+      const games = readJson<Game[]>("games.json", getDefaultGames()).map(
+        (g) => ({ externalUrl: null, ...g }),
+      );
       const idx = games.findIndex((g) => g.id === id);
       if (idx === -1) return undefined;
       games[idx] = { ...games[idx], ...updates };
@@ -227,6 +235,7 @@ export const store = {
 };
 
 function getDefaultGames(): Game[] {
+  const now = new Date().toISOString();
   return [
     {
       id: "game_tfadhloon",
@@ -240,7 +249,53 @@ function getDefaultGames(): Game[] {
       visible: true,
       pricingText: "2 KD / 3 hours",
       route: "/tfadhloon",
-      createdAt: new Date().toISOString(),
+      externalUrl: null,
+      createdAt: now,
+    },
+    {
+      id: "game_aljasoos",
+      slug: "aljasoos",
+      title: "Aljasoos",
+      titleAr: "الجاسوس",
+      description: "Find the spy before they find you.",
+      descriptionAr: "اكشف الجاسوس قبل أن يكشفك.",
+      logoUrl: null,
+      status: "active",
+      visible: true,
+      pricingText: "2 KD / 3 hours",
+      route: "/aljasoos",
+      externalUrl: null,
+      createdAt: now,
+    },
+    {
+      id: "game_flash",
+      slug: "flash",
+      title: "Flash",
+      titleAr: "فلاش",
+      description: "Lightning fast party game.",
+      descriptionAr: "لعبة حفلات سريعة البرق.",
+      logoUrl: null,
+      status: "active",
+      visible: true,
+      pricingText: "2 KD / 3 hours",
+      route: "/flash",
+      externalUrl: null,
+      createdAt: now,
+    },
+    {
+      id: "game_yesno",
+      slug: "yesno",
+      title: "Yes / No",
+      titleAr: "نعم / لا",
+      description: "One question. Two answers. Infinite awkwardness.",
+      descriptionAr: "سؤال واحد. إجابتان. إحراج لا نهاية له.",
+      logoUrl: null,
+      status: "active",
+      visible: true,
+      pricingText: "2 KD / 3 hours",
+      route: "/yesno",
+      externalUrl: null,
+      createdAt: now,
     },
     {
       id: "game_bomb",
@@ -254,35 +309,68 @@ function getDefaultGames(): Game[] {
       visible: true,
       pricingText: "2 KD / 3 hours",
       route: "/bomb",
-      createdAt: new Date().toISOString(),
+      externalUrl: null,
+      createdAt: now,
     },
     {
-      id: "game_yesno",
-      slug: "yesno",
-      title: "Yes/No",
-      titleAr: "نعم/لا",
-      description: "One question. Two answers. Infinite awkwardness.",
-      descriptionAr: "سؤال واحد. إجابتان. إحراج لا نهاية له.",
+      id: "game_reactor",
+      slug: "reactor",
+      title: "Reactor",
+      titleAr: "المفاعل",
+      description: "React fast or face the consequences.",
+      descriptionAr: "تصرف بسرعة أو تواجه العواقب.",
       logoUrl: null,
       status: "active",
       visible: true,
       pricingText: "2 KD / 3 hours",
-      route: "/yesno",
-      createdAt: new Date().toISOString(),
+      route: "/reactor",
+      externalUrl: null,
+      createdAt: now,
     },
     {
-      id: "game_mystery",
-      slug: "mystery",
-      title: "Mystery Mode",
-      titleAr: "وضع الغموض",
-      description: "Something new is coming to the arcade.",
-      descriptionAr: "شيء جديد قادم إلى الأركيد.",
+      id: "game_forehead",
+      slug: "forehead",
+      title: "Forehead",
+      titleAr: "الجبهة",
+      description: "Who am I? Hold it to your forehead and find out.",
+      descriptionAr: "من أنا؟ ضعها على جبهتك واكتشف.",
       logoUrl: null,
-      status: "coming_soon",
+      status: "active",
       visible: true,
-      pricingText: null,
-      route: null,
-      createdAt: new Date().toISOString(),
+      pricingText: "2 KD / 3 hours",
+      route: "/forehead",
+      externalUrl: "https://forehead-game.replit.app/forehead",
+      createdAt: now,
+    },
+    {
+      id: "game_guessthecharacter",
+      slug: "guessthecharacter",
+      title: "Guess the Character",
+      titleAr: "خمّن الشخصية",
+      description: "Famous faces, mystery rounds.",
+      descriptionAr: "وجوه مشهورة، جولات غامضة.",
+      logoUrl: null,
+      status: "active",
+      visible: true,
+      pricingText: "2 KD / 3 hours",
+      route: "/guessthecharacter",
+      externalUrl: "https://forehead-game.replit.app/character",
+      createdAt: now,
+    },
+    {
+      id: "game_charades",
+      slug: "charades",
+      title: "Charades",
+      titleAr: "الشرادة",
+      description: "Act it out. No words allowed.",
+      descriptionAr: "مثّلها. لا كلمات مسموحة.",
+      logoUrl: null,
+      status: "active",
+      visible: true,
+      pricingText: "2 KD / 3 hours",
+      route: "/charades",
+      externalUrl: "https://forehead-game.replit.app/charades",
+      createdAt: now,
     },
   ];
 }

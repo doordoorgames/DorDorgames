@@ -446,6 +446,8 @@ components:
           type: ["string", "null"]
         route:
           type: ["string", "null"]
+        externalUrl:
+          type: ["string", "null"]
         createdAt:
           type: string
 
@@ -474,6 +476,8 @@ components:
           type: string
         route:
           type: string
+        externalUrl:
+          type: string
 
     GameUpdate:
       type: object
@@ -496,6 +500,8 @@ components:
         pricingText:
           type: string
         route:
+          type: string
+        externalUrl:
           type: string
 
     Room:

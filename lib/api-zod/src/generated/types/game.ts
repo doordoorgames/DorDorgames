@@ -24,5 +24,7 @@ export interface Game {
   pricingText: string | null;
   /** @nullable */
   route?: string | null;
+  /** @nullable */
+  externalUrl?: string | null;
   createdAt?: string;
 }

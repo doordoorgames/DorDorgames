@@ -29,6 +29,7 @@ export const ListGamesResponseItem = zod.object({
   visible: zod.boolean(),
   pricingText: zod.string().nullable(),
   route: zod.string().nullish(),
+  externalUrl: zod.string().nullish(),
   createdAt: zod.string().optional(),
 });
 export const ListGamesResponse = zod.array(ListGamesResponseItem);
@@ -47,6 +48,7 @@ export const CreateGameBody = zod.object({
   visible: zod.boolean().optional(),
   pricingText: zod.string().optional(),
   route: zod.string().optional(),
+  externalUrl: zod.string().optional(),
 });
 
 /**
@@ -68,6 +70,7 @@ export const GetGameResponse = zod.object({
   visible: zod.boolean(),
   pricingText: zod.string().nullable(),
   route: zod.string().nullish(),
+  externalUrl: zod.string().nullish(),
   createdAt: zod.string().optional(),
 });
 
@@ -88,6 +91,7 @@ export const UpdateGameBody = zod.object({
   visible: zod.boolean().optional(),
   pricingText: zod.string().optional(),
   route: zod.string().optional(),
+  externalUrl: zod.string().optional(),
 });
 
 export const UpdateGameResponse = zod.object({
@@ -102,6 +106,7 @@ export const UpdateGameResponse = zod.object({
   visible: zod.boolean(),
   pricingText: zod.string().nullable(),
   route: zod.string().nullish(),
+  externalUrl: zod.string().nullish(),
   createdAt: zod.string().optional(),
 });
 
@@ -133,6 +138,7 @@ export const ListRoomsResponseItem = zod.object({
       visible: zod.boolean(),
       pricingText: zod.string().nullable(),
       route: zod.string().nullish(),
+      externalUrl: zod.string().nullish(),
       createdAt: zod.string().optional(),
     })
     .optional(),
@@ -176,6 +182,7 @@ export const GetRoomResponse = zod.object({
       visible: zod.boolean(),
       pricingText: zod.string().nullable(),
       route: zod.string().nullish(),
+      externalUrl: zod.string().nullish(),
       createdAt: zod.string().optional(),
     })
     .optional(),
@@ -221,6 +228,7 @@ export const SwitchRoomGameResponse = zod.object({
       visible: zod.boolean(),
       pricingText: zod.string().nullable(),
       route: zod.string().nullish(),
+      externalUrl: zod.string().nullish(),
       createdAt: zod.string().optional(),
     })
     .optional(),
@@ -259,6 +267,7 @@ export const JoinRoomResponse = zod.object({
       visible: zod.boolean(),
       pricingText: zod.string().nullable(),
       route: zod.string().nullish(),
+      externalUrl: zod.string().nullish(),
       createdAt: zod.string().optional(),
     })
     .optional(),

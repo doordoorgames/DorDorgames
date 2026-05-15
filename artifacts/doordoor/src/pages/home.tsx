@@ -1,6 +1,6 @@
 import { Layout } from "@/components/layout";
 import { motion } from "framer-motion";
-import { GAMES_CONFIG } from "@/games-config";
+import { useListGames } from "@workspace/api-client-react";
 
 const cardVariants = {
   hidden: { opacity: 0, y: 16 },
@@ -12,6 +12,8 @@ const cardVariants = {
 };
 
 export default function Home() {
+  const { data: games, isLoading } = useListGames();
+
   return (
     <Layout>
       <motion.div
@@ -29,12 +31,56 @@ export default function Home() {
           </p>
         </div>
 
-        <div className="grid grid-cols-1 gap-4">
-          {GAMES_CONFIG.map((game, i) => {
-            const isComingSoon = game.status === "coming_soon";
-            const hasUrl = game.externalUrl && game.externalUrl.startsWith("http");
+        {isLoading ? (
+          <div className="flex justify-center py-12">
+            <span className="font-mono text-primary text-sm animate-pulse">LOADING...</span>
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 gap-4">
+            {games?.map((game, i) => {
+              const isComingSoon = game.status === "coming_soon";
+              const hasUrl = game.externalUrl && game.externalUrl.startsWith("http");
 
-            if (isComingSoon || !hasUrl) {
+              if (isComingSoon) {
+                return (
+                  <motion.div
+                    key={game.id}
+                    custom={i}
+                    variants={cardVariants}
+                    initial="hidden"
+                    animate="visible"
+                    data-testid={`card-game-${game.id}`}
+                  >
+                    <div className="relative border-2 border-muted p-4 bg-background opacity-50 cursor-not-allowed">
+                      <GameCardInner game={game} state="coming_soon" />
+                      <div className="absolute inset-0 flex items-center justify-center bg-background/60">
+                        <span className="font-mono text-muted-foreground text-xs">
+                          COMING SOON &nbsp;/&nbsp;
+                          <span className="arabic-text">قريباً</span>
+                        </span>
+                      </div>
+                    </div>
+                  </motion.div>
+                );
+              }
+
+              if (!hasUrl) {
+                return (
+                  <motion.div
+                    key={game.id}
+                    custom={i}
+                    variants={cardVariants}
+                    initial="hidden"
+                    animate="visible"
+                    data-testid={`card-game-${game.id}`}
+                  >
+                    <div className="border-2 border-primary/30 p-4 bg-background opacity-60 cursor-not-allowed">
+                      <GameCardInner game={game} state="no_url" />
+                    </div>
+                  </motion.div>
+                );
+              }
+
               return (
                 <motion.div
                   key={game.id}
@@ -44,47 +90,30 @@ export default function Home() {
                   animate="visible"
                   data-testid={`card-game-${game.id}`}
                 >
-                  <div className="relative border-2 border-muted p-4 bg-background opacity-50 cursor-not-allowed">
-                    <GameCardInner game={game} />
-                    <div className="absolute inset-0 flex items-center justify-center bg-background/60">
-                      <span className="font-mono text-muted-foreground text-xs">
-                        COMING SOON &nbsp;/&nbsp;
-                        <span className="arabic-text">قريباً</span>
-                      </span>
-                    </div>
-                  </div>
+                  <a
+                    href={game.externalUrl!}
+                    className="block border-2 border-primary hover:border-accent hover:shadow-[0_0_18px_rgba(0,255,65,0.45)] p-4 transition-all duration-200 transform hover:scale-[1.02] bg-background cursor-pointer"
+                  >
+                    <GameCardInner game={game} state="active" />
+                  </a>
                 </motion.div>
               );
-            }
-
-            return (
-              <motion.div
-                key={game.id}
-                custom={i}
-                variants={cardVariants}
-                initial="hidden"
-                animate="visible"
-                data-testid={`card-game-${game.id}`}
-              >
-                <a
-                  href={game.externalUrl}
-                  className="block border-2 border-primary hover:border-accent hover:shadow-[0_0_18px_rgba(0,255,65,0.45)] p-4 transition-all duration-200 transform hover:scale-[1.02] bg-background cursor-pointer"
-                >
-                  <GameCardInner game={game} />
-                </a>
-              </motion.div>
-            );
-          })}
-        </div>
+            })}
+          </div>
+        )}
       </motion.div>
     </Layout>
   );
 }
 
+type CardState = "active" | "coming_soon" | "no_url";
+
 function GameCardInner({
   game,
+  state,
 }: {
-  game: (typeof GAMES_CONFIG)[number];
+  game: { id: string; title: string; titleAr: string; externalUrl?: string | null };
+  state: CardState;
 }) {
   return (
     <div className="flex items-center gap-4">
@@ -101,14 +130,23 @@ function GameCardInner({
         <p className="arabic-text text-sm text-muted-foreground mb-2 truncate" dir="rtl">
           {game.titleAr}
         </p>
-        <span className="inline-block px-2 py-0.5 bg-primary/20 text-primary text-[9px] font-mono border border-primary/50 uppercase">
-          ACTIVE
-        </span>
+        {state === "active" && (
+          <span className="inline-block px-2 py-0.5 bg-primary/20 text-primary text-[9px] font-mono border border-primary/50 uppercase">
+            ACTIVE
+          </span>
+        )}
+        {state === "no_url" && (
+          <span className="inline-block px-2 py-0.5 bg-muted text-muted-foreground text-[9px] font-mono border border-muted-foreground/30 uppercase">
+            URL MISSING
+          </span>
+        )}
       </div>
 
-      <div className="text-muted-foreground/40 font-mono text-xs flex-shrink-0">
-        ▶
-      </div>
+      {state === "active" && (
+        <div className="text-muted-foreground/40 font-mono text-xs flex-shrink-0">
+          ▶
+        </div>
+      )}
     </div>
   );
 }

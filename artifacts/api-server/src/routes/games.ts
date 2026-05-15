@@ -10,7 +10,7 @@ import { store } from "../lib/store";
 
 const router: IRouter = Router();
 
-router.get("/games", (req, res) => {
+router.get("/games", (_req, res) => {
   const games = store.games.list().filter((g) => g.visible);
   res.json(games);
 });
@@ -28,6 +28,7 @@ router.post("/games", (req, res) => {
     visible: body.visible ?? true,
     pricingText: body.pricingText ?? null,
     route: body.route ?? null,
+    externalUrl: body.externalUrl ?? null,
   });
   res.status(201).json(game);
 });
@@ -55,6 +56,7 @@ router.patch("/games/:id", (req, res) => {
     ...(body.visible !== undefined && { visible: body.visible }),
     ...(body.pricingText !== undefined && { pricingText: body.pricingText }),
     ...(body.route !== undefined && { route: body.route }),
+    ...(body.externalUrl !== undefined && { externalUrl: body.externalUrl || null }),
   });
   if (!game) {
     res.status(404).json({ error: "Game not found" });
