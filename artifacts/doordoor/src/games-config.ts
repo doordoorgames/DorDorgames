@@ -23,7 +23,7 @@ export const GAMES_CONFIG: GameConfig[] = [
     title: "Tfadhloon",
     titleAr: "تفضلون",
     route: "/tfadhloon",
-    externalUrl: "", // 👈 paste Tfadhloon URL here
+    externalUrl: "www.tfadhloon.com", // 👈 paste Tfadhloon URL here
     status: "active",
     description: "The ultimate party icebreaker — vote, reveal, chaos.",
     descriptionAr: "لعبة الحفلات المثالية — صوّت، اكشف، فوضى.",
@@ -43,7 +43,7 @@ export const GAMES_CONFIG: GameConfig[] = [
     title: "Flash",
     titleAr: "فلاش",
     route: "/flash",
-    externalUrl: "", // 👈 paste Flash URL here
+    externalUrl: "www.dordor.games/flash", // 👈 paste Flash URL here
     status: "active",
     description: "Lightning fast party game.",
     descriptionAr: "لعبة حفلات سريعة البرق.",
@@ -53,7 +53,7 @@ export const GAMES_CONFIG: GameConfig[] = [
     title: "Yes / No",
     titleAr: "نعم / لا",
     route: "/yesno",
-    externalUrl: "", // 👈 paste Yes/No URL here
+    externalUrl: "www.dordor.games/yesno", // 👈 paste Yes/No URL here
     status: "active",
     description: "One question. Two answers. Infinite awkwardness.",
     descriptionAr: "سؤال واحد. إجابتان. إحراج لا نهاية له.",
@@ -63,7 +63,7 @@ export const GAMES_CONFIG: GameConfig[] = [
     title: "Bomb",
     titleAr: "القنبلة",
     route: "/bomb",
-    externalUrl: "", // 👈 paste Bomb URL here
+    externalUrl: "www.dordor.games/bomb", // 👈 paste Bomb URL here
     status: "active",
     description: "Pass the bomb before it explodes. Categories. Speed.",
     descriptionAr: "مرر القنبلة قبل أن تنفجر. فئات. سرعة.",
@@ -73,7 +73,7 @@ export const GAMES_CONFIG: GameConfig[] = [
     title: "Reactor",
     titleAr: "المفاعل",
     route: "/reactor",
-    externalUrl: "", // 👈 paste Reactor URL here
+    externalUrl: "www.dordor.games/reactor", // 👈 paste Reactor URL here
     status: "active",
     description: "React fast or face the consequences.",
     descriptionAr: "تصرف بسرعة أو تواجه العواقب.",
