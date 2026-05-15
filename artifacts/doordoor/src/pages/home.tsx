@@ -49,12 +49,9 @@ export default function Home() {
 }
 
 function GameCard({ game }: { game: GameConfig }) {
-  const isComingSoon = game.status === "coming_soon";
-  const hasExternal = game.externalUrl.startsWith("https://") || game.externalUrl.startsWith("http://");
-
   const inner = <GameCardInner game={game} />;
 
-  if (isComingSoon) {
+  if (game.launchMode === "coming_soon") {
     return (
       <div className="relative border-2 border-muted p-4 bg-background opacity-50 cursor-not-allowed">
         {inner}
@@ -68,8 +65,8 @@ function GameCard({ game }: { game: GameConfig }) {
     );
   }
 
-  // External game (different domain) — open in new tab
-  if (hasExternal) {
+  // "redirect" — open the external site in a new tab
+  if (game.launchMode === "redirect") {
     return (
       <a
         href={game.externalUrl}
@@ -82,7 +79,7 @@ function GameCard({ game }: { game: GameConfig }) {
     );
   }
 
-  // Internal game — navigate to /route on the same domain
+  // "iframe" (and any other mode) — route through dordor.games/game-name
   return (
     <Link
       href={game.route}
