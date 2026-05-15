@@ -185,51 +185,6 @@ function HeroSection() {
           </div>
         </motion.div>
 
-        {/* CTA buttons */}
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ delay: 0.3, duration: 0.6 }}
-          style={{ display: "flex", gap: "8px" }}
-        >
-          <Link href="/join">
-            <div
-              style={{
-                padding: "7px 20px",
-                fontFamily: "var(--font-sans)",
-                fontSize: "10px",
-                letterSpacing: "0.18em",
-                textTransform: "uppercase",
-                color: "#00ffff",
-                border: "1px solid rgba(0,220,255,0.45)",
-                background: "rgba(0,220,255,0.07)",
-                cursor: "pointer",
-                backdropFilter: "blur(10px)",
-              }}
-            >
-              Join
-            </div>
-          </Link>
-          <Link href="/host">
-            <div
-              style={{
-                padding: "7px 20px",
-                fontFamily: "var(--font-sans)",
-                fontSize: "10px",
-                letterSpacing: "0.18em",
-                textTransform: "uppercase",
-                color: "#ff00ff",
-                border: "1px solid rgba(255,0,255,0.45)",
-                background: "rgba(255,0,255,0.1)",
-                cursor: "pointer",
-                backdropFilter: "blur(10px)",
-                boxShadow: "0 0 12px rgba(255,0,255,0.15)",
-              }}
-            >
-              Host
-            </div>
-          </Link>
-        </motion.div>
       </div>
     </div>
   );
@@ -493,26 +448,18 @@ export default function Home() {
   return (
     <div
       style={{
-        position: "fixed",
-        inset: 0,
-        display: "flex",
-        flexDirection: "column",
+        minHeight: "100dvh",
         maxWidth: "430px",
         margin: "0 auto",
         background: "#050508",
-        overflow: "hidden",
       }}
     >
       <HeroSection />
 
-      {/* Scrollable game launcher */}
+      {/* Game launcher — scrolls naturally with the page */}
       <div
         style={{
-          flex: 1,
-          overflowY: "auto",
-          overflowX: "hidden",
-          WebkitOverflowScrolling: "touch",
-          paddingBottom: "70px",
+          paddingBottom: "80px",
         }}
       >
         {/* Section header */}
