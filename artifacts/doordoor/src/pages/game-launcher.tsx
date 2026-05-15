@@ -1,36 +1,25 @@
 import { useEffect } from "react";
 import { useLocation } from "wouter";
 import { Layout } from "@/components/layout";
-import { useListGames } from "@workspace/api-client-react";
+import { getGameByRoute } from "@/games-config";
+
+function normalizeUrl(url: string): string {
+  if (!url) return "";
+  if (url.startsWith("http://") || url.startsWith("https://")) return url;
+  return "https://" + url;
+}
 
 export default function GameLauncher() {
   const [location] = useLocation();
-  // slug = route path without leading slash, e.g. "/flash" → "flash"
-  const slug = location.replace(/^\//, "");
-
-  const { data: games, isLoading } = useListGames();
-  const game = games?.find((g) => g.slug === slug);
-
-  const hasUrl = game?.externalUrl && game.externalUrl.startsWith("http");
+  const game = getGameByRoute(location);
+  const url = game ? normalizeUrl(game.externalUrl) : "";
 
   useEffect(() => {
-    if (game && hasUrl && game.externalUrl) {
-      window.location.replace(game.externalUrl);
+    if (game && url) {
+      window.location.replace(url);
     }
-  }, [game, hasUrl]);
+  }, [game, url]);
 
-  // Still loading from API
-  if (isLoading) {
-    return (
-      <Layout>
-        <div className="flex flex-col items-center justify-center py-24 gap-4">
-          <div className="font-mono text-primary text-sm animate-pulse">LOADING...</div>
-        </div>
-      </Layout>
-    );
-  }
-
-  // Game not found in API
   if (!game) {
     return (
       <Layout>
@@ -41,7 +30,6 @@ export default function GameLauncher() {
     );
   }
 
-  // Coming Soon
   if (game.status === "coming_soon") {
     return (
       <Layout>
@@ -60,8 +48,7 @@ export default function GameLauncher() {
     );
   }
 
-  // Active but URL not set yet
-  if (!hasUrl) {
+  if (!url) {
     return (
       <Layout>
         <div className="flex flex-col items-center justify-center py-24 gap-6">
@@ -69,9 +56,9 @@ export default function GameLauncher() {
           <h1 className="font-mono text-xl text-primary uppercase tracking-widest">{game.title}</h1>
           <p className="arabic-text text-base text-muted-foreground" dir="rtl">{game.titleAr}</p>
           <div className="border border-primary/30 px-8 py-6 text-center space-y-2">
-            <p className="font-mono text-primary/70 text-xs uppercase">Active — URL not configured</p>
+            <p className="font-mono text-primary/70 text-xs uppercase">Active — URL not set</p>
             <p className="font-mono text-muted-foreground text-[10px]">
-              Set the external URL in the admin panel to enable this game.
+              Add the external URL in games-config.ts to enable this game.
             </p>
           </div>
         </div>
@@ -79,7 +66,6 @@ export default function GameLauncher() {
     );
   }
 
-  // Has URL — show brief redirect message while window.location.replace fires
   return (
     <Layout>
       <div className="flex flex-col items-center justify-center py-24 gap-4">
