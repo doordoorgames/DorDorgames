@@ -1,5 +1,11 @@
 export type GameStatus = "active" | "coming_soon";
 
+// "iframe"    — game loads inside a full-screen iframe on this domain.
+//               Browser URL stays on dordor.games/flash. No visible redirect.
+// "redirect"  — user is navigated to a separate domain (opens in new tab).
+// "coming_soon" — not yet available.
+export type LaunchMode = "iframe" | "redirect" | "coming_soon";
+
 export interface GameConfig {
   id: string;
   title: string;
@@ -7,21 +13,11 @@ export interface GameConfig {
   route: string;
   externalUrl: string;
   status: GameStatus;
+  launchMode: LaunchMode;
   description?: string;
   descriptionAr?: string;
 }
 
-// ─────────────────────────────────────────────────────────────────────────────
-// GAME LAUNCHER CONFIG
-//
-// externalUrl: full https:// URL for games on a completely separate domain
-//   (opens in new tab, e.g. tfadhloon.com).
-//
-// Leave externalUrl = "" for games proxied through this platform
-//   (Flash, Yes/No, Bomb, Reactor). Those are served at /flash etc. on
-//   dordor.games via a server-side reverse proxy — the browser URL never
-//   leaves dordor.games and window.location.origin stays correct for QR codes.
-// ─────────────────────────────────────────────────────────────────────────────
 export const GAMES_CONFIG: GameConfig[] = [
   {
     id: "tfadhloon",
@@ -30,6 +26,7 @@ export const GAMES_CONFIG: GameConfig[] = [
     route: "/tfadhloon",
     externalUrl: "https://www.tfadhloon.com",
     status: "active",
+    launchMode: "redirect",
     description: "The ultimate party icebreaker — vote, reveal, chaos.",
     descriptionAr: "لعبة الحفلات المثالية — صوّت، اكشف، فوضى.",
   },
@@ -40,6 +37,7 @@ export const GAMES_CONFIG: GameConfig[] = [
     route: "/aljasoos",
     externalUrl: "",
     status: "coming_soon",
+    launchMode: "coming_soon",
     description: "Find the spy before they find you.",
     descriptionAr: "اكشف الجاسوس قبل أن يكشفك.",
   },
@@ -48,8 +46,9 @@ export const GAMES_CONFIG: GameConfig[] = [
     title: "Flash",
     titleAr: "فلاش",
     route: "/flash",
-    externalUrl: "",
+    externalUrl: "https://flash-billboard.replit.app/flash",
     status: "active",
+    launchMode: "iframe",
     description: "Lightning fast party game.",
     descriptionAr: "لعبة حفلات سريعة البرق.",
   },
@@ -58,8 +57,9 @@ export const GAMES_CONFIG: GameConfig[] = [
     title: "Yes / No",
     titleAr: "نعم / لا",
     route: "/yesno",
-    externalUrl: "",
+    externalUrl: "https://flash-billboard.replit.app/yesno",
     status: "active",
+    launchMode: "iframe",
     description: "One question. Two answers. Infinite awkwardness.",
     descriptionAr: "سؤال واحد. إجابتان. إحراج لا نهاية له.",
   },
@@ -68,8 +68,9 @@ export const GAMES_CONFIG: GameConfig[] = [
     title: "Bomb",
     titleAr: "القنبلة",
     route: "/bomb",
-    externalUrl: "",
+    externalUrl: "https://flash-billboard.replit.app/bomb",
     status: "active",
+    launchMode: "iframe",
     description: "Pass the bomb before it explodes. Categories. Speed.",
     descriptionAr: "مرر القنبلة قبل أن تنفجر. فئات. سرعة.",
   },
@@ -78,8 +79,9 @@ export const GAMES_CONFIG: GameConfig[] = [
     title: "Reactor",
     titleAr: "المفاعل",
     route: "/reactor",
-    externalUrl: "",
+    externalUrl: "https://flash-billboard.replit.app/reactor",
     status: "active",
+    launchMode: "iframe",
     description: "React fast or face the consequences.",
     descriptionAr: "تصرف بسرعة أو تواجه العواقب.",
   },
@@ -90,6 +92,7 @@ export const GAMES_CONFIG: GameConfig[] = [
     route: "/forehead",
     externalUrl: "https://forehead-game.replit.app/forehead",
     status: "active",
+    launchMode: "iframe",
     description: "Who am I? Hold it to your forehead and find out.",
     descriptionAr: "من أنا؟ ضعها على جبهتك واكتشف.",
   },
@@ -100,6 +103,7 @@ export const GAMES_CONFIG: GameConfig[] = [
     route: "/guessthecharacter",
     externalUrl: "https://forehead-game.replit.app/character",
     status: "active",
+    launchMode: "iframe",
     description: "Famous faces, mystery rounds.",
     descriptionAr: "وجوه مشهورة، جولات غامضة.",
   },
@@ -110,6 +114,7 @@ export const GAMES_CONFIG: GameConfig[] = [
     route: "/charades",
     externalUrl: "https://forehead-game.replit.app/charades",
     status: "active",
+    launchMode: "iframe",
     description: "Act it out. No words allowed.",
     descriptionAr: "مثّلها. لا كلمات مسموحة.",
   },

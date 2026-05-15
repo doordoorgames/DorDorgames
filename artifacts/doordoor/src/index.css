@@ -87,6 +87,11 @@
     50% { box-shadow: 0 0 20px var(--primary-border), inset 0 0 10px var(--primary-border); }
     100% { box-shadow: 0 0 5px var(--primary-border), inset 0 0 5px var(--primary-border); }
   }
+
+  @keyframes shimmer {
+    0% { background-position: 200% 0; }
+    100% { background-position: -200% 0; }
+  }
 }
 
 :root {
