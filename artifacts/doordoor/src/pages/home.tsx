@@ -1,6 +1,7 @@
 import { Layout } from "@/components/layout";
 import { motion } from "framer-motion";
-import { GAMES_CONFIG } from "@/games-config";
+import { Link } from "wouter";
+import { GAMES_CONFIG, type GameConfig } from "@/games-config";
 
 const cardVariants = {
   hidden: { opacity: 0, y: 16 },
@@ -10,12 +11,6 @@ const cardVariants = {
     transition: { delay: i * 0.06, duration: 0.3 },
   }),
 };
-
-function normalizeUrl(url: string): string {
-  if (!url) return "";
-  if (url.startsWith("http://") || url.startsWith("https://")) return url;
-  return "https://" + url;
-}
 
 export default function Home() {
   return (
@@ -36,81 +31,69 @@ export default function Home() {
         </div>
 
         <div className="grid grid-cols-1 gap-4">
-          {GAMES_CONFIG.map((game, i) => {
-            const isComingSoon = game.status === "coming_soon";
-            const url = normalizeUrl(game.externalUrl);
-            const hasUrl = url.length > 0;
-
-            if (isComingSoon) {
-              return (
-                <motion.div
-                  key={game.id}
-                  custom={i}
-                  variants={cardVariants}
-                  initial="hidden"
-                  animate="visible"
-                >
-                  <div className="relative border-2 border-muted p-4 bg-background opacity-50 cursor-not-allowed">
-                    <GameCardInner game={game} state="coming_soon" />
-                    <div className="absolute inset-0 flex items-center justify-center bg-background/60">
-                      <span className="font-mono text-muted-foreground text-xs">
-                        COMING SOON &nbsp;/&nbsp;
-                        <span className="arabic-text">قريباً</span>
-                      </span>
-                    </div>
-                  </div>
-                </motion.div>
-              );
-            }
-
-            if (!hasUrl) {
-              return (
-                <motion.div
-                  key={game.id}
-                  custom={i}
-                  variants={cardVariants}
-                  initial="hidden"
-                  animate="visible"
-                >
-                  <div className="border-2 border-primary/30 p-4 bg-background opacity-60 cursor-not-allowed">
-                    <GameCardInner game={game} state="no_url" />
-                  </div>
-                </motion.div>
-              );
-            }
-
-            return (
-              <motion.div
-                key={game.id}
-                custom={i}
-                variants={cardVariants}
-                initial="hidden"
-                animate="visible"
-              >
-                <a
-                  href={url}
-                  className="block border-2 border-primary hover:border-accent hover:shadow-[0_0_18px_rgba(0,255,65,0.45)] p-4 transition-all duration-200 transform hover:scale-[1.02] bg-background cursor-pointer"
-                >
-                  <GameCardInner game={game} state="active" />
-                </a>
-              </motion.div>
-            );
-          })}
+          {GAMES_CONFIG.map((game, i) => (
+            <motion.div
+              key={game.id}
+              custom={i}
+              variants={cardVariants}
+              initial="hidden"
+              animate="visible"
+            >
+              <GameCard game={game} />
+            </motion.div>
+          ))}
         </div>
       </motion.div>
     </Layout>
   );
 }
 
-type CardState = "active" | "coming_soon" | "no_url";
+function GameCard({ game }: { game: GameConfig }) {
+  const isComingSoon = game.status === "coming_soon";
+  const hasExternal = game.externalUrl.startsWith("https://") || game.externalUrl.startsWith("http://");
 
-function GameCardInner({
-  game,
-  state,
-}: {
-  game: { title: string; titleAr: string };
-  state: CardState;
-}) {
+  const inner = <GameCardInner game={game} />;
+
+  if (isComingSoon) {
+    return (
+      <div className="relative border-2 border-muted p-4 bg-background opacity-50 cursor-not-allowed">
+        {inner}
+        <div className="absolute inset-0 flex items-center justify-center bg-background/60">
+          <span className="font-mono text-muted-foreground text-xs">
+            COMING SOON &nbsp;/&nbsp;
+            <span className="arabic-text">قريباً</span>
+          </span>
+        </div>
+      </div>
+    );
+  }
+
+  // External game (different domain) — open in new tab
+  if (hasExternal) {
+    return (
+      <a
+        href={game.externalUrl}
+        target="_blank"
+        rel="noopener noreferrer"
+        className="block border-2 border-primary hover:border-accent hover:shadow-[0_0_18px_rgba(0,255,65,0.45)] p-4 transition-all duration-200 transform hover:scale-[1.02] bg-background cursor-pointer"
+      >
+        {inner}
+      </a>
+    );
+  }
+
+  // Internal game — navigate to /route on the same domain
+  return (
+    <Link
+      href={game.route}
+      className="block border-2 border-primary hover:border-accent hover:shadow-[0_0_18px_rgba(0,255,65,0.45)] p-4 transition-all duration-200 transform hover:scale-[1.02] bg-background cursor-pointer"
+    >
+      {inner}
+    </Link>
+  );
+}
+
+function GameCardInner({ game }: { game: GameConfig }) {
   return (
     <div className="flex items-center gap-4">
       <div className="w-14 h-14 bg-muted border border-border flex items-center justify-center flex-shrink-0">
@@ -126,21 +109,12 @@ function GameCardInner({
         <p className="arabic-text text-sm text-muted-foreground mb-2 truncate" dir="rtl">
           {game.titleAr}
         </p>
-        {state === "active" && (
-          <span className="inline-block px-2 py-0.5 bg-primary/20 text-primary text-[9px] font-mono border border-primary/50 uppercase">
-            ACTIVE
-          </span>
-        )}
-        {state === "no_url" && (
-          <span className="inline-block px-2 py-0.5 bg-muted text-muted-foreground text-[9px] font-mono border border-muted-foreground/30 uppercase">
-            URL MISSING
-          </span>
-        )}
+        <span className="inline-block px-2 py-0.5 bg-primary/20 text-primary text-[9px] font-mono border border-primary/50 uppercase">
+          ACTIVE
+        </span>
       </div>
 
-      {state === "active" && (
-        <div className="text-muted-foreground/40 font-mono text-xs flex-shrink-0">▶</div>
-      )}
+      <div className="text-muted-foreground/40 font-mono text-xs flex-shrink-0">▶</div>
     </div>
   );
 }

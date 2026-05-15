@@ -13,9 +13,10 @@ export interface GameConfig {
 
 // ─────────────────────────────────────────────────────────────────────────────
 // GAME LAUNCHER CONFIG
-// Fill in each externalUrl with the full Replit URL for that game.
-// Example: "https://my-game.replit.app"
-// Leave blank ("") to show "url pending" on the card until the URL is ready.
+//
+// externalUrl: full https:// URL for games hosted on a separate domain.
+//   Leave "" for games served as internal routes on this same domain.
+//   Internal routes use the `route` field for navigation (e.g. /flash).
 // ─────────────────────────────────────────────────────────────────────────────
 export const GAMES_CONFIG: GameConfig[] = [
   {
@@ -23,7 +24,7 @@ export const GAMES_CONFIG: GameConfig[] = [
     title: "Tfadhloon",
     titleAr: "تفضلون",
     route: "/tfadhloon",
-    externalUrl: "www.tfadhloon.com", // 👈 paste Tfadhloon URL here
+    externalUrl: "https://www.tfadhloon.com",
     status: "active",
     description: "The ultimate party icebreaker — vote, reveal, chaos.",
     descriptionAr: "لعبة الحفلات المثالية — صوّت، اكشف، فوضى.",
@@ -33,7 +34,7 @@ export const GAMES_CONFIG: GameConfig[] = [
     title: "Aljasoos",
     titleAr: "الجاسوس",
     route: "/aljasoos",
-    externalUrl: "", // 👈 paste Aljasoos URL here
+    externalUrl: "",
     status: "active",
     description: "Find the spy before they find you.",
     descriptionAr: "اكشف الجاسوس قبل أن يكشفك.",
@@ -43,7 +44,7 @@ export const GAMES_CONFIG: GameConfig[] = [
     title: "Flash",
     titleAr: "فلاش",
     route: "/flash",
-    externalUrl: "www.dordor.games/flash", // 👈 paste Flash URL here
+    externalUrl: "",
     status: "active",
     description: "Lightning fast party game.",
     descriptionAr: "لعبة حفلات سريعة البرق.",
@@ -53,7 +54,7 @@ export const GAMES_CONFIG: GameConfig[] = [
     title: "Yes / No",
     titleAr: "نعم / لا",
     route: "/yesno",
-    externalUrl: "www.dordor.games/yesno", // 👈 paste Yes/No URL here
+    externalUrl: "",
     status: "active",
     description: "One question. Two answers. Infinite awkwardness.",
     descriptionAr: "سؤال واحد. إجابتان. إحراج لا نهاية له.",
@@ -63,7 +64,7 @@ export const GAMES_CONFIG: GameConfig[] = [
     title: "Bomb",
     titleAr: "القنبلة",
     route: "/bomb",
-    externalUrl: "www.dordor.games/bomb", // 👈 paste Bomb URL here
+    externalUrl: "",
     status: "active",
     description: "Pass the bomb before it explodes. Categories. Speed.",
     descriptionAr: "مرر القنبلة قبل أن تنفجر. فئات. سرعة.",
@@ -73,7 +74,7 @@ export const GAMES_CONFIG: GameConfig[] = [
     title: "Reactor",
     titleAr: "المفاعل",
     route: "/reactor",
-    externalUrl: "www.dordor.games/reactor", // 👈 paste Reactor URL here
+    externalUrl: "",
     status: "active",
     description: "React fast or face the consequences.",
     descriptionAr: "تصرف بسرعة أو تواجه العواقب.",
@@ -83,7 +84,7 @@ export const GAMES_CONFIG: GameConfig[] = [
     title: "Forehead",
     titleAr: "الجبهة",
     route: "/forehead",
-    externalUrl: "https://forehead-game.replit.app/forehead", // 👈 paste Forehead URL here
+    externalUrl: "https://forehead-game.replit.app/forehead",
     status: "active",
     description: "Who am I? Hold it to your forehead and find out.",
     descriptionAr: "من أنا؟ ضعها على جبهتك واكتشف.",
@@ -93,7 +94,7 @@ export const GAMES_CONFIG: GameConfig[] = [
     title: "Guess the Character",
     titleAr: "خمّن الشخصية",
     route: "/guessthecharacter",
-    externalUrl: "https://forehead-game.replit.app/character", // 👈 paste Guess the Character URL here
+    externalUrl: "https://forehead-game.replit.app/character",
     status: "active",
     description: "Famous faces, mystery rounds.",
     descriptionAr: "وجوه مشهورة، جولات غامضة.",
@@ -103,7 +104,7 @@ export const GAMES_CONFIG: GameConfig[] = [
     title: "Charades",
     titleAr: "الشرادة",
     route: "/charades",
-    externalUrl: "https://forehead-game.replit.app/charades", // 👈 paste Charades URL here
+    externalUrl: "https://forehead-game.replit.app/charades",
     status: "active",
     description: "Act it out. No words allowed.",
     descriptionAr: "مثّلها. لا كلمات مسموحة.",
