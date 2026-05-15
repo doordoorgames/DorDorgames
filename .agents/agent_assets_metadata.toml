@@ -1,0 +1,85 @@
+uploads = []
+
+[[generated]]
+id = "oaX9AK9WCBA8WaXHuqlHf"
+uri = "file://attached_assets/generated_images/hero-silhouette.png"
+type = "image"
+title = "generated_image"
+
+[[generated]]
+id = "DaNXqRmOIwHjs0BIzCLZL"
+uri = "file://attached_assets/generated_images/game-flash.png"
+type = "image"
+title = "generated_image"
+
+[[generated]]
+id = "GPJPQzhu2Pi4YDSfP_-Vg"
+uri = "file://attached_assets/generated_images/game-bomb.png"
+type = "image"
+title = "generated_image"
+
+[[generated]]
+id = "Wx66Wxzee0HHbSck3u9tT"
+uri = "file://attached_assets/generated_images/game-forehead.png"
+type = "image"
+title = "generated_image"
+
+[[generated]]
+id = "deiR5n6uFGeH4Dn6zlyKS"
+uri = "file://attached_assets/generated_images/game-yesno.png"
+type = "image"
+title = "generated_image"
+
+[[generated]]
+id = "jK0usUtaXTlk6_gbkk0VC"
+uri = "file://attached_assets/generated_images/game-movie-radar.png"
+type = "image"
+title = "generated_image"
+
+[[generated]]
+id = "xjgR6CRE1IqAEhUH-FUO2"
+uri = "file://attached_assets/generated_images/game-fun-challenges.png"
+type = "image"
+title = "generated_image"
+
+[[outputs]]
+id = "j3MeS8eH1nrcEq720Hkdu"
+uri = "file://attached_assets/generated_images/hero-silhouette.png"
+type = "image"
+title = "Hero — Anime City Silhouette"
+
+[[outputs]]
+id = "-n9U9uqcfFT490xbVxGvk"
+uri = "file://attached_assets/generated_images/game-flash.png"
+type = "image"
+title = "Flash card art"
+
+[[outputs]]
+id = "xl9yYQNKZ61zxNDGxECgS"
+uri = "file://attached_assets/generated_images/game-bomb.png"
+type = "image"
+title = "Bomb card art"
+
+[[outputs]]
+id = "Tipem50il_dxkHw6k_mM0"
+uri = "file://attached_assets/generated_images/game-forehead.png"
+type = "image"
+title = "Forehead card art"
+
+[[outputs]]
+id = "Q7h-oCaFPlADIOCX1qPY5"
+uri = "file://attached_assets/generated_images/game-yesno.png"
+type = "image"
+title = "Yes/No card art"
+
+[[outputs]]
+id = "GfSxwd1kILEGtZaaVcDWa"
+uri = "file://attached_assets/generated_images/game-movie-radar.png"
+type = "image"
+title = "Movie Radar card art"
+
+[[outputs]]
+id = "taNp3bvUS1GtMuI752zCM"
+uri = "file://attached_assets/generated_images/game-fun-challenges.png"
+type = "image"
+title = "Fun Challenges card art"

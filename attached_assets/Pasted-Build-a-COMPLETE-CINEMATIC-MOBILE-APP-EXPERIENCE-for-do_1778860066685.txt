@@ -1,0 +1,302 @@
+Build a COMPLETE CINEMATIC MOBILE APP EXPERIENCE for dordor.games.
+
+This is NOT a website.
+This is NOT a landing page.
+This is NOT synthwave vaporwave.
+
+The current version feels like:
+- generic retro webpage
+- flat neon sections
+- placeholder boxes
+- weak hierarchy
+- cheap glowing UI
+
+I want a PREMIUM futuristic anime gaming platform UI that feels like:
+- anime Netflix
+- futuristic gaming OS
+- Ghost in the Shell
+- Akira UI
+- Bubblegum Crisis
+- underground Tokyo gaming network
+- premium mobile gaming startup
+
+The experience MUST feel:
+- cinematic
+- layered
+- atmospheric
+- alive
+- immersive
+- app-like
+- touch-friendly
+- polished
+
+IMPORTANT:
+The entire UI must look like a REAL iPhone app screenshot.
+
+NOT:
+- webpage sections
+- stacked rectangles
+- giant blobs
+- flat gradients
+- basic neon outlines
+- generic synthwave grids
+- simplistic retro web design
+
+====================================
+LAYOUT STRUCTURE
+====================================
+
+Create a FIXED mobile viewport experience.
+
+The UI should behave like a native app shell.
+
+NO long webpage scrolling feeling.
+
+The screen should contain:
+1. Cinematic top hero area
+2. Premium game launcher grid
+3. Elegant bottom navigation
+4. Ambient animated background layers
+
+Everything should feel integrated into one operating system.
+
+Use:
+- depth blur
+- glassmorphism
+- layered transparency
+- bloom lighting
+- subtle reflections
+- haze
+- particles
+- parallax movement
+- cinematic contrast
+
+====================================
+TOP HERO SECTION
+====================================
+
+Upper 35% of screen should contain:
+- anime cyberpunk city at night
+- subtle moving background
+- rain haze
+- distant neon signs
+- blinking windows
+- tiny moving traffic lights
+- occasional drifting Sakura petals
+- faint CRT scanline texture
+- soft animated grain/noise
+
+Foreground:
+Anime character silhouette from behind overlooking the city.
+
+NOT full anime face.
+Mostly silhouette mood.
+
+Character should feel:
+- mysterious
+- cool
+- underground gamer
+- futuristic hacker
+- anime protagonist energy
+
+====================================
+LOGO
+====================================
+
+Large stylized logo:
+DOORDOOR
+
+NOT generic techno font.
+
+Use:
+- anime brush logo
+- custom stylized lettering
+- aggressive cinematic title styling
+- subtle animated glow pulse
+
+Under logo:
+small Japanese subtitle text.
+
+====================================
+GAME GRID
+====================================
+
+Create a PREMIUM 2-column mobile game launcher grid.
+
+The cards are the MOST IMPORTANT PART.
+
+Current version looks empty and dead.
+Fix this completely.
+
+Each game card MUST:
+- contain cinematic anime artwork
+- feel alive
+- feel premium
+- have distinct visual identity
+- contain layered lighting
+- use depth shadows
+- contain subtle animation
+- glow only softly
+- NOT use plain colored rectangles
+
+Game cards should feel like:
+Netflix anime thumbnails mixed with futuristic gaming launcher tiles.
+
+Cards should slightly move/parallax on touch.
+
+Each card should contain:
+- title
+- artwork
+- subtle particles
+- glow edge
+- cinematic composition
+
+Games:
+FLASH
+BOMB
+FOREHEAD
+YES / NO
+MOVIE RADAR
+FUN CHALLENGES
+
+====================================
+INDIVIDUAL GAME MOODS
+====================================
+
+FLASH:
+Anime boy with glowing cards in dark neon environment.
+Purple/cyan energy.
+
+BOMB:
+Dangerous reactor bomb device.
+Red/orange warning lights.
+Smoke particles.
+Timer glow.
+
+FOREHEAD:
+Anime guessing/intelligence vibe.
+Stylized anime character with forehead label.
+Purple mystery lighting.
+
+YES / NO:
+Retro anime CRT monitor with glowing YES/NO interface.
+Dark moody lighting.
+
+MOVIE RADAR:
+Old radar monitor scanning films/signals.
+Blue/cyan scanning effects.
+
+FUN CHALLENGES:
+Chaotic anime rooftop party at night.
+Warm magenta lighting.
+Fun energetic atmosphere.
+
+====================================
+BOTTOM NAVIGATION
+====================================
+
+Current bottom nav is horrible.
+Replace it completely.
+
+DO NOT:
+- use giant glowing pill
+- use oversized buttons
+- use chunky shapes
+
+Create:
+- slim elegant navigation bar
+- floating glass panel
+- subtle transparency
+- small clean icons
+- soft glow only
+- futuristic operating system aesthetic
+
+Navigation should feel expensive and modern.
+
+====================================
+COLOR SYSTEM
+====================================
+
+Primary colors:
+- deep purple
+- magenta
+- cyan
+- selective pink
+
+Use darkness heavily.
+
+DO NOT flood the screen with neon equally.
+
+The current version has too much equal glow everywhere.
+
+Need:
+- contrast
+- focus points
+- controlled lighting
+- cinematic darkness
+
+====================================
+TYPOGRAPHY
+====================================
+
+Use typography hierarchy properly.
+
+Logo:
+- large
+- stylized
+- cinematic
+
+Subtitles:
+- thin futuristic text
+
+Card labels:
+- compact
+- sharp
+- clean
+
+Avoid:
+- generic retro fonts everywhere
+- weak thin typography
+
+====================================
+ANIMATION & LIFE
+====================================
+
+The app must feel alive.
+
+Add subtle ambient motion:
+- drifting particles
+- pulsing glow
+- moving haze
+- flickering signs
+- CRT flickers
+- soft reflections
+- breathing UI
+- animated light bloom
+
+DO NOT overdo animations.
+Must remain premium and smooth.
+
+====================================
+IMPORTANT FINAL RULES
+====================================
+
+This should feel like:
+a REAL premium futuristic mobile gaming platform startup.
+
+NOT:
+- a hobby project
+- a retro webpage
+- a synthwave template
+- a simple neon landing page
+
+PRIORITIZE:
+- composition
+- cinematic mood
+- mobile realism
+- premium presentation
+- anime launcher aesthetics
+- layered UI depth
+- immersive atmosphere
+
+Keep everything optimized for vertical mobile portrait screens.
