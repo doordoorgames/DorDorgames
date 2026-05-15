@@ -127,6 +127,22 @@
     50% { opacity: var(--star-max-opacity, 0.7); transform: scale(1.2); }
   }
 
+  @keyframes logoNeonPulse {
+    0%, 100% {
+      filter:
+        drop-shadow(0 0 6px rgba(255, 0, 255, 0.6))
+        drop-shadow(0 0 16px rgba(255, 0, 255, 0.35))
+        drop-shadow(0 0 40px rgba(255, 0, 255, 0.15));
+    }
+    50% {
+      filter:
+        drop-shadow(0 0 14px rgba(255, 0, 255, 1))
+        drop-shadow(0 0 36px rgba(255, 0, 255, 0.7))
+        drop-shadow(0 0 80px rgba(255, 0, 255, 0.4))
+        drop-shadow(0 0 120px rgba(200, 0, 255, 0.2));
+    }
+  }
+
   @keyframes cityPulse {
     0%, 100% { background-position: 0% 50%; }
     50% { background-position: 100% 50%; }
@@ -319,4 +335,5 @@
   .animate-window-blink { animation: windowBlink 8s ease-in-out infinite; }
   .animate-slide-up { animation: slideUp 0.5s ease-out both; }
   .animate-hero-reveal { animation: heroReveal 0.8s ease-out both; }
+  .logo-neon-pulse { animation: logoNeonPulse 2.4s ease-in-out infinite; }
 }

@@ -135,11 +135,10 @@ function HeroSection() {
           <img
             src="/images/logo.png"
             alt="dordor.games"
+            className="logo-neon-pulse"
             style={{
-              width: "160px",
+              width: "170px",
               height: "auto",
-              filter:
-                "drop-shadow(0 0 10px rgba(255,0,255,0.5)) drop-shadow(0 0 24px rgba(255,0,255,0.25))",
             }}
           />
         </motion.div>
