@@ -14,24 +14,15 @@ const GAME_IMAGES: Record<string, string> = {
   "fun-challenges": "/images/game-fun-challenges.png",
 };
 
-// Rain streaks for hero
-const RAIN_STREAKS = Array.from({ length: 20 }, (_, i) => ({
+// Randomly placed blinking stars
+const STARS = Array.from({ length: 48 }, (_, i) => ({
   id: i,
-  left: `${(i * 23 + i * i * 7) % 98}%`,
-  height: `${40 + (i % 5) * 15}px`,
-  duration: `${0.8 + (i % 6) * 0.2}s`,
-  delay: `${(i * 0.15) % 2.5}s`,
-  opacity: 0.1 + (i % 4) * 0.05,
-}));
-
-// Sakura petals
-const SAKURA = Array.from({ length: 8 }, (_, i) => ({
-  id: i,
-  startX: `${10 + (i * 41) % 80}%`,
-  size: 4 + (i % 3) * 2,
-  duration: `${5 + (i % 5) * 1.5}s`,
-  delay: `${(i * 0.8) % 5}s`,
-  drift: `${(i % 2 === 0 ? 30 : -30) + (i % 3) * 10}px`,
+  top: `${(i * 17 + i * i * 3) % 62}%`,
+  left: `${(i * 29 + i * i * 7) % 96}%`,
+  size: i % 5 === 0 ? 2.5 : i % 3 === 0 ? 2 : 1.5,
+  duration: `${2.2 + (i * 0.37) % 3.8}s`,
+  delay: `${(i * 0.53) % 5}s`,
+  maxOpacity: 0.4 + (i % 4) * 0.15,
 }));
 
 function HeroSection() {
@@ -46,23 +37,16 @@ function HeroSection() {
         flexShrink: 0,
       }}
     >
-      {/* Looping video background */}
-      <video
-        autoPlay
-        loop
-        muted
-        playsInline
+      {/* Still city background */}
+      <div
         style={{
           position: "absolute",
           inset: 0,
-          width: "100%",
-          height: "100%",
-          objectFit: "cover",
-          objectPosition: "center top",
+          backgroundImage: "url('/images/hero-city.png')",
+          backgroundSize: "cover",
+          backgroundPosition: "center top",
         }}
-      >
-        <source src="/videos/hero-bg.mp4" type="video/mp4" />
-      </video>
+      />
 
       {/* Bottom gradient fade into app background */}
       <div
@@ -95,38 +79,21 @@ function HeroSection() {
         }}
       />
 
-      {/* Rain streaks */}
-      {RAIN_STREAKS.map((r) => (
+      {/* Blinking star layer */}
+      {STARS.map((s) => (
         <div
-          key={r.id}
+          key={s.id}
           style={{
             position: "absolute",
-            left: r.left,
-            top: "-10px",
-            width: "1px",
-            height: r.height,
-            background: `linear-gradient(to bottom, transparent, rgba(180,220,255,${r.opacity}), transparent)`,
-            animation: `particleDrift ${r.duration} linear ${r.delay} infinite`,
-            ["--dx" as string]: "2px",
-          }}
-        />
-      ))}
-
-      {/* Sakura petals */}
-      {SAKURA.map((p) => (
-        <div
-          key={p.id}
-          style={{
-            position: "absolute",
-            left: p.startX,
-            top: "-10px",
-            width: `${p.size}px`,
-            height: `${p.size}px`,
-            background: "rgba(255,180,210,0.6)",
-            borderRadius: "50% 0 50% 0",
-            boxShadow: "0 0 4px rgba(255,150,200,0.4)",
-            animation: `particleDrift ${p.duration} ease-in-out ${p.delay} infinite`,
-            ["--dx" as string]: p.drift,
+            top: s.top,
+            left: s.left,
+            width: `${s.size}px`,
+            height: `${s.size}px`,
+            borderRadius: "50%",
+            background: "white",
+            boxShadow: `0 0 ${s.size + 2}px rgba(255,255,255,0.8)`,
+            animation: `starPulse ${s.duration} ease-in-out ${s.delay} infinite`,
+            ["--star-max-opacity" as string]: s.maxOpacity,
           }}
         />
       ))}

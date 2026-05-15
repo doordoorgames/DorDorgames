@@ -122,6 +122,11 @@
     100% { transform: translateY(-180px) translateX(var(--dx, 20px)); opacity: 0; }
   }
 
+  @keyframes starPulse {
+    0%, 100% { opacity: 0.05; transform: scale(0.8); }
+    50% { opacity: var(--star-max-opacity, 0.7); transform: scale(1.2); }
+  }
+
   @keyframes cityPulse {
     0%, 100% { background-position: 0% 50%; }
     50% { background-position: 100% 50%; }
