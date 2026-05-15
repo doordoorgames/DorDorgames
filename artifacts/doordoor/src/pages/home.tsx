@@ -30,22 +30,16 @@ function HeroSection() {
     <div
       style={{
         position: "relative",
-        height: "42vh",
-        minHeight: "220px",
-        maxHeight: "320px",
+        width: "100%",
         overflow: "hidden",
         flexShrink: 0,
       }}
     >
-      {/* Still city background */}
-      <div
-        style={{
-          position: "absolute",
-          inset: 0,
-          backgroundImage: "url('/images/hero-city.jpg')",
-          backgroundSize: "cover",
-          backgroundPosition: "center top",
-        }}
+      {/* Full uncropped background image */}
+      <img
+        src="/images/hero-city.jpg"
+        alt=""
+        style={{ width: "100%", height: "auto", display: "block" }}
       />
 
       {/* Bottom gradient fade into app background */}
