@@ -51,6 +51,10 @@ export default function AdminDashboard() {
 
   if (!token) return null;
 
+  const isDomainMisconfigured =
+    typeof window !== "undefined" &&
+    window.location.hostname.includes("replit.app");
+
   const handleCloseRoom = (code: string) => {
     if (confirm("FORCE CLOSE ROOM?")) {
       closeRoom.mutate({ code }, { onSuccess: () => refetchRooms() });
@@ -80,6 +84,14 @@ export default function AdminDashboard() {
   return (
     <Layout>
       <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-6 pb-8">
+        {isDomainMisconfigured && (
+          <div className="border border-yellow-500 bg-yellow-500/10 px-3 py-2 text-yellow-400 font-mono text-[10px] leading-snug">
+            ⚠ CUSTOM DOMAIN NOT CONNECTED — you are on a replit.app URL. Game
+            proxy routes and QR codes will not work correctly until dordor.games
+            is pointing to this deployment.
+          </div>
+        )}
+
         <div className="flex items-center justify-between border-b border-destructive pb-4">
           <h1 className="font-mono text-xl text-destructive animate-flicker">ADMIN_OS</h1>
           <button

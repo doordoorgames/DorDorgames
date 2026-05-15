@@ -14,9 +14,13 @@ export interface GameConfig {
 // ─────────────────────────────────────────────────────────────────────────────
 // GAME LAUNCHER CONFIG
 //
-// externalUrl: full https:// URL for games hosted on a separate domain.
-//   Leave "" for games served as internal routes on this same domain.
-//   Internal routes use the `route` field for navigation (e.g. /flash).
+// externalUrl: full https:// URL for games on a completely separate domain
+//   (opens in new tab, e.g. tfadhloon.com).
+//
+// Leave externalUrl = "" for games proxied through this platform
+//   (Flash, Yes/No, Bomb, Reactor). Those are served at /flash etc. on
+//   dordor.games via a server-side reverse proxy — the browser URL never
+//   leaves dordor.games and window.location.origin stays correct for QR codes.
 // ─────────────────────────────────────────────────────────────────────────────
 export const GAMES_CONFIG: GameConfig[] = [
   {
@@ -35,7 +39,7 @@ export const GAMES_CONFIG: GameConfig[] = [
     titleAr: "الجاسوس",
     route: "/aljasoos",
     externalUrl: "",
-    status: "active",
+    status: "coming_soon",
     description: "Find the spy before they find you.",
     descriptionAr: "اكشف الجاسوس قبل أن يكشفك.",
   },
@@ -44,7 +48,7 @@ export const GAMES_CONFIG: GameConfig[] = [
     title: "Flash",
     titleAr: "فلاش",
     route: "/flash",
-    externalUrl: "https://flash-billboard.replit.app/flash",
+    externalUrl: "",
     status: "active",
     description: "Lightning fast party game.",
     descriptionAr: "لعبة حفلات سريعة البرق.",
@@ -54,7 +58,7 @@ export const GAMES_CONFIG: GameConfig[] = [
     title: "Yes / No",
     titleAr: "نعم / لا",
     route: "/yesno",
-    externalUrl: "https://flash-billboard.replit.app/yesno",
+    externalUrl: "",
     status: "active",
     description: "One question. Two answers. Infinite awkwardness.",
     descriptionAr: "سؤال واحد. إجابتان. إحراج لا نهاية له.",
@@ -64,7 +68,7 @@ export const GAMES_CONFIG: GameConfig[] = [
     title: "Bomb",
     titleAr: "القنبلة",
     route: "/bomb",
-    externalUrl: "https://flash-billboard.replit.app/bomb",
+    externalUrl: "",
     status: "active",
     description: "Pass the bomb before it explodes. Categories. Speed.",
     descriptionAr: "مرر القنبلة قبل أن تنفجر. فئات. سرعة.",
@@ -74,7 +78,7 @@ export const GAMES_CONFIG: GameConfig[] = [
     title: "Reactor",
     titleAr: "المفاعل",
     route: "/reactor",
-    externalUrl: "https://flash-billboard.replit.app/reactor",
+    externalUrl: "",
     status: "active",
     description: "React fast or face the consequences.",
     descriptionAr: "تصرف بسرعة أو تواجه العواقب.",
