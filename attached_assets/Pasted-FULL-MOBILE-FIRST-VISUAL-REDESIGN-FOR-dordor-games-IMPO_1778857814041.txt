@@ -1,0 +1,230 @@
+FULL MOBILE-FIRST VISUAL REDESIGN FOR dordor.games
+
+IMPORTANT:
+- The platform name is EXACTLY:
+dordor.games
+
+NOT:
+DOORDOOR
+DOORDOOR NETWORK
+DoorDoor
+DoorDoor.games
+
+Use ONLY:
+dordor.games
+
+IMPORTANT:
+- Do NOT change backend logic
+- Do NOT break room systems
+- Do NOT modify multiplayer networking
+- Do NOT touch QR logic
+- Do NOT remove existing games
+- This task is ONLY a complete frontend visual redesign and motion polish
+- Keep all existing routes and functionality working
+
+CORE DIRECTION:
+The website should feel like:
+- a 90s anime futuristic game platform
+- retro-futuristic
+- emotional
+- stylish
+- atmospheric
+- cinematic
+- alive
+- like a late-night anime arcade/social hub
+
+NOT:
+- Netflix
+- corporate SaaS
+- hacker-only aesthetic
+- generic cyberpunk template
+- desktop dashboard UI
+
+MAIN REFERENCES:
+- Bubblegum Crisis
+- Akira nightlife
+- city pop anime aesthetics
+- VHS future nostalgia
+- CRT televisions
+- retro anime glow
+- PS1 / Sega Dreamcast era vibes
+- anime rooftop nights
+- Sakura trees
+- grainy neon TV aesthetics
+
+LAYOUT:
+Convert the homepage into a vertical iPhone-style mobile-first layout.
+
+NO desktop dashboard.
+NO right-side info panels.
+NO giant analytics sections.
+
+The homepage should feel like a premium iPhone app.
+
+STRUCTURE:
+1. Full-width animated hero section on top
+2. Two-column game grid underneath
+3. Floating bottom navigation bar
+4. Minimal clean UI
+5. Large cinematic game cards
+
+HERO SECTION:
+Top section should include:
+- animated looping background video
+- subtle movement only
+- slow neon city animations
+- slight VHS grain
+- subtle drifting particles
+- light flickering signs
+- soft rain/light movement
+- NO distracting chaos
+
+The hero section should feel alive but calm.
+
+Use:
+- MP4/WebM looping background
+- muted/darkened with overlay
+- optimized for mobile performance
+
+VIDEO STYLE:
+- anime city skyline
+- rooftop nights
+- neon reflections
+- CRT glow
+- Sakura petals drifting slowly
+- distant traffic lights
+- retro Tokyo/Kuwait hybrid future city
+
+VISUAL EFFECTS:
+Add subtle motion throughout the UI:
+- pulsating neon glows
+- hover glow on cards
+- breathing light effects
+- subtle CRT scanlines
+- tiny VHS grain/noise overlay
+- ambient flickering
+- soft animated gradients
+- gentle bloom/glow
+
+Do NOT overdo animations.
+
+Everything should feel premium and cinematic.
+
+TYPOGRAPHY:
+Use:
+- bold retro arcade fonts
+- clean futuristic fonts
+- strong anime-inspired typography
+- glowing headers
+
+Avoid:
+- generic rounded modern fonts
+- childish styles
+- emoji-heavy design
+
+COLORS:
+Primary palette:
+- deep blacks
+- dark purples
+- neon magenta
+- electric cyan
+- warm pink highlights
+- subtle amber/orange accents
+
+GAME GRID:
+Homepage contains a 2-column grid only.
+
+Large cinematic cards.
+
+Games:
+- Flash
+- Bomb
+- Reactor
+- Forehead
+- Yes / No
+- Movie Radar
+- Fun Challenges
+- Guess The Character
+
+Each game card should:
+- have animated glow borders
+- have unique mood/art direction
+- keep unified UI style
+- feel like anime posters
+
+Examples:
+
+FLASH:
+- floating memory cards
+- purple neon
+- stylish calm energy
+
+BOMB:
+- red danger glow
+- reactor countdown vibe
+- industrial anime energy
+
+FOREHEAD:
+- fun social anime energy
+- rooftop friend-group vibe
+- slightly playful
+
+MOVIE RADAR:
+- VHS tape aesthetics
+- CRT televisions
+- retro detective mood
+
+FUN CHALLENGES:
+- brighter city pop mood
+- playful neon streets
+- anime nightlife vibe
+
+BOTTOM NAVIGATION:
+Floating iPhone-style bottom nav:
+- Home
+- Games
+- My Room
+- Leaderboard
+- Profile
+
+Use glowing icons only.
+Minimal labels.
+Transparent glassmorphism background.
+
+MOBILE EXPERIENCE:
+Everything must:
+- fit perfectly on phone screens
+- avoid ugly desktop scaling
+- avoid overflow
+- avoid cropped elements
+- stay centered
+- feel like a native app
+
+PERFORMANCE:
+Animations must remain lightweight.
+Avoid lag.
+Optimize videos and glow effects for mobile Safari and iPhone.
+
+DO NOT:
+- use visible replit branding
+- use replit URLs
+- use giant side dashboards
+- use corporate UI patterns
+- use flat boring cards
+- use excessive text blocks
+- use emoji-based styling
+
+FINAL GOAL:
+The website should feel like:
+“a stylish late-night anime arcade universe where friends join party games together.”
+
+It should emotionally feel:
+- nostalgic
+- futuristic
+- social
+- stylish
+- alive
+- cinematic
+- memorable
+
+while still being extremely usable on mobile.
