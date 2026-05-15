@@ -42,7 +42,7 @@ function HeroSection() {
         style={{
           position: "absolute",
           inset: 0,
-          backgroundImage: "url('/images/hero-city.png')",
+          backgroundImage: "url('/images/hero-city.jpg')",
           backgroundSize: "cover",
           backgroundPosition: "center top",
         }}
@@ -125,23 +125,6 @@ function HeroSection() {
           zIndex: 10,
         }}
       >
-        {/* Logo image */}
-        <motion.div
-          initial={{ opacity: 0, y: -10 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8, ease: "easeOut" }}
-          style={{ textAlign: "center", marginBottom: "6px" }}
-        >
-          <img
-            src="/images/logo.png"
-            alt="dordor.games"
-            className="logo-neon-pulse"
-            style={{
-              width: "170px",
-              height: "auto",
-            }}
-          />
-        </motion.div>
 
       </div>
     </div>
