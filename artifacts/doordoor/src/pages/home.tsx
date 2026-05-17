@@ -43,23 +43,16 @@ function HeroSection() {
         style={{ width: "100%", height: "auto", display: "block" }}
       />
 
-      {/* Bottom gradient fade into app background */}
+      {/* Thin bottom edge fade to blend into game grid */}
       <div
         style={{
           position: "absolute",
-          inset: 0,
-          background:
-            "linear-gradient(to bottom, rgba(5,5,8,0.25) 0%, rgba(5,5,8,0.1) 30%, rgba(5,5,8,0.5) 70%, #050508 100%)",
-        }}
-      />
-
-      {/* Top vignette */}
-      <div
-        style={{
-          position: "absolute",
-          inset: 0,
-          background:
-            "radial-gradient(ellipse at 50% 0%, transparent 40%, rgba(5,5,8,0.6) 100%)",
+          bottom: 0,
+          left: 0,
+          right: 0,
+          height: "60px",
+          background: "linear-gradient(to bottom, transparent, #050508)",
+          pointerEvents: "none",
         }}
       />
 
