@@ -42,6 +42,12 @@ uri = "file://attached_assets/generated_images/game-fun-challenges.png"
 type = "image"
 title = "generated_image"
 
+[[generated]]
+id = "3bSFaO5uC--gqLwqEnF_p"
+uri = "file://attached_assets/generated_images/game-doyouknowme.png"
+type = "image"
+title = "generated_image"
+
 [[outputs]]
 id = "j3MeS8eH1nrcEq720Hkdu"
 uri = "file://attached_assets/generated_images/hero-silhouette.png"
