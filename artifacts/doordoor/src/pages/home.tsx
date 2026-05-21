@@ -299,19 +299,6 @@ function GameCard({
           {game.titleAr}
         </div>
 
-        {isRedirect && (
-          <div
-            style={{
-              marginTop: "4px",
-              fontSize: "7px",
-              fontFamily: "var(--font-sans)",
-              color: "rgba(255,200,80,0.65)",
-              letterSpacing: "0.12em",
-            }}
-          >
-            ↗ External
-          </div>
-        )}
       </div>
 
       {/* Coming soon overlay */}
