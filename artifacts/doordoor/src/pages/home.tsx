@@ -15,6 +15,7 @@ const GAME_IMAGES: Record<string, string> = {
   guessthecharacter: "/images/game-guess.jpg",
   doyouknowme: "/images/game-doyouknowme.png",
   tfadhloon: "/images/game-tfadhloon.jpg",
+  charades: "/images/game-charades.png",
 };
 
 // Randomly placed blinking stars
