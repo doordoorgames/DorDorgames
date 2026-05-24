@@ -41,7 +41,7 @@ export const GAMES_CONFIG: GameConfig[] = [
     title: "Tfadhloon",
     titleAr: "تفضلون",
     route: "/tfadhloon",
-    externalUrl: "https://www.tfadhloon.com",
+    externalUrl: "https://t.dordor.games",
     status: "active",
     launchMode: "redirect",
     description: "The ultimate party icebreaker.",
