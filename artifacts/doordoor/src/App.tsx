@@ -40,6 +40,7 @@ function Router() {
         <Route path="/forehead" component={GameLauncher} />
         <Route path="/guessthecharacter" component={GameLauncher} />
         <Route path="/charades" component={GameLauncher} />
+        <Route path="/spy" component={GameLauncher} />
         <Route path="/doyouknowme" component={GameLauncher} />
 
         <Route component={NotFound} />

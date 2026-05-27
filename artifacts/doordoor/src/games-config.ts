@@ -23,6 +23,20 @@ export interface GameConfig {
 
 export const GAMES_CONFIG: GameConfig[] = [
   {
+    id: "spy",
+    title: "Spy",
+    titleAr: "الجاسوس",
+    route: "/spy",
+    externalUrl: "https://s.dordor.games",
+    status: "active",
+    launchMode: "redirect",
+    description: "Find the spy before they find you.",
+    descriptionAr: "اكشف الجاسوس قبل أن يكشفك.",
+    accentColor: "#cc44ff",
+    bgGradient: "linear-gradient(145deg, #0d0020 0%, #2a0045 45%, #4d0080 100%)",
+    symbol: "◉",
+  },
+  {
     id: "doyouknowme",
     title: "Do You Know Me?",
     titleAr: "تعرفوني؟",
