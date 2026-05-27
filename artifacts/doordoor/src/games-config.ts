@@ -151,7 +151,7 @@ export const GAMES_CONFIG: GameConfig[] = [
   {
     id: "charades",
     title: "Charades",
-    titleAr: "الشرادة",
+    titleAr: "بدون كلام",
     route: "/charades",
     externalUrl: "https://forehead-game.replit.app/charades",
     status: "active",
