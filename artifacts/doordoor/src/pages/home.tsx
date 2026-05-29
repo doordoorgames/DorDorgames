@@ -16,6 +16,7 @@ const GAME_IMAGES: Record<string, string> = {
   doyouknowme: "/images/game-doyouknowme.png",
   spy: "/images/game-spy.jpg",
   tfadhloon: "/images/game-tfadhloon.jpg",
+  aljasoos: "/images/game-aljasoos.png",
   charades: "/images/game-charades.png",
 };
 
