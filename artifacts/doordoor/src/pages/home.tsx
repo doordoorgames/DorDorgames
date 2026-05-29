@@ -13,10 +13,10 @@ const GAME_IMAGES: Record<string, string> = {
   "movie-radar": "/images/game-movie-radar.png",
   "fun-challenges": "/images/game-fun-challenges.png",
   guessthecharacter: "/images/game-guess.jpg",
-  doyouknowme: "/images/game-doyouknowme.png",
+  doyouknowme: "/images/game-doyouknowme-2.jpg",
   spy: "/images/game-spy.jpg",
   tfadhloon: "/images/game-tfadhloon.jpg",
-  aljasoos: "/images/game-aljasoos.png",
+  aljasoos: "/images/game-aljasoos-2.jpg",
   charades: "/images/game-charades.png",
 };
 
