@@ -1,8 +1,10 @@
 import { useState, useRef } from "react";
 import { Link } from "wouter";
 import { motion, useMotionValue, useTransform } from "framer-motion";
-import { GAMES_CONFIG, type GameConfig } from "@/games-config";
+import { type GameConfig } from "@/games-config";
 import { BottomNav } from "@/components/bottom-nav";
+import { useLiveGames } from "@/hooks/use-live-games";
+import { UpdateBanner } from "@/components/update-banner";
 
 // Map game IDs to generated artwork
 const GAME_IMAGES: Record<string, string> = {
@@ -138,7 +140,7 @@ function GameCard({
   const rotateX = useTransform(y, [-60, 60], [4, -4]);
   const rotateY = useTransform(x, [-60, 60], [-4, 4]);
 
-  const imageUrl = GAME_IMAGES[game.id];
+  const imageUrl = game.imageUrl || GAME_IMAGES[game.id];
   const isComingSoon = game.launchMode === "coming_soon";
   const isRedirect = game.launchMode === "redirect";
 
@@ -347,8 +349,9 @@ function GameCard({
 }
 
 export default function Home() {
-  const activeGames = GAMES_CONFIG.filter((g) => g.launchMode !== "coming_soon");
-  const comingSoonGames = GAMES_CONFIG.filter((g) => g.launchMode === "coming_soon");
+  const { games, updateAvailable } = useLiveGames();
+  const activeGames = games.filter((g) => g.launchMode !== "coming_soon");
+  const comingSoonGames = games.filter((g) => g.launchMode === "coming_soon");
 
   return (
     <div
@@ -470,6 +473,7 @@ export default function Home() {
         )}
       </div>
 
+      <UpdateBanner visible={updateAvailable} />
       <BottomNav />
     </div>
   );

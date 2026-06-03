@@ -1,9 +1,5 @@
 export type GameStatus = "active" | "coming_soon";
 
-// "iframe"    — game loads inside a full-screen iframe on this domain.
-//               Browser URL stays on dordor.games/flash. No visible redirect.
-// "redirect"  — user is navigated to a separate domain (opens in new tab).
-// "coming_soon" — not yet available.
 export type LaunchMode = "iframe" | "redirect" | "coming_soon";
 
 export interface GameConfig {
@@ -19,6 +15,7 @@ export interface GameConfig {
   accentColor: string;
   bgGradient: string;
   symbol: string;
+  imageUrl?: string;
 }
 
 export const GAMES_CONFIG: GameConfig[] = [
@@ -35,6 +32,7 @@ export const GAMES_CONFIG: GameConfig[] = [
     accentColor: "#cc44ff",
     bgGradient: "linear-gradient(145deg, #0d0020 0%, #2a0045 45%, #4d0080 100%)",
     symbol: "◉",
+    imageUrl: "/images/game-spy-v3.png",
   },
   {
     id: "doyouknowme",
@@ -49,6 +47,7 @@ export const GAMES_CONFIG: GameConfig[] = [
     accentColor: "#ff44aa",
     bgGradient: "linear-gradient(145deg, #1a0015 0%, #4d0040 45%, #8b0066 100%)",
     symbol: "♥",
+    imageUrl: "/images/game-doyouknowme-2.jpg",
   },
   {
     id: "tfadhloon",
@@ -63,6 +62,7 @@ export const GAMES_CONFIG: GameConfig[] = [
     accentColor: "#ffcc00",
     bgGradient: "linear-gradient(145deg, #1a1400 0%, #4a3800 45%, #8b6800 100%)",
     symbol: "★",
+    imageUrl: "/images/game-tfadhloon.jpg",
   },
   {
     id: "dots",
@@ -77,6 +77,7 @@ export const GAMES_CONFIG: GameConfig[] = [
     accentColor: "#ffaa00",
     bgGradient: "linear-gradient(145deg, #1a0e00 0%, #3d2200 45%, #6b3d00 100%)",
     symbol: "•",
+    imageUrl: "/images/game-nawafeth.png",
   },
   {
     id: "flash",
@@ -91,6 +92,7 @@ export const GAMES_CONFIG: GameConfig[] = [
     accentColor: "#bf00ff",
     bgGradient: "linear-gradient(145deg, #0d0020 0%, #2d0055 45%, #5b0fa8 100%)",
     symbol: "⚡",
+    imageUrl: "/images/game-flash.png",
   },
   {
     id: "bomb",
@@ -105,6 +107,7 @@ export const GAMES_CONFIG: GameConfig[] = [
     accentColor: "#ff2200",
     bgGradient: "linear-gradient(145deg, #1a0000 0%, #4a0800 45%, #8b1500 100%)",
     symbol: "●",
+    imageUrl: "/images/game-bomb.png",
   },
   {
     id: "reactor",
@@ -133,6 +136,7 @@ export const GAMES_CONFIG: GameConfig[] = [
     accentColor: "#ff4499",
     bgGradient: "linear-gradient(145deg, #1a0015 0%, #4d0040 45%, #8b0060 100%)",
     symbol: "◎",
+    imageUrl: "/images/game-forehead.png",
   },
   {
     id: "yesno",
@@ -147,6 +151,7 @@ export const GAMES_CONFIG: GameConfig[] = [
     accentColor: "#00ccff",
     bgGradient: "linear-gradient(145deg, #00061a 0%, #001550 45%, #002a8b 100%)",
     symbol: "◐",
+    imageUrl: "/images/game-yesno.png",
   },
   {
     id: "guessthecharacter",
@@ -161,6 +166,7 @@ export const GAMES_CONFIG: GameConfig[] = [
     accentColor: "#aa44ff",
     bgGradient: "linear-gradient(145deg, #08001a 0%, #1e0055 45%, #3a0090 100%)",
     symbol: "?",
+    imageUrl: "/images/game-guess.jpg",
   },
   {
     id: "charades",
@@ -175,6 +181,7 @@ export const GAMES_CONFIG: GameConfig[] = [
     accentColor: "#ff8800",
     bgGradient: "linear-gradient(145deg, #1a0800 0%, #4a2000 45%, #8b4000 100%)",
     symbol: "✦",
+    imageUrl: "/images/game-charades.png",
   },
   {
     id: "movie-radar",
@@ -189,6 +196,7 @@ export const GAMES_CONFIG: GameConfig[] = [
     accentColor: "#ff9933",
     bgGradient: "linear-gradient(145deg, #1a0d00 0%, #3d2200 45%, #6b3d00 100%)",
     symbol: "▶",
+    imageUrl: "/images/game-movie-radar.png",
   },
   {
     id: "fun-challenges",
@@ -203,6 +211,7 @@ export const GAMES_CONFIG: GameConfig[] = [
     accentColor: "#ff00aa",
     bgGradient: "linear-gradient(145deg, #1a0011 0%, #4d0033 30%, #1a0055 70%, #003355 100%)",
     symbol: "◆",
+    imageUrl: "/images/game-fun-challenges.png",
   },
   {
     id: "aljasoos",
@@ -217,6 +226,7 @@ export const GAMES_CONFIG: GameConfig[] = [
     accentColor: "#44aaff",
     bgGradient: "linear-gradient(145deg, #000d1a 0%, #001a33 45%, #002d55 100%)",
     symbol: "◉",
+    imageUrl: "/images/game-aljasoos-2.jpg",
   },
 ];
 
