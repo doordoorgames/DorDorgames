@@ -18,6 +18,7 @@ const GAME_IMAGES: Record<string, string> = {
   tfadhloon: "/images/game-tfadhloon.jpg",
   aljasoos: "/images/game-aljasoos-2.jpg",
   charades: "/images/game-charades.png",
+  dots: "/images/game-nawafeth.png",
 };
 
 // Randomly placed blinking stars

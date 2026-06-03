@@ -66,8 +66,8 @@ export const GAMES_CONFIG: GameConfig[] = [
   },
   {
     id: "dots",
-    title: "Dots",
-    titleAr: "نقط",
+    title: "Nawafeth",
+    titleAr: "نوافذ",
     route: "/dots",
     externalUrl: "https://flash-billboard.replit.app/dots",
     status: "active",
