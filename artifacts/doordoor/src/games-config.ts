@@ -74,8 +74,8 @@ export const GAMES_CONFIG: GameConfig[] = [
     launchMode: "iframe",
     description: "Connect the dots. Outsmart your friends.",
     descriptionAr: "وصّل النقاط. تفوّق على أصدقائك.",
-    accentColor: "#00eeff",
-    bgGradient: "linear-gradient(145deg, #000d1a 0%, #001a33 45%, #003355 100%)",
+    accentColor: "#ffaa00",
+    bgGradient: "linear-gradient(145deg, #1a0e00 0%, #3d2200 45%, #6b3d00 100%)",
     symbol: "•",
   },
   {
