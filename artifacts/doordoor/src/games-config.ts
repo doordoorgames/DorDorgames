@@ -92,7 +92,7 @@ export const GAMES_CONFIG: GameConfig[] = [
     accentColor: "#bf00ff",
     bgGradient: "linear-gradient(145deg, #0d0020 0%, #2d0055 45%, #5b0fa8 100%)",
     symbol: "⚡",
-    imageUrl: "/images/game-flash.png",
+    imageUrl: "/images/game-flash-v2.jpg",
   },
   {
     id: "bomb",
