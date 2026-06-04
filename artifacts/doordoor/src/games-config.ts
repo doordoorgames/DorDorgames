@@ -125,8 +125,8 @@ export const GAMES_CONFIG: GameConfig[] = [
   },
   {
     id: "forehead",
-    title: "Forehead",
-    titleAr: "الجبهة",
+    title: "Guess Your Word",
+    titleAr: "خمن كلمتك",
     route: "/forehead",
     externalUrl: "https://forehead-game.replit.app/forehead",
     status: "active",
@@ -136,7 +136,7 @@ export const GAMES_CONFIG: GameConfig[] = [
     accentColor: "#ff4499",
     bgGradient: "linear-gradient(145deg, #1a0015 0%, #4d0040 45%, #8b0060 100%)",
     symbol: "◎",
-    imageUrl: "/images/game-forehead.png",
+    imageUrl: "/images/game-forehead-v2.jpg",
   },
   {
     id: "yesno",
