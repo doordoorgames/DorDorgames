@@ -350,8 +350,8 @@ function GameCard({
 
 export default function Home() {
   const { games, updateAvailable } = useLiveGames();
-  const activeGames = games.filter((g) => g.launchMode !== "coming_soon");
-  const comingSoonGames = games.filter((g) => g.launchMode === "coming_soon");
+  const activeGames = games.filter((g) => !g.hidden && g.launchMode !== "coming_soon");
+  const comingSoonGames = games.filter((g) => !g.hidden && g.launchMode === "coming_soon");
 
   return (
     <div

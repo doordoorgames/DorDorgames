@@ -16,6 +16,7 @@ export interface GameConfig {
   bgGradient: string;
   symbol: string;
   imageUrl?: string;
+  hidden?: boolean;
 }
 
 export const GAMES_CONFIG: GameConfig[] = [
@@ -122,6 +123,7 @@ export const GAMES_CONFIG: GameConfig[] = [
     accentColor: "#00ff41",
     bgGradient: "linear-gradient(145deg, #001400 0%, #003800 45%, #006600 100%)",
     symbol: "◈",
+    hidden: true,
   },
   {
     id: "forehead",

@@ -101,7 +101,8 @@
     "descriptionAr": "تصرف بسرعة أو تواجه العواقب.",
     "accentColor": "#00ff41",
     "bgGradient": "linear-gradient(145deg, #001400 0%, #003800 45%, #006600 100%)",
-    "symbol": "◈"
+    "symbol": "◈",
+    "hidden": true
   },
   {
     "id": "forehead",
