@@ -108,7 +108,7 @@ export const GAMES_CONFIG: GameConfig[] = [
     accentColor: "#ff2200",
     bgGradient: "linear-gradient(145deg, #1a0000 0%, #4a0800 45%, #8b1500 100%)",
     symbol: "●",
-    imageUrl: "/images/game-bomb.png",
+    imageUrl: "/images/game-bomb-v2.png",
   },
   {
     id: "reactor",
