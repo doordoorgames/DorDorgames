@@ -63,7 +63,7 @@ export const GAMES_CONFIG: GameConfig[] = [
     accentColor: "#ffcc00",
     bgGradient: "linear-gradient(145deg, #1a1400 0%, #4a3800 45%, #8b6800 100%)",
     symbol: "★",
-    imageUrl: "/images/game-tfadhloon-v2.png",
+    imageUrl: "/images/game-tfadhloon-v3.png",
   },
   {
     id: "forehead",
