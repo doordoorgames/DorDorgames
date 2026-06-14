@@ -183,7 +183,7 @@ export const GAMES_CONFIG: GameConfig[] = [
     accentColor: "#ff8800",
     bgGradient: "linear-gradient(145deg, #1a0800 0%, #4a2000 45%, #8b4000 100%)",
     symbol: "✦",
-    imageUrl: "/images/game-charades.png",
+    imageUrl: "/images/game-charades-v2.png",
   },
   {
     id: "movie-radar",
