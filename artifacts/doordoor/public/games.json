@@ -163,50 +163,5 @@
     "bgGradient": "linear-gradient(145deg, #1a0800 0%, #4a2000 45%, #8b4000 100%)",
     "symbol": "✦",
     "imageUrl": "/images/game-charades-v2.png"
-  },
-  {
-    "id": "movie-radar",
-    "title": "Movie Radar",
-    "titleAr": "رادار الأفلام",
-    "route": "/movie-radar",
-    "externalUrl": "",
-    "status": "coming_soon",
-    "launchMode": "coming_soon",
-    "description": "VHS vibes. Retro cinema quizzes.",
-    "descriptionAr": "أجواء VHS. اختبارات سينما كلاسيكية.",
-    "accentColor": "#ff9933",
-    "bgGradient": "linear-gradient(145deg, #1a0d00 0%, #3d2200 45%, #6b3d00 100%)",
-    "symbol": "▶",
-    "imageUrl": "/images/game-movie-radar.png"
-  },
-  {
-    "id": "fun-challenges",
-    "title": "Fun Challenges",
-    "titleAr": "تحديات مرحة",
-    "route": "/fun-challenges",
-    "externalUrl": "",
-    "status": "coming_soon",
-    "launchMode": "coming_soon",
-    "description": "City pop nights. Neon dares.",
-    "descriptionAr": "ليالي نيون. تحديات مضحكة.",
-    "accentColor": "#ff00aa",
-    "bgGradient": "linear-gradient(145deg, #1a0011 0%, #4d0033 30%, #1a0055 70%, #003355 100%)",
-    "symbol": "◆",
-    "imageUrl": "/images/game-fun-challenges.png"
-  },
-  {
-    "id": "aljasoos",
-    "title": "Aljasoos",
-    "titleAr": "الجاسوس",
-    "route": "/aljasoos",
-    "externalUrl": "",
-    "status": "coming_soon",
-    "launchMode": "coming_soon",
-    "description": "Find the spy before they find you.",
-    "descriptionAr": "اكشف الجاسوس قبل أن يكشفك.",
-    "accentColor": "#44aaff",
-    "bgGradient": "linear-gradient(145deg, #000d1a 0%, #001a33 45%, #002d55 100%)",
-    "symbol": "◉",
-    "imageUrl": "/images/game-aljasoos-v2.jpg"
   }
 ]
