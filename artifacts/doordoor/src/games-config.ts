@@ -33,7 +33,7 @@ export const GAMES_CONFIG: GameConfig[] = [
     accentColor: "#cc44ff",
     bgGradient: "linear-gradient(145deg, #0d0020 0%, #2a0045 45%, #4d0080 100%)",
     symbol: "◉",
-    imageUrl: "/images/game-spy-v3.png",
+    imageUrl: "/images/game-spy-v4.jpg",
   },
   {
     id: "doyouknowme",
