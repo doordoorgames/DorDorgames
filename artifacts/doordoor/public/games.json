@@ -75,21 +75,6 @@
     "imageUrl": "/images/game-flash-v3.png"
   },
   {
-    "id": "bomb",
-    "title": "Bomb",
-    "titleAr": "القنبلة",
-    "route": "/bomb",
-    "externalUrl": "https://flash-billboard.replit.app/bomb",
-    "status": "active",
-    "launchMode": "iframe",
-    "description": "Pass the bomb before it explodes.",
-    "descriptionAr": "مرر القنبلة قبل أن تنفجر.",
-    "accentColor": "#ff2200",
-    "bgGradient": "linear-gradient(145deg, #1a0000 0%, #4a0800 45%, #8b1500 100%)",
-    "symbol": "●",
-    "imageUrl": "/images/game-bomb-v3.png"
-  },
-  {
     "id": "reactor",
     "title": "Reactor",
     "titleAr": "المفاعل",
@@ -103,21 +88,6 @@
     "bgGradient": "linear-gradient(145deg, #001400 0%, #003800 45%, #006600 100%)",
     "symbol": "◈",
     "hidden": true
-  },
-  {
-    "id": "dots",
-    "title": "Nawafeth",
-    "titleAr": "نوافذ",
-    "route": "/dots",
-    "externalUrl": "https://flash-billboard.replit.app/dots",
-    "status": "active",
-    "launchMode": "iframe",
-    "description": "Connect the dots. Outsmart your friends.",
-    "descriptionAr": "وصّل النقاط. تفوّق على أصدقائك.",
-    "accentColor": "#ffaa00",
-    "bgGradient": "linear-gradient(145deg, #1a0e00 0%, #3d2200 45%, #6b3d00 100%)",
-    "symbol": "•",
-    "imageUrl": "/images/game-nawafeth.png"
   },
   {
     "id": "yesno",
@@ -163,5 +133,35 @@
     "bgGradient": "linear-gradient(145deg, #1a0800 0%, #4a2000 45%, #8b4000 100%)",
     "symbol": "✦",
     "imageUrl": "/images/game-charades-v2.png"
+  },
+  {
+    "id": "dots",
+    "title": "Nawafeth",
+    "titleAr": "نوافذ",
+    "route": "/dots",
+    "externalUrl": "https://flash-billboard.replit.app/dots",
+    "status": "active",
+    "launchMode": "iframe",
+    "description": "Connect the dots. Outsmart your friends.",
+    "descriptionAr": "وصّل النقاط. تفوّق على أصدقائك.",
+    "accentColor": "#ffaa00",
+    "bgGradient": "linear-gradient(145deg, #1a0e00 0%, #3d2200 45%, #6b3d00 100%)",
+    "symbol": "•",
+    "imageUrl": "/images/game-nawafeth.png"
+  },
+  {
+    "id": "bomb",
+    "title": "Bomb",
+    "titleAr": "القنبلة",
+    "route": "/bomb",
+    "externalUrl": "https://flash-billboard.replit.app/bomb",
+    "status": "coming_soon",
+    "launchMode": "coming_soon",
+    "description": "Pass the bomb before it explodes.",
+    "descriptionAr": "مرر القنبلة قبل أن تنفجر.",
+    "accentColor": "#ff2200",
+    "bgGradient": "linear-gradient(145deg, #1a0000 0%, #4a0800 45%, #8b1500 100%)",
+    "symbol": "●",
+    "imageUrl": "/images/game-bomb-v3.png"
   }
 ]

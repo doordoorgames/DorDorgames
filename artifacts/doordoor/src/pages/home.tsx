@@ -447,7 +447,7 @@ export default function Home() {
                   textTransform: "uppercase",
                 }}
               >
-                Coming Soon
+                Coming Soon · قريباً
               </span>
               <div
                 style={{
