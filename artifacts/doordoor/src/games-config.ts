@@ -17,6 +17,7 @@ export interface GameConfig {
   symbol: string;
   imageUrl?: string;
   hidden?: boolean;
+  privateTest?: boolean;
 }
 
 export const GAMES_CONFIG: GameConfig[] = [
@@ -161,14 +162,15 @@ export const GAMES_CONFIG: GameConfig[] = [
     titleAr: "نوافذ",
     route: "/dots",
     externalUrl: "https://flash-billboard.replit.app/dots",
-    status: "active",
-    launchMode: "iframe",
+    status: "coming_soon",
+    launchMode: "coming_soon",
     description: "Connect the dots. Outsmart your friends.",
     descriptionAr: "وصّل النقاط. تفوّق على أصدقائك.",
     accentColor: "#ffaa00",
     bgGradient: "linear-gradient(145deg, #1a0e00 0%, #3d2200 45%, #6b3d00 100%)",
     symbol: "•",
     imageUrl: "/images/game-nawafeth.png",
+    privateTest: true,
   },
   {
     id: "bomb",
@@ -184,6 +186,7 @@ export const GAMES_CONFIG: GameConfig[] = [
     bgGradient: "linear-gradient(145deg, #1a0000 0%, #4a0800 45%, #8b1500 100%)",
     symbol: "●",
     imageUrl: "/images/game-bomb-v3.png",
+    privateTest: true,
   },
 ];
 

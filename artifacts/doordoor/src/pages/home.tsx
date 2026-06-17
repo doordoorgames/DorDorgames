@@ -1,10 +1,11 @@
 import { useState, useRef } from "react";
-import { Link } from "wouter";
+import { Link, useLocation } from "wouter";
 import { motion, useMotionValue, useTransform } from "framer-motion";
 import { type GameConfig } from "@/games-config";
 import { BottomNav } from "@/components/bottom-nav";
 import { useLiveGames } from "@/hooks/use-live-games";
 import { UpdateBanner } from "@/components/update-banner";
+import { PasswordModal } from "@/components/password-modal";
 
 // Map game IDs to generated artwork
 const GAME_IMAGES: Record<string, string> = {
@@ -130,9 +131,11 @@ function HeroSection() {
 function GameCard({
   game,
   index,
+  onPrivateTest,
 }: {
   game: GameConfig;
   index: number;
+  onPrivateTest?: (game: GameConfig) => void;
 }) {
   const cardRef = useRef<HTMLDivElement>(null);
   const x = useMotionValue(0);
@@ -141,7 +144,8 @@ function GameCard({
   const rotateY = useTransform(x, [-60, 60], [-4, 4]);
 
   const imageUrl = game.imageUrl || GAME_IMAGES[game.id];
-  const isComingSoon = game.launchMode === "coming_soon";
+  const isPrivateTest = !!game.privateTest;
+  const isComingSoon = game.launchMode === "coming_soon" && !isPrivateTest;
   const isRedirect = game.launchMode === "redirect";
 
   function handleMouseMove(e: React.MouseEvent<HTMLDivElement>) {
@@ -193,7 +197,11 @@ function GameCard({
           background: imageUrl
             ? `url('${imageUrl}') center top / cover no-repeat`
             : game.bgGradient,
-          filter: isComingSoon ? "brightness(0.3) saturate(0.4)" : "none",
+          filter: isComingSoon
+            ? "brightness(0.3) saturate(0.4)"
+            : isPrivateTest
+              ? "brightness(0.5) saturate(0.5)"
+              : "none",
           transition: "filter 0.3s ease",
         }}
       />
@@ -335,9 +343,48 @@ function GameCard({
           </div>
         </div>
       )}
+
+      {/* Private test overlay + badge */}
+      {isPrivateTest && (
+        <>
+          <div
+            style={{
+              position: "absolute",
+              inset: 0,
+              background: "rgba(0,0,0,0.28)",
+            }}
+          />
+          <div
+            style={{
+              position: "absolute",
+              top: "8px",
+              left: "50%",
+              transform: "translateX(-50%)",
+              padding: "3px 9px",
+              background: "rgba(40,0,70,0.88)",
+              border: "1px solid rgba(150,80,255,0.35)",
+              borderRadius: "2px",
+              fontFamily: "var(--font-sans)",
+              fontSize: "7px",
+              color: "rgba(190,150,255,0.85)",
+              letterSpacing: "0.2em",
+              textTransform: "uppercase",
+              whiteSpace: "nowrap",
+            }}
+          >
+            Private Test
+          </div>
+        </>
+      )}
     </motion.div>
   );
 
+  if (isPrivateTest)
+    return (
+      <div style={{ cursor: "pointer" }} onClick={() => onPrivateTest?.(game)}>
+        {cardInner}
+      </div>
+    );
   if (isComingSoon) return cardInner;
   if (isRedirect)
     return (
@@ -350,8 +397,20 @@ function GameCard({
 
 export default function Home() {
   const { games, updateAvailable } = useLiveGames();
+  const [, navigate] = useLocation();
+  const [pendingGame, setPendingGame] = useState<GameConfig | null>(null);
+
   const activeGames = games.filter((g) => !g.hidden && g.launchMode !== "coming_soon");
   const comingSoonGames = games.filter((g) => !g.hidden && g.launchMode === "coming_soon");
+
+  function handlePrivateTest(game: GameConfig) {
+    setPendingGame(game);
+  }
+
+  function handlePasswordSuccess(game: GameConfig) {
+    setPendingGame(null);
+    navigate(game.route);
+  }
 
   return (
     <div
@@ -416,7 +475,7 @@ export default function Home() {
           }}
         >
           {activeGames.map((game, i) => (
-            <GameCard key={game.id} game={game} index={i} />
+            <GameCard key={game.id} game={game} index={i} onPrivateTest={handlePrivateTest} />
           ))}
         </div>
 
@@ -466,7 +525,7 @@ export default function Home() {
               }}
             >
               {comingSoonGames.map((game, i) => (
-                <GameCard key={game.id} game={game} index={activeGames.length + i} />
+                <GameCard key={game.id} game={game} index={activeGames.length + i} onPrivateTest={handlePrivateTest} />
               ))}
             </div>
           </>
@@ -475,6 +534,11 @@ export default function Home() {
 
       <UpdateBanner visible={updateAvailable} />
       <BottomNav />
+      <PasswordModal
+        game={pendingGame}
+        onSuccess={handlePasswordSuccess}
+        onClose={() => setPendingGame(null)}
+      />
     </div>
   );
 }
