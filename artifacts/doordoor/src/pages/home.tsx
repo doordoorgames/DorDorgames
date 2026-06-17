@@ -344,37 +344,15 @@ function GameCard({
         </div>
       )}
 
-      {/* Private test overlay + badge */}
+      {/* Private test overlay */}
       {isPrivateTest && (
-        <>
-          <div
-            style={{
-              position: "absolute",
-              inset: 0,
-              background: "rgba(0,0,0,0.28)",
-            }}
-          />
-          <div
-            style={{
-              position: "absolute",
-              top: "8px",
-              left: "50%",
-              transform: "translateX(-50%)",
-              padding: "3px 9px",
-              background: "rgba(40,0,70,0.88)",
-              border: "1px solid rgba(150,80,255,0.35)",
-              borderRadius: "2px",
-              fontFamily: "var(--font-sans)",
-              fontSize: "7px",
-              color: "rgba(190,150,255,0.85)",
-              letterSpacing: "0.2em",
-              textTransform: "uppercase",
-              whiteSpace: "nowrap",
-            }}
-          >
-            Private Test
-          </div>
-        </>
+        <div
+          style={{
+            position: "absolute",
+            inset: 0,
+            background: "rgba(0,0,0,0.28)",
+          }}
+        />
       )}
     </motion.div>
   );
@@ -409,7 +387,11 @@ export default function Home() {
 
   function handlePasswordSuccess(game: GameConfig) {
     setPendingGame(null);
-    navigate(game.route);
+    if (game.externalUrl) {
+      window.location.href = game.externalUrl;
+    } else {
+      navigate(game.route);
+    }
   }
 
   return (
