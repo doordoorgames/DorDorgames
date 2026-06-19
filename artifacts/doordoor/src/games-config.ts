@@ -139,7 +139,7 @@ export const GAMES_CONFIG: GameConfig[] = [
     accentColor: "#aa44ff",
     bgGradient: "linear-gradient(145deg, #08001a 0%, #1e0055 45%, #3a0090 100%)",
     symbol: "?",
-    imageUrl: "/images/game-guess-v4.png",
+    imageUrl: "/images/game-guess-v5.jpg",
   },
   {
     id: "charades",
