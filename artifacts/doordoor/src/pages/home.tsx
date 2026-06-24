@@ -381,7 +381,7 @@ export default function Home() {
   const [adminModalOpen, setAdminModalOpen] = useState(false);
 
   const activeGames = games.filter((g) => !g.hidden && g.launchMode !== "coming_soon");
-  const comingSoonGames = games.filter((g) => !g.hidden && g.launchMode === "coming_soon");
+  const comingSoonGames = games.filter((g) => !g.hidden && g.launchMode === "coming_soon" && !g.privateTest);
 
   function handlePrivateTest(game: GameConfig) {
     setPendingGame(game);
