@@ -6,6 +6,7 @@ import { BottomNav } from "@/components/bottom-nav";
 import { useLiveGames } from "@/hooks/use-live-games";
 import { UpdateBanner } from "@/components/update-banner";
 import { PasswordModal } from "@/components/password-modal";
+import { AdminModal } from "@/components/admin-modal";
 
 // Map game IDs to generated artwork
 const GAME_IMAGES: Record<string, string> = {
@@ -377,6 +378,7 @@ export default function Home() {
   const { games, updateAvailable } = useLiveGames();
   const [, navigate] = useLocation();
   const [pendingGame, setPendingGame] = useState<GameConfig | null>(null);
+  const [adminModalOpen, setAdminModalOpen] = useState(false);
 
   const activeGames = games.filter((g) => !g.hidden && g.launchMode !== "coming_soon");
   const comingSoonGames = games.filter((g) => !g.hidden && g.launchMode === "coming_soon");
@@ -512,10 +514,35 @@ export default function Home() {
             </div>
           </>
         )}
+        {/* Hidden admin access */}
+        <div style={{ textAlign: "center", padding: "28px 0 8px" }}>
+          <button
+            onClick={() => setAdminModalOpen(true)}
+            style={{
+              background: "none",
+              border: "none",
+              cursor: "pointer",
+              fontFamily: "var(--font-sans)",
+              fontSize: "8px",
+              color: "rgba(255,255,255,0.07)",
+              letterSpacing: "0.3em",
+              textTransform: "uppercase",
+              padding: "8px 16px",
+              userSelect: "none",
+            }}
+          >
+            admin
+          </button>
+        </div>
       </div>
 
       <UpdateBanner visible={updateAvailable} />
       <BottomNav />
+      <AdminModal
+        visible={adminModalOpen}
+        onSuccess={() => { setAdminModalOpen(false); navigate("/shelved"); }}
+        onClose={() => setAdminModalOpen(false)}
+      />
       <PasswordModal
         game={pendingGame}
         onSuccess={handlePasswordSuccess}

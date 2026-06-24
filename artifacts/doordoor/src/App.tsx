@@ -13,6 +13,7 @@ import RoomView from "@/pages/room";
 import AdminLogin from "@/pages/admin";
 import AdminDashboard from "@/pages/admin-dashboard";
 import GameLauncher from "@/pages/game-launcher";
+import ShelvedGames from "@/pages/shelved-games";
 
 const queryClient = new QueryClient();
 
@@ -29,6 +30,7 @@ function Router() {
         <Route path="/room/:code" component={RoomView} />
         <Route path="/admin" component={AdminLogin} />
         <Route path="/admin/dashboard" component={AdminDashboard} />
+        <Route path="/shelved" component={ShelvedGames} />
 
         {/* Game launcher routes */}
         <Route path="/tfadhloon" component={GameLauncher} />
