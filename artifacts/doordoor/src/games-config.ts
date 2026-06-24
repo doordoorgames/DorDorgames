@@ -126,7 +126,7 @@ export const GAMES_CONFIG: GameConfig[] = [
     accentColor: "#00ccff",
     bgGradient: "linear-gradient(145deg, #00061a 0%, #001550 45%, #002a8b 100%)",
     symbol: "◐",
-    imageUrl: "/images/game-yesno-v2.png",
+    imageUrl: "/images/game-yesno-v3.png",
     privateTest: true,
   },
   {
