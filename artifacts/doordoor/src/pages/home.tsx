@@ -524,7 +524,7 @@ export default function Home() {
               cursor: "pointer",
               fontFamily: "var(--font-sans)",
               fontSize: "8px",
-              color: "rgba(255,255,255,0.07)",
+              color: "rgba(255,255,255,0.15)",
               letterSpacing: "0.3em",
               textTransform: "uppercase",
               padding: "8px 16px",
