@@ -1,0 +1,14 @@
+[
+  {
+    "id": "test-host-playwright-001",
+    "fullName": "Playwright Test Host",
+    "email": "playwright@doordoor.test",
+    "phone": "+96500000001",
+    "passwordHash": "$2b$10$OHKozKc8YBBB0Xr4CszNaO1vMNKmEiog3xxlz2xxUsELZOAbaFhL2",
+    "phoneVerified": true,
+    "trialUsed": true,
+    "remainingMinutes": 180,
+    "createdAt": "2026-06-30T11:17:06.687Z",
+    "updatedAt": "2026-06-30T11:17:06.687Z"
+  }
+]

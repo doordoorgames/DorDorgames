@@ -142,5 +142,17 @@
     "id": "n4nfscmmnmr0j4t83",
     "createdAt": "2026-06-30T10:54:30.387Z",
     "updatedAt": "2026-06-30T10:54:42.906Z"
+  },
+  {
+    "id": "test-host-playwright-e2e",
+    "fullName": "E2E Test Host",
+    "email": "e2etest@doordoor.test",
+    "phone": "+96500099999",
+    "passwordHash": "$2b$10$3o5JYgrumT2MwydugoAUfuhm6nbYPVZFcl8gOX.cqUlXKUVnhw.Mq",
+    "phoneVerified": true,
+    "trialUsed": true,
+    "remainingMinutes": 0,
+    "createdAt": "2026-06-30T11:18:35.776Z",
+    "updatedAt": "2026-06-30T11:18:44.934Z"
   }
 ]
