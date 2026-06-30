@@ -8,22 +8,28 @@ export default function RoomView() {
   const [, setLocation] = useLocation();
   const params = useParams();
   const code = params.code || "";
+  const [sessionEnded, setSessionEnded] = useState(false);
 
   const { data: room, isLoading, error } = useGetRoom(code, {
     query: {
-      enabled: !!code,
+      enabled: !!code && !sessionEnded,
       refetchInterval: 3000,
-      queryKey: getGetRoomQueryKey(code)
+      queryKey: getGetRoomQueryKey(code),
+      retry: false,
     }
   });
 
   useEffect(() => {
-    if (error) {
+    if (!error) return;
+    const status = (error as { status?: number }).status;
+    if (status === 404) {
+      setSessionEnded(true);
+    } else {
       setLocation("/");
     }
   }, [error, setLocation]);
 
-  if (isLoading || !room) {
+  if (isLoading && !room) {
     return (
       <Layout>
         <div className="flex justify-center p-8">
@@ -31,6 +37,39 @@ export default function RoomView() {
         </div>
       </Layout>
     );
+  }
+
+  if (sessionEnded) {
+    return (
+      <Layout>
+        <motion.div
+          initial={{ opacity: 0, scale: 0.95 }}
+          animate={{ opacity: 1, scale: 1 }}
+          className="flex flex-col items-center justify-center min-h-[60vh] space-y-6 text-center"
+        >
+          <div className="text-6xl">⏱</div>
+          <h1 className="font-mono text-2xl text-primary animate-glow-pulse tracking-widest">
+            SESSION ENDED
+          </h1>
+          <p className="font-mono text-sm text-muted-foreground">
+            انتهت الجلسة
+          </p>
+          <p className="font-mono text-xs text-muted-foreground max-w-xs">
+            The host's time ran out and this room has been closed.
+          </p>
+          <button
+            onClick={() => setLocation("/")}
+            className="mt-4 font-mono text-sm border border-primary text-primary px-6 py-3 hover:bg-primary hover:text-background transition-all"
+          >
+            BACK TO ARCADE / العودة
+          </button>
+        </motion.div>
+      </Layout>
+    );
+  }
+
+  if (!room) {
+    return null;
   }
 
   return (

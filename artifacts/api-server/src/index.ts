@@ -1,5 +1,6 @@
 import app from "./app";
 import { logger } from "./lib/logger";
+import { store } from "./lib/store";
 
 const rawPort = process.env["PORT"];
 
@@ -14,6 +15,18 @@ const port = Number(rawPort);
 if (Number.isNaN(port) || port <= 0) {
   throw new Error(`Invalid PORT value: "${rawPort}"`);
 }
+
+const SWEEP_INTERVAL_MS = 60_000;
+
+function sweepExpiredRooms() {
+  const closed = store.rooms.closeExpired();
+  if (closed > 0) {
+    logger.info({ count: closed }, "Swept expired rooms");
+  }
+}
+
+sweepExpiredRooms();
+setInterval(sweepExpiredRooms, SWEEP_INTERVAL_MS);
 
 app.listen(port, (err) => {
   if (err) {

@@ -147,9 +147,25 @@ export const store = {
       return readJson<Room[]>("rooms.json", []);
     },
     get(code: string): Room | undefined {
+      const now = new Date().toISOString();
       return readJson<Room[]>("rooms.json", []).find(
-        (r) => r.code === code && r.open,
+        (r) => r.code === code && r.open && r.expiresAt > now,
       );
+    },
+    closeExpired(): number {
+      const rooms = readJson<Room[]>("rooms.json", []);
+      const now = new Date().toISOString();
+      let count = 0;
+      for (const room of rooms) {
+        if (room.open && room.expiresAt <= now) {
+          room.open = false;
+          count++;
+        }
+      }
+      if (count > 0) {
+        writeJson("rooms.json", rooms);
+      }
+      return count;
     },
     create(hostPhone: string, gameId: string, durationMinutes: number = 180): Room {
       const rooms = readJson<Room[]>("rooms.json", []);
