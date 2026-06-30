@@ -1,0 +1,14 @@
+[
+  {
+    "fullName": "Test Host",
+    "email": "test@example.com",
+    "phone": "96500000001",
+    "passwordHash": "$2b$10$vw5BJwkLASe.Ys83wJDaWux20d3BJPBMh3QztEbSXxa/AMtowXctC",
+    "phoneVerified": true,
+    "trialUsed": true,
+    "remainingMinutes": 0,
+    "id": "0xkhvo26zmr0g3vvm",
+    "createdAt": "2026-06-30T09:29:48.322Z",
+    "updatedAt": "2026-06-30T09:30:00.797Z"
+  }
+]

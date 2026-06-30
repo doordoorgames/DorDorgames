@@ -6,7 +6,8 @@
  * OpenAPI spec version: 0.1.0
  */
 
-export interface OtpVerify {
-  phone: string;
-  otp: string;
+export interface LoginBody {
+  /** Email address or phone number */
+  identifier: string;
+  password: string;
 }

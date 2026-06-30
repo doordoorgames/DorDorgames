@@ -94,7 +94,6 @@ export interface Room {
 }
 
 export interface RoomInput {
-  hostPhone: string;
   gameId: string;
 }
 
@@ -106,25 +105,49 @@ export interface GuestJoin {
   nickname: string;
 }
 
-export interface OtpRequest {
+export interface HostProfile {
+  id: string;
+  fullName: string;
+  email: string;
   phone: string;
+  phoneVerified: boolean;
+  trialUsed: boolean;
+  remainingMinutes: number;
+  createdAt: string;
+  updatedAt: string;
 }
 
-export interface OtpRequestResult {
+export interface SignupRequestOtpBody {
+  fullName: string;
+  email: string;
+  phone: string;
+  /** @minLength 8 */
+  password: string;
+}
+
+export interface SignupRequestOtpResult {
   success: boolean;
   message: string;
 }
 
-export interface OtpVerify {
+export interface SignupVerifyOtpBody {
   phone: string;
+  /**
+   * @minLength 4
+   * @maxLength 4
+   */
   otp: string;
 }
 
-export interface HostSession {
-  phone: string;
-  active: boolean;
-  /** @nullable */
-  expiresAt: string | null;
+export interface AuthResult {
+  token: string;
+  host: HostProfile;
+}
+
+export interface LoginBody {
+  /** Email address or phone number */
+  identifier: string;
+  password: string;
 }
 
 export interface PromoValidate {

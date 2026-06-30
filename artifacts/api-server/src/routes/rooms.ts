@@ -1,6 +1,5 @@
 import { Router, type IRouter } from "express";
 import {
-  CreateRoomBody,
   GetRoomParams,
   CloseRoomParams,
   SwitchRoomGameParams,
@@ -8,9 +7,15 @@ import {
   JoinRoomParams,
   JoinRoomBody,
 } from "@workspace/api-zod";
-import { store } from "../lib/store";
+import { z } from "zod";
+import { store } from "../lib/store.js";
+import { requireHost } from "../lib/auth.js";
 
 const router: IRouter = Router();
+
+const CreateRoomBody = z.object({
+  gameId: z.string(),
+});
 
 function roomWithGame(room: ReturnType<typeof store.rooms.get>) {
   if (!room) return undefined;
@@ -26,14 +31,32 @@ router.get("/rooms", (_req, res) => {
   res.json(rooms);
 });
 
-router.post("/rooms", (req, res) => {
-  const body = CreateRoomBody.parse(req.body);
-  const game = store.games.get(body.gameId);
+router.post("/rooms", requireHost, (req, res) => {
+  const bodyResult = CreateRoomBody.safeParse(req.body);
+  if (!bodyResult.success) {
+    res.status(400).json({ error: "gameId is required" });
+    return;
+  }
+  const { gameId } = bodyResult.data;
+  const host = req.hostAccount!;
+
+  if (host.remainingMinutes <= 0) {
+    res.status(403).json({
+      error: "No hosting time remaining. Please purchase more time.",
+    });
+    return;
+  }
+
+  const game = store.games.get(gameId);
   if (!game) {
     res.status(404).json({ error: "Game not found" });
     return;
   }
-  const room = store.rooms.create(body.hostPhone, body.gameId);
+
+  const roomMinutes = Math.min(host.remainingMinutes, 180);
+  store.hosts.deductTime(host.id, roomMinutes);
+
+  const room = store.rooms.create(host.phone, gameId, roomMinutes);
   res.status(201).json(roomWithGame(room));
 });
 

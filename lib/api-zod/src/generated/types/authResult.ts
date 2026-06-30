@@ -5,10 +5,9 @@
  * DoorDoor.games API specification
  * OpenAPI spec version: 0.1.0
  */
+import type { HostProfile } from "./hostProfile";
 
-export interface HostSession {
-  phone: string;
-  active: boolean;
-  /** @nullable */
-  expiresAt: string | null;
+export interface AuthResult {
+  token: string;
+  host: HostProfile;
 }

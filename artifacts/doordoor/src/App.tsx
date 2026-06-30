@@ -3,8 +3,8 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { AnimatePresence } from "framer-motion";
+import { setAuthTokenGetter } from "@workspace/api-client-react";
 import NotFound from "@/pages/not-found";
-
 import Home from "@/pages/home";
 import Join from "@/pages/join";
 import Host from "@/pages/host";
@@ -14,6 +14,8 @@ import AdminLogin from "@/pages/admin";
 import AdminDashboard from "@/pages/admin-dashboard";
 import GameLauncher from "@/pages/game-launcher";
 import ShelvedGames from "@/pages/shelved-games";
+
+setAuthTokenGetter(() => localStorage.getItem("host_token"));
 
 const queryClient = new QueryClient();
 

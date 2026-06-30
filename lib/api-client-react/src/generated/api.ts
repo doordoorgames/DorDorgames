@@ -20,15 +20,14 @@ import type {
   AdminCredentials,
   AdminSession,
   AdminStats,
+  AuthResult,
   Game,
   GameInput,
   GameUpdate,
   GuestJoin,
   HealthStatus,
-  HostSession,
-  OtpRequest,
-  OtpRequestResult,
-  OtpVerify,
+  HostProfile,
+  LoginBody,
   PaymentRequest,
   PaymentResult,
   PromoCode,
@@ -38,6 +37,9 @@ import type {
   Room,
   RoomGameSwitch,
   RoomInput,
+  SignupRequestOtpBody,
+  SignupRequestOtpResult,
+  SignupVerifyOtpBody,
 } from "./api.schemas";
 
 import { customFetch } from "../custom-fetch";
@@ -589,7 +591,7 @@ export function useListRooms<
 }
 
 /**
- * @summary Create a new room (host)
+ * @summary Create a new room (requires host auth)
  */
 export const getCreateRoomUrl = () => {
   return `/api/rooms`;
@@ -608,7 +610,7 @@ export const createRoom = async (
 };
 
 export const getCreateRoomMutationOptions = <
-  TError = ErrorType<unknown>,
+  TError = ErrorType<void>,
   TContext = unknown,
 >(options?: {
   mutation?: UseMutationOptions<
@@ -649,13 +651,13 @@ export type CreateRoomMutationResult = NonNullable<
   Awaited<ReturnType<typeof createRoom>>
 >;
 export type CreateRoomMutationBody = BodyType<RoomInput>;
-export type CreateRoomMutationError = ErrorType<unknown>;
+export type CreateRoomMutationError = ErrorType<void>;
 
 /**
- * @summary Create a new room (host)
+ * @summary Create a new room (requires host auth)
  */
 export const useCreateRoom = <
-  TError = ErrorType<unknown>,
+  TError = ErrorType<void>,
   TContext = unknown,
 >(options?: {
   mutation?: UseMutationOptions<
@@ -1010,42 +1012,42 @@ export const useJoinRoom = <
 };
 
 /**
- * @summary Request OTP for phone number (simulated)
+ * @summary Start host signup — collect details and send OTP to phone
  */
-export const getRequestOtpUrl = () => {
-  return `/api/hosts/request-otp`;
+export const getAuthSignupRequestOtpUrl = () => {
+  return `/api/auth/signup/request-otp`;
 };
 
-export const requestOtp = async (
-  otpRequest: OtpRequest,
+export const authSignupRequestOtp = async (
+  signupRequestOtpBody: SignupRequestOtpBody,
   options?: RequestInit,
-): Promise<OtpRequestResult> => {
-  return customFetch<OtpRequestResult>(getRequestOtpUrl(), {
+): Promise<SignupRequestOtpResult> => {
+  return customFetch<SignupRequestOtpResult>(getAuthSignupRequestOtpUrl(), {
     ...options,
     method: "POST",
     headers: { "Content-Type": "application/json", ...options?.headers },
-    body: JSON.stringify(otpRequest),
+    body: JSON.stringify(signupRequestOtpBody),
   });
 };
 
-export const getRequestOtpMutationOptions = <
-  TError = ErrorType<unknown>,
+export const getAuthSignupRequestOtpMutationOptions = <
+  TError = ErrorType<void>,
   TContext = unknown,
 >(options?: {
   mutation?: UseMutationOptions<
-    Awaited<ReturnType<typeof requestOtp>>,
+    Awaited<ReturnType<typeof authSignupRequestOtp>>,
     TError,
-    { data: BodyType<OtpRequest> },
+    { data: BodyType<SignupRequestOtpBody> },
     TContext
   >;
   request?: SecondParameter<typeof customFetch>;
 }): UseMutationOptions<
-  Awaited<ReturnType<typeof requestOtp>>,
+  Awaited<ReturnType<typeof authSignupRequestOtp>>,
   TError,
-  { data: BodyType<OtpRequest> },
+  { data: BodyType<SignupRequestOtpBody> },
   TContext
 > => {
-  const mutationKey = ["requestOtp"];
+  const mutationKey = ["authSignupRequestOtp"];
   const { mutation: mutationOptions, request: requestOptions } = options
     ? options.mutation &&
       "mutationKey" in options.mutation &&
@@ -1055,83 +1057,83 @@ export const getRequestOtpMutationOptions = <
     : { mutation: { mutationKey }, request: undefined };
 
   const mutationFn: MutationFunction<
-    Awaited<ReturnType<typeof requestOtp>>,
-    { data: BodyType<OtpRequest> }
+    Awaited<ReturnType<typeof authSignupRequestOtp>>,
+    { data: BodyType<SignupRequestOtpBody> }
   > = (props) => {
     const { data } = props ?? {};
 
-    return requestOtp(data, requestOptions);
+    return authSignupRequestOtp(data, requestOptions);
   };
 
   return { mutationFn, ...mutationOptions };
 };
 
-export type RequestOtpMutationResult = NonNullable<
-  Awaited<ReturnType<typeof requestOtp>>
+export type AuthSignupRequestOtpMutationResult = NonNullable<
+  Awaited<ReturnType<typeof authSignupRequestOtp>>
 >;
-export type RequestOtpMutationBody = BodyType<OtpRequest>;
-export type RequestOtpMutationError = ErrorType<unknown>;
+export type AuthSignupRequestOtpMutationBody = BodyType<SignupRequestOtpBody>;
+export type AuthSignupRequestOtpMutationError = ErrorType<void>;
 
 /**
- * @summary Request OTP for phone number (simulated)
+ * @summary Start host signup — collect details and send OTP to phone
  */
-export const useRequestOtp = <
-  TError = ErrorType<unknown>,
+export const useAuthSignupRequestOtp = <
+  TError = ErrorType<void>,
   TContext = unknown,
 >(options?: {
   mutation?: UseMutationOptions<
-    Awaited<ReturnType<typeof requestOtp>>,
+    Awaited<ReturnType<typeof authSignupRequestOtp>>,
     TError,
-    { data: BodyType<OtpRequest> },
+    { data: BodyType<SignupRequestOtpBody> },
     TContext
   >;
   request?: SecondParameter<typeof customFetch>;
 }): UseMutationResult<
-  Awaited<ReturnType<typeof requestOtp>>,
+  Awaited<ReturnType<typeof authSignupRequestOtp>>,
   TError,
-  { data: BodyType<OtpRequest> },
+  { data: BodyType<SignupRequestOtpBody> },
   TContext
 > => {
-  return useMutation(getRequestOtpMutationOptions(options));
+  return useMutation(getAuthSignupRequestOtpMutationOptions(options));
 };
 
 /**
- * @summary Verify OTP and create host session (simulated - always succeeds)
+ * @summary Verify OTP and create host account with 60-min free trial
  */
-export const getVerifyOtpUrl = () => {
-  return `/api/hosts/verify-otp`;
+export const getAuthSignupVerifyOtpUrl = () => {
+  return `/api/auth/signup/verify-otp`;
 };
 
-export const verifyOtp = async (
-  otpVerify: OtpVerify,
+export const authSignupVerifyOtp = async (
+  signupVerifyOtpBody: SignupVerifyOtpBody,
   options?: RequestInit,
-): Promise<HostSession> => {
-  return customFetch<HostSession>(getVerifyOtpUrl(), {
+): Promise<AuthResult> => {
+  return customFetch<AuthResult>(getAuthSignupVerifyOtpUrl(), {
     ...options,
     method: "POST",
     headers: { "Content-Type": "application/json", ...options?.headers },
-    body: JSON.stringify(otpVerify),
+    body: JSON.stringify(signupVerifyOtpBody),
   });
 };
 
-export const getVerifyOtpMutationOptions = <
-  TError = ErrorType<unknown>,
+export const getAuthSignupVerifyOtpMutationOptions = <
+  TError = ErrorType<void>,
   TContext = unknown,
 >(options?: {
   mutation?: UseMutationOptions<
-    Awaited<ReturnType<typeof verifyOtp>>,
+    Awaited<ReturnType<typeof authSignupVerifyOtp>>,
     TError,
-    { data: BodyType<OtpVerify> },
+    { data: BodyType<SignupVerifyOtpBody> },
     TContext
   >;
   request?: SecondParameter<typeof customFetch>;
 }): UseMutationOptions<
-  Awaited<ReturnType<typeof verifyOtp>>,
+  Awaited<ReturnType<typeof authSignupVerifyOtp>>,
   TError,
-  { data: BodyType<OtpVerify> },
+  { data: BodyType<SignupVerifyOtpBody> },
   TContext
 > => {
-  const mutationKey = ["verifyOtp"];
+  const mutationKey = ["authSignupVerifyOtp"];
   const { mutation: mutationOptions, request: requestOptions } = options
     ? options.mutation &&
       "mutationKey" in options.mutation &&
@@ -1141,113 +1143,191 @@ export const getVerifyOtpMutationOptions = <
     : { mutation: { mutationKey }, request: undefined };
 
   const mutationFn: MutationFunction<
-    Awaited<ReturnType<typeof verifyOtp>>,
-    { data: BodyType<OtpVerify> }
+    Awaited<ReturnType<typeof authSignupVerifyOtp>>,
+    { data: BodyType<SignupVerifyOtpBody> }
   > = (props) => {
     const { data } = props ?? {};
 
-    return verifyOtp(data, requestOptions);
+    return authSignupVerifyOtp(data, requestOptions);
   };
 
   return { mutationFn, ...mutationOptions };
 };
 
-export type VerifyOtpMutationResult = NonNullable<
-  Awaited<ReturnType<typeof verifyOtp>>
+export type AuthSignupVerifyOtpMutationResult = NonNullable<
+  Awaited<ReturnType<typeof authSignupVerifyOtp>>
 >;
-export type VerifyOtpMutationBody = BodyType<OtpVerify>;
-export type VerifyOtpMutationError = ErrorType<unknown>;
+export type AuthSignupVerifyOtpMutationBody = BodyType<SignupVerifyOtpBody>;
+export type AuthSignupVerifyOtpMutationError = ErrorType<void>;
 
 /**
- * @summary Verify OTP and create host session (simulated - always succeeds)
+ * @summary Verify OTP and create host account with 60-min free trial
  */
-export const useVerifyOtp = <
-  TError = ErrorType<unknown>,
+export const useAuthSignupVerifyOtp = <
+  TError = ErrorType<void>,
   TContext = unknown,
 >(options?: {
   mutation?: UseMutationOptions<
-    Awaited<ReturnType<typeof verifyOtp>>,
+    Awaited<ReturnType<typeof authSignupVerifyOtp>>,
     TError,
-    { data: BodyType<OtpVerify> },
+    { data: BodyType<SignupVerifyOtpBody> },
     TContext
   >;
   request?: SecondParameter<typeof customFetch>;
 }): UseMutationResult<
-  Awaited<ReturnType<typeof verifyOtp>>,
+  Awaited<ReturnType<typeof authSignupVerifyOtp>>,
   TError,
-  { data: BodyType<OtpVerify> },
+  { data: BodyType<SignupVerifyOtpBody> },
   TContext
 > => {
-  return useMutation(getVerifyOtpMutationOptions(options));
+  return useMutation(getAuthSignupVerifyOtpMutationOptions(options));
 };
 
 /**
- * @summary Get current host session status
+ * @summary Login with email/phone and password
  */
-export const getGetHostSessionUrl = () => {
-  return `/api/hosts/session`;
+export const getAuthLoginUrl = () => {
+  return `/api/auth/login`;
 };
 
-export const getHostSession = async (
+export const authLogin = async (
+  loginBody: LoginBody,
   options?: RequestInit,
-): Promise<HostSession> => {
-  return customFetch<HostSession>(getGetHostSessionUrl(), {
+): Promise<AuthResult> => {
+  return customFetch<AuthResult>(getAuthLoginUrl(), {
+    ...options,
+    method: "POST",
+    headers: { "Content-Type": "application/json", ...options?.headers },
+    body: JSON.stringify(loginBody),
+  });
+};
+
+export const getAuthLoginMutationOptions = <
+  TError = ErrorType<void>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof authLogin>>,
+    TError,
+    { data: BodyType<LoginBody> },
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationOptions<
+  Awaited<ReturnType<typeof authLogin>>,
+  TError,
+  { data: BodyType<LoginBody> },
+  TContext
+> => {
+  const mutationKey = ["authLogin"];
+  const { mutation: mutationOptions, request: requestOptions } = options
+    ? options.mutation &&
+      "mutationKey" in options.mutation &&
+      options.mutation.mutationKey
+      ? options
+      : { ...options, mutation: { ...options.mutation, mutationKey } }
+    : { mutation: { mutationKey }, request: undefined };
+
+  const mutationFn: MutationFunction<
+    Awaited<ReturnType<typeof authLogin>>,
+    { data: BodyType<LoginBody> }
+  > = (props) => {
+    const { data } = props ?? {};
+
+    return authLogin(data, requestOptions);
+  };
+
+  return { mutationFn, ...mutationOptions };
+};
+
+export type AuthLoginMutationResult = NonNullable<
+  Awaited<ReturnType<typeof authLogin>>
+>;
+export type AuthLoginMutationBody = BodyType<LoginBody>;
+export type AuthLoginMutationError = ErrorType<void>;
+
+/**
+ * @summary Login with email/phone and password
+ */
+export const useAuthLogin = <
+  TError = ErrorType<void>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof authLogin>>,
+    TError,
+    { data: BodyType<LoginBody> },
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationResult<
+  Awaited<ReturnType<typeof authLogin>>,
+  TError,
+  { data: BodyType<LoginBody> },
+  TContext
+> => {
+  return useMutation(getAuthLoginMutationOptions(options));
+};
+
+/**
+ * @summary Get current authenticated host profile
+ */
+export const getGetAuthMeUrl = () => {
+  return `/api/auth/me`;
+};
+
+export const getAuthMe = async (
+  options?: RequestInit,
+): Promise<HostProfile> => {
+  return customFetch<HostProfile>(getGetAuthMeUrl(), {
     ...options,
     method: "GET",
   });
 };
 
-export const getGetHostSessionQueryKey = () => {
-  return [`/api/hosts/session`] as const;
+export const getGetAuthMeQueryKey = () => {
+  return [`/api/auth/me`] as const;
 };
 
-export const getGetHostSessionQueryOptions = <
-  TData = Awaited<ReturnType<typeof getHostSession>>,
-  TError = ErrorType<unknown>,
+export const getGetAuthMeQueryOptions = <
+  TData = Awaited<ReturnType<typeof getAuthMe>>,
+  TError = ErrorType<void>,
 >(options?: {
-  query?: UseQueryOptions<
-    Awaited<ReturnType<typeof getHostSession>>,
-    TError,
-    TData
-  >;
+  query?: UseQueryOptions<Awaited<ReturnType<typeof getAuthMe>>, TError, TData>;
   request?: SecondParameter<typeof customFetch>;
 }) => {
   const { query: queryOptions, request: requestOptions } = options ?? {};
 
-  const queryKey = queryOptions?.queryKey ?? getGetHostSessionQueryKey();
+  const queryKey = queryOptions?.queryKey ?? getGetAuthMeQueryKey();
 
-  const queryFn: QueryFunction<Awaited<ReturnType<typeof getHostSession>>> = ({
+  const queryFn: QueryFunction<Awaited<ReturnType<typeof getAuthMe>>> = ({
     signal,
-  }) => getHostSession({ signal, ...requestOptions });
+  }) => getAuthMe({ signal, ...requestOptions });
 
   return { queryKey, queryFn, ...queryOptions } as UseQueryOptions<
-    Awaited<ReturnType<typeof getHostSession>>,
+    Awaited<ReturnType<typeof getAuthMe>>,
     TError,
     TData
   > & { queryKey: QueryKey };
 };
 
-export type GetHostSessionQueryResult = NonNullable<
-  Awaited<ReturnType<typeof getHostSession>>
+export type GetAuthMeQueryResult = NonNullable<
+  Awaited<ReturnType<typeof getAuthMe>>
 >;
-export type GetHostSessionQueryError = ErrorType<unknown>;
+export type GetAuthMeQueryError = ErrorType<void>;
 
 /**
- * @summary Get current host session status
+ * @summary Get current authenticated host profile
  */
 
-export function useGetHostSession<
-  TData = Awaited<ReturnType<typeof getHostSession>>,
-  TError = ErrorType<unknown>,
+export function useGetAuthMe<
+  TData = Awaited<ReturnType<typeof getAuthMe>>,
+  TError = ErrorType<void>,
 >(options?: {
-  query?: UseQueryOptions<
-    Awaited<ReturnType<typeof getHostSession>>,
-    TError,
-    TData
-  >;
+  query?: UseQueryOptions<Awaited<ReturnType<typeof getAuthMe>>, TError, TData>;
   request?: SecondParameter<typeof customFetch>;
 }): UseQueryResult<TData, TError> & { queryKey: QueryKey } {
-  const queryOptions = getGetHostSessionQueryOptions(options);
+  const queryOptions = getGetAuthMeQueryOptions(options);
 
   const query = useQuery(queryOptions) as UseQueryResult<TData, TError> & {
     queryKey: QueryKey;

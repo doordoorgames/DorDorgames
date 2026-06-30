@@ -72,6 +72,19 @@ export interface Room {
   open: boolean;
 }
 
+export interface Host {
+  id: string;
+  fullName: string;
+  email: string;
+  phone: string;
+  passwordHash: string;
+  phoneVerified: boolean;
+  trialUsed: boolean;
+  remainingMinutes: number;
+  createdAt: string;
+  updatedAt: string;
+}
+
 export interface PromoCode {
   id: string;
   code: string;
@@ -86,8 +99,7 @@ export const store = {
   games: {
     list(): Game[] {
       const games = readJson<Game[]>("games.json", getDefaultGames());
-      // Backward-compat: ensure externalUrl exists on old records
-      return games.map((g) => ({ externalUrl: null, ...g }));
+      return games.map((g) => ({ ...g, externalUrl: g.externalUrl ?? null }));
     },
     get(id: string): Game | undefined {
       return this.list().find((g) => g.id === id);
@@ -108,7 +120,7 @@ export const store = {
     },
     update(id: string, updates: Partial<Omit<Game, "id" | "createdAt">>): Game | undefined {
       const games = readJson<Game[]>("games.json", getDefaultGames()).map(
-        (g) => ({ externalUrl: null, ...g }),
+        (g) => ({ ...g, externalUrl: g.externalUrl ?? null }),
       );
       const idx = games.findIndex((g) => g.id === id);
       if (idx === -1) return undefined;
@@ -139,11 +151,11 @@ export const store = {
         (r) => r.code === code && r.open,
       );
     },
-    create(hostPhone: string, gameId: string): Room {
+    create(hostPhone: string, gameId: string, durationMinutes: number = 180): Room {
       const rooms = readJson<Room[]>("rooms.json", []);
       const code = generateRoomCode();
       const now = new Date();
-      const expiresAt = new Date(now.getTime() + 3 * 60 * 60 * 1000);
+      const expiresAt = new Date(now.getTime() + durationMinutes * 60 * 1000);
       const room: Room = {
         id: generateId(),
         code,
@@ -183,6 +195,78 @@ export const store = {
       }
       writeJson("rooms.json", rooms);
       return rooms[idx];
+    },
+  },
+
+  hosts: {
+    list(): Host[] {
+      return readJson<Host[]>("hosts.json", []);
+    },
+    get(id: string): Host | undefined {
+      return this.list().find((h) => h.id === id);
+    },
+    getByPhone(phone: string): Host | undefined {
+      return this.list().find((h) => h.phone === phone);
+    },
+    getByEmail(email: string): Host | undefined {
+      return this.list().find(
+        (h) => h.email.toLowerCase() === email.toLowerCase(),
+      );
+    },
+    getByIdentifier(identifier: string): Host | undefined {
+      const lower = identifier.toLowerCase();
+      return this.list().find(
+        (h) => h.email.toLowerCase() === lower || h.phone === identifier,
+      );
+    },
+    create(input: Omit<Host, "id" | "createdAt" | "updatedAt">): Host {
+      const hosts = this.list();
+      const now = new Date().toISOString();
+      const host: Host = {
+        ...input,
+        id: generateId(),
+        createdAt: now,
+        updatedAt: now,
+      };
+      hosts.push(host);
+      writeJson("hosts.json", hosts);
+      return host;
+    },
+    update(
+      id: string,
+      updates: Partial<Omit<Host, "id" | "createdAt">>,
+    ): Host | undefined {
+      const hosts = readJson<Host[]>("hosts.json", []);
+      const idx = hosts.findIndex((h) => h.id === id);
+      if (idx === -1) return undefined;
+      hosts[idx] = {
+        ...hosts[idx],
+        ...updates,
+        updatedAt: new Date().toISOString(),
+      };
+      writeJson("hosts.json", hosts);
+      return hosts[idx];
+    },
+    deductTime(id: string, minutes: number): Host | undefined {
+      const hosts = readJson<Host[]>("hosts.json", []);
+      const idx = hosts.findIndex((h) => h.id === id);
+      if (idx === -1) return undefined;
+      hosts[idx].remainingMinutes = Math.max(
+        0,
+        hosts[idx].remainingMinutes - minutes,
+      );
+      hosts[idx].updatedAt = new Date().toISOString();
+      writeJson("hosts.json", hosts);
+      return hosts[idx];
+    },
+    addTime(id: string, minutes: number): Host | undefined {
+      const hosts = readJson<Host[]>("hosts.json", []);
+      const idx = hosts.findIndex((h) => h.id === id);
+      if (idx === -1) return undefined;
+      hosts[idx].remainingMinutes += minutes;
+      hosts[idx].updatedAt = new Date().toISOString();
+      writeJson("hosts.json", hosts);
+      return hosts[idx];
     },
   },
 

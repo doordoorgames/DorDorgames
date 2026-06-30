@@ -6,6 +6,10 @@
  * OpenAPI spec version: 0.1.0
  */
 
-export interface RoomInput {
-  gameId: string;
+export interface SignupRequestOtpBody {
+  fullName: string;
+  email: string;
+  phone: string;
+  /** @minLength 8 */
+  password: string;
 }

@@ -150,10 +150,9 @@ export const ListRoomsResponseItem = zod.object({
 export const ListRoomsResponse = zod.array(ListRoomsResponseItem);
 
 /**
- * @summary Create a new room (host)
+ * @summary Create a new room (requires host auth)
  */
 export const CreateRoomBody = zod.object({
-  hostPhone: zod.string(),
   gameId: zod.string(),
 });
 
@@ -278,38 +277,72 @@ export const JoinRoomResponse = zod.object({
 });
 
 /**
- * @summary Request OTP for phone number (simulated)
+ * @summary Start host signup — collect details and send OTP to phone
  */
-export const RequestOtpBody = zod.object({
+export const authSignupRequestOtpBodyPasswordMin = 8;
+
+export const AuthSignupRequestOtpBody = zod.object({
+  fullName: zod.string(),
+  email: zod.string().email(),
   phone: zod.string(),
+  password: zod.string().min(authSignupRequestOtpBodyPasswordMin),
 });
 
-export const RequestOtpResponse = zod.object({
+export const AuthSignupRequestOtpResponse = zod.object({
   success: zod.boolean(),
   message: zod.string(),
 });
 
 /**
- * @summary Verify OTP and create host session (simulated - always succeeds)
+ * @summary Verify OTP and create host account with 60-min free trial
  */
-export const VerifyOtpBody = zod.object({
-  phone: zod.string(),
-  otp: zod.string(),
-});
+export const authSignupVerifyOtpBodyOtpMin = 4;
+export const authSignupVerifyOtpBodyOtpMax = 4;
 
-export const VerifyOtpResponse = zod.object({
+export const AuthSignupVerifyOtpBody = zod.object({
   phone: zod.string(),
-  active: zod.boolean(),
-  expiresAt: zod.string().nullable(),
+  otp: zod
+    .string()
+    .min(authSignupVerifyOtpBodyOtpMin)
+    .max(authSignupVerifyOtpBodyOtpMax),
 });
 
 /**
- * @summary Get current host session status
+ * @summary Login with email/phone and password
  */
-export const GetHostSessionResponse = zod.object({
+export const AuthLoginBody = zod.object({
+  identifier: zod.string().describe("Email address or phone number"),
+  password: zod.string(),
+});
+
+export const AuthLoginResponse = zod.object({
+  token: zod.string(),
+  host: zod.object({
+    id: zod.string(),
+    fullName: zod.string(),
+    email: zod.string(),
+    phone: zod.string(),
+    phoneVerified: zod.boolean(),
+    trialUsed: zod.boolean(),
+    remainingMinutes: zod.number(),
+    createdAt: zod.string(),
+    updatedAt: zod.string(),
+  }),
+});
+
+/**
+ * @summary Get current authenticated host profile
+ */
+export const GetAuthMeResponse = zod.object({
+  id: zod.string(),
+  fullName: zod.string(),
+  email: zod.string(),
   phone: zod.string(),
-  active: zod.boolean(),
-  expiresAt: zod.string().nullable(),
+  phoneVerified: zod.boolean(),
+  trialUsed: zod.boolean(),
+  remainingMinutes: zod.number(),
+  createdAt: zod.string(),
+  updatedAt: zod.string(),
 });
 
 /**

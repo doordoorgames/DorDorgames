@@ -6,6 +6,7 @@
  * OpenAPI spec version: 0.1.0
  */
 
-export interface OtpRequest {
-  phone: string;
+export interface SignupRequestOtpResult {
+  success: boolean;
+  message: string;
 }

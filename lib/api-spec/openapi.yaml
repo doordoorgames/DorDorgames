@@ -13,12 +13,13 @@ tags:
     description: Game management
   - name: rooms
     description: Room/lobby management
-  - name: hosts
-    description: Host authentication
+  - name: auth
+    description: Host account authentication
   - name: checkout
     description: Payment and promo codes
   - name: admin
     description: Admin operations
+
 paths:
   /healthz:
     get:
@@ -139,7 +140,9 @@ paths:
     post:
       operationId: createRoom
       tags: [rooms]
-      summary: Create a new room (host)
+      summary: Create a new room (requires host auth)
+      security:
+        - BearerAuth: []
       requestBody:
         required: true
         content:
@@ -153,6 +156,10 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/Room"
+        "401":
+          description: Authentication required
+        "403":
+          description: No hosting time remaining
 
   /rooms/{code}:
     get:
@@ -240,56 +247,91 @@ paths:
         "404":
           description: Room not found
 
-  /hosts/request-otp:
+  /auth/signup/request-otp:
     post:
-      operationId: requestOtp
-      tags: [hosts]
-      summary: Request OTP for phone number (simulated)
+      operationId: authSignupRequestOtp
+      tags: [auth]
+      summary: Start host signup — collect details and send OTP to phone
       requestBody:
         required: true
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/OtpRequest"
+              $ref: "#/components/schemas/SignupRequestOtpBody"
       responses:
         "200":
           description: OTP sent (simulated)
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/OtpRequestResult"
+                $ref: "#/components/schemas/SignupRequestOtpResult"
+        "400":
+          description: Validation error
+        "409":
+          description: Phone or email already registered
 
-  /hosts/verify-otp:
+  /auth/signup/verify-otp:
     post:
-      operationId: verifyOtp
-      tags: [hosts]
-      summary: Verify OTP and create host session (simulated - always succeeds)
+      operationId: authSignupVerifyOtp
+      tags: [auth]
+      summary: Verify OTP and create host account with 60-min free trial
       requestBody:
         required: true
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/OtpVerify"
+              $ref: "#/components/schemas/SignupVerifyOtpBody"
       responses:
-        "200":
-          description: Session created
+        "201":
+          description: Account created — returns JWT and host profile
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/HostSession"
+                $ref: "#/components/schemas/AuthResult"
+        "400":
+          description: Invalid OTP or no pending registration
+        "409":
+          description: Phone already registered
 
-  /hosts/session:
-    get:
-      operationId: getHostSession
-      tags: [hosts]
-      summary: Get current host session status
+  /auth/login:
+    post:
+      operationId: authLogin
+      tags: [auth]
+      summary: Login with email/phone and password
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/LoginBody"
       responses:
         "200":
-          description: Session info
+          description: Login successful — returns JWT and host profile
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/HostSession"
+                $ref: "#/components/schemas/AuthResult"
+        "401":
+          description: Invalid credentials
+        "403":
+          description: Phone not verified
+
+  /auth/me:
+    get:
+      operationId: getAuthMe
+      tags: [auth]
+      summary: Get current authenticated host profile
+      security:
+        - BearerAuth: []
+      responses:
+        "200":
+          description: Host profile
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HostProfile"
+        "401":
+          description: Authentication required
 
   /checkout/validate-promo:
     post:
@@ -411,6 +453,12 @@ paths:
           description: Deleted
 
 components:
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
   schemas:
     HealthStatus:
       type: object
@@ -531,10 +579,8 @@ components:
 
     RoomInput:
       type: object
-      required: [hostPhone, gameId]
+      required: [gameId]
       properties:
-        hostPhone:
-          type: string
         gameId:
           type: string
 
@@ -552,14 +598,45 @@ components:
         nickname:
           type: string
 
-    OtpRequest:
+    HostProfile:
       type: object
-      required: [phone]
+      required: [id, fullName, email, phone, phoneVerified, trialUsed, remainingMinutes, createdAt, updatedAt]
       properties:
+        id:
+          type: string
+        fullName:
+          type: string
+        email:
+          type: string
         phone:
           type: string
+        phoneVerified:
+          type: boolean
+        trialUsed:
+          type: boolean
+        remainingMinutes:
+          type: integer
+        createdAt:
+          type: string
+        updatedAt:
+          type: string
 
-    OtpRequestResult:
+    SignupRequestOtpBody:
+      type: object
+      required: [fullName, email, phone, password]
+      properties:
+        fullName:
+          type: string
+        email:
+          type: string
+          format: email
+        phone:
+          type: string
+        password:
+          type: string
+          minLength: 8
+
+    SignupRequestOtpResult:
       type: object
       required: [success, message]
       properties:
@@ -568,7 +645,7 @@ components:
         message:
           type: string
 
-    OtpVerify:
+    SignupVerifyOtpBody:
       type: object
       required: [phone, otp]
       properties:
@@ -576,17 +653,27 @@ components:
           type: string
         otp:
           type: string
+          minLength: 4
+          maxLength: 4
 
-    HostSession:
+    AuthResult:
       type: object
-      required: [phone, active, expiresAt]
+      required: [token, host]
       properties:
-        phone:
+        token:
           type: string
-        active:
-          type: boolean
-        expiresAt:
-          type: ["string", "null"]
+        host:
+          $ref: "#/components/schemas/HostProfile"
+
+    LoginBody:
+      type: object
+      required: [identifier, password]
+      properties:
+        identifier:
+          type: string
+          description: Email address or phone number
+        password:
+          type: string
 
     PromoValidate:
       type: object

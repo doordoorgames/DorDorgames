@@ -6,7 +6,11 @@
  * OpenAPI spec version: 0.1.0
  */
 
-export interface OtpRequestResult {
-  success: boolean;
-  message: string;
+export interface SignupVerifyOtpBody {
+  phone: string;
+  /**
+   * @minLength 4
+   * @maxLength 4
+   */
+  otp: string;
 }

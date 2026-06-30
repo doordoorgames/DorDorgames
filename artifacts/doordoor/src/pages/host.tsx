@@ -1,178 +1,309 @@
 import { useState } from "react";
 import { useLocation } from "wouter";
 import { Layout } from "@/components/layout";
-import { useRequestOtp, useVerifyOtp, useValidatePromo, useProcessPayment } from "@workspace/api-client-react";
+import {
+  useAuthSignupRequestOtp,
+  useAuthSignupVerifyOtp,
+  useAuthLogin,
+} from "@workspace/api-client-react";
 import { useToast } from "@/hooks/use-toast";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
+
+type Mode = "signup" | "login";
+type SignupStep = "details" | "otp";
 
 export default function Host() {
   const [, setLocation] = useLocation();
-  const [step, setStep] = useState<"phone" | "otp" | "payment">("phone");
+  const [mode, setMode] = useState<Mode>("login");
+  const [signupStep, setSignupStep] = useState<SignupStep>("details");
+
+  const [fullName, setFullName] = useState("");
+  const [email, setEmail] = useState("");
   const [phone, setPhone] = useState("");
+  const [password, setPassword] = useState("");
   const [otp, setOtp] = useState("");
-  const [promoCode, setPromoCode] = useState("");
-  
-  const requestOtp = useRequestOtp();
-  const verifyOtp = useVerifyOtp();
-  const validatePromo = useValidatePromo();
-  const processPayment = useProcessPayment();
+
+  const [loginIdentifier, setLoginIdentifier] = useState("");
+  const [loginPassword, setLoginPassword] = useState("");
+
+  const signupRequestOtp = useAuthSignupRequestOtp();
+  const signupVerifyOtp = useAuthSignupVerifyOtp();
+  const login = useAuthLogin();
   const { toast } = useToast();
 
-  const handlePhoneSubmit = (e: React.FormEvent) => {
+  const inputClass =
+    "w-full bg-background border-2 border-secondary text-foreground font-mono p-3 text-sm focus:outline-none focus:border-accent focus:shadow-[0_0_15px_rgba(0,206,209,0.4)] transition-all placeholder:text-muted/50";
+
+  const handleSignupDetails = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!phone) return;
-    
-    requestOtp.mutate({ data: { phone } }, {
-      onSuccess: () => {
-        setStep("otp");
-        toast({ title: "OTP SENT", description: "Check your phone for the code." });
+    if (!fullName || !email || !phone || !password) return;
+
+    signupRequestOtp.mutate(
+      { data: { fullName, email, phone, password } },
+      {
+        onSuccess: () => {
+          setSignupStep("otp");
+          toast({
+            title: "OTP SENT",
+            description: `Check ${phone} — use any 4-digit code (simulated).`,
+          });
+        },
+        onError: (err: any) => {
+          const msg =
+            err?.response?.data?.error ||
+            err?.message ||
+            "Something went wrong";
+          toast({ title: "ERROR", description: msg, variant: "destructive" });
+        },
       },
-      onError: (err: any) => {
-        toast({ title: "ERROR", description: err.message, variant: "destructive" });
-      }
-    });
+    );
   };
 
-  const handleOtpSubmit = (e: React.FormEvent) => {
+  const handleSignupOtp = (e: React.FormEvent) => {
     e.preventDefault();
     if (!otp) return;
-    
-    verifyOtp.mutate({ data: { phone, otp } }, {
-      onSuccess: (session) => {
-        localStorage.setItem("host_phone", phone);
-        setStep("payment");
-      },
-      onError: (err: any) => {
-        toast({ title: "INVALID OTP", description: err.message, variant: "destructive" });
-      }
-    });
-  };
 
-  const handlePromoCheck = () => {
-    if (!promoCode) return;
-    validatePromo.mutate({ data: { code: promoCode } }, {
-      onSuccess: (res) => {
-        if (res.valid) {
-          toast({ title: "PROMO APPLIED", description: res.message });
-        } else {
-          toast({ title: "INVALID PROMO", description: res.message || "Promo code is invalid", variant: "destructive" });
-        }
-      },
-      onError: (err: any) => {
-        toast({ title: "ERROR", description: err.message, variant: "destructive" });
-      }
-    });
-  };
-
-  const handlePaymentSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    processPayment.mutate({ data: { phone, promoCode: promoCode || undefined } }, {
-      onSuccess: (res) => {
-        if (res.success) {
-          toast({ title: "PAYMENT SUCCESSFUL", description: "Welcome Host." });
+    signupVerifyOtp.mutate(
+      { data: { phone, otp } },
+      {
+        onSuccess: (res) => {
+          localStorage.setItem("host_token", res.token);
+          toast({
+            title: "WELCOME",
+            description: `Account created. 60 minutes of hosting time granted.`,
+          });
           setLocation("/host/dashboard");
-        } else {
-          toast({ title: "PAYMENT FAILED", description: res.message, variant: "destructive" });
-        }
+        },
+        onError: (err: any) => {
+          const msg =
+            err?.response?.data?.error || err?.message || "Invalid OTP";
+          toast({ title: "INVALID OTP", description: msg, variant: "destructive" });
+        },
       },
-      onError: (err: any) => {
-        toast({ title: "ERROR", description: err.message, variant: "destructive" });
-      }
-    });
+    );
+  };
+
+  const handleLogin = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!loginIdentifier || !loginPassword) return;
+
+    login.mutate(
+      { data: { identifier: loginIdentifier, password: loginPassword } },
+      {
+        onSuccess: (res) => {
+          localStorage.setItem("host_token", res.token);
+          toast({ title: "WELCOME BACK", description: res.host.fullName });
+          setLocation("/host/dashboard");
+        },
+        onError: (err: any) => {
+          const msg =
+            err?.response?.data?.error ||
+            err?.message ||
+            "Invalid credentials";
+          toast({ title: "LOGIN FAILED", description: msg, variant: "destructive" });
+        },
+      },
+    );
+  };
+
+  const switchMode = (next: Mode) => {
+    setMode(next);
+    setSignupStep("details");
+    setOtp("");
   };
 
   return (
     <Layout>
-      <motion.div 
+      <motion.div
         initial={{ opacity: 0, scale: 0.95 }}
         animate={{ opacity: 1, scale: 1 }}
         className="flex flex-col items-center justify-center min-h-[70vh]"
       >
         <div className="w-full max-w-sm space-y-8">
-          <div className="text-center space-y-4">
-            <h1 className="font-mono text-3xl text-secondary animate-glow-pulse">HOST PORTAL</h1>
-            <p className="arabic-text text-muted-foreground text-sm">بوابة المضيف</p>
+          <div className="text-center space-y-2">
+            <h1 className="font-mono text-3xl text-secondary animate-glow-pulse">
+              HOST PORTAL
+            </h1>
+            <p className="arabic-text text-muted-foreground text-sm">
+              بوابة المضيف
+            </p>
           </div>
 
-          {step === "phone" && (
-            <form onSubmit={handlePhoneSubmit} className="space-y-6">
-              <div>
+          <div className="flex border-2 border-muted">
+            <button
+              onClick={() => switchMode("login")}
+              className={`flex-1 font-mono text-sm py-2 transition-all ${
+                mode === "login"
+                  ? "bg-secondary text-secondary-foreground"
+                  : "text-muted-foreground hover:text-foreground"
+              }`}
+            >
+              LOGIN
+            </button>
+            <button
+              onClick={() => switchMode("signup")}
+              className={`flex-1 font-mono text-sm py-2 transition-all ${
+                mode === "signup"
+                  ? "bg-primary text-primary-foreground"
+                  : "text-muted-foreground hover:text-foreground"
+              }`}
+            >
+              SIGN UP
+            </button>
+          </div>
+
+          <AnimatePresence mode="wait">
+            {mode === "login" && (
+              <motion.form
+                key="login"
+                initial={{ opacity: 0, x: -10 }}
+                animate={{ opacity: 1, x: 0 }}
+                exit={{ opacity: 0, x: 10 }}
+                onSubmit={handleLogin}
+                className="space-y-4"
+              >
+                <input
+                  type="text"
+                  placeholder="EMAIL OR PHONE / الإيميل أو الهاتف"
+                  value={loginIdentifier}
+                  onChange={(e) => setLoginIdentifier(e.target.value)}
+                  className={inputClass}
+                  autoComplete="username"
+                />
+                <input
+                  type="password"
+                  placeholder="PASSWORD / كلمة المرور"
+                  value={loginPassword}
+                  onChange={(e) => setLoginPassword(e.target.value)}
+                  className={inputClass}
+                  autoComplete="current-password"
+                />
+                <button
+                  type="submit"
+                  disabled={login.isPending || !loginIdentifier || !loginPassword}
+                  className="w-full bg-secondary text-secondary-foreground font-mono text-xl p-4 border-2 border-secondary hover:bg-transparent hover:text-secondary transition-all disabled:opacity-50 shadow-[0_0_10px_rgba(0,255,65,0.4)]"
+                >
+                  {login.isPending ? "CHECKING..." : "LOGIN / دخول"}
+                </button>
+                <p className="text-center text-xs text-muted-foreground font-mono">
+                  No account?{" "}
+                  <button
+                    type="button"
+                    onClick={() => switchMode("signup")}
+                    className="text-primary underline"
+                  >
+                    Sign up
+                  </button>
+                </p>
+              </motion.form>
+            )}
+
+            {mode === "signup" && signupStep === "details" && (
+              <motion.form
+                key="signup-details"
+                initial={{ opacity: 0, x: 10 }}
+                animate={{ opacity: 1, x: 0 }}
+                exit={{ opacity: 0, x: -10 }}
+                onSubmit={handleSignupDetails}
+                className="space-y-4"
+              >
+                <div className="text-center space-y-1">
+                  <p className="font-mono text-xs text-accent">
+                    1 HOUR FREE TRIAL / ساعة مجانية
+                  </p>
+                </div>
+                <input
+                  type="text"
+                  placeholder="FULL NAME / الاسم الكامل"
+                  value={fullName}
+                  onChange={(e) => setFullName(e.target.value)}
+                  className={inputClass}
+                  autoComplete="name"
+                />
+                <input
+                  type="email"
+                  placeholder="EMAIL / الإيميل"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  className={inputClass}
+                  autoComplete="email"
+                />
                 <input
                   type="tel"
                   placeholder="PHONE / رقم الهاتف"
                   value={phone}
                   onChange={(e) => setPhone(e.target.value)}
-                  className="w-full bg-background border-2 border-secondary text-foreground font-mono p-4 text-center text-xl focus:outline-none focus:border-accent focus:shadow-[0_0_15px_rgba(0,255,65,0.5)] transition-all placeholder:text-muted/50"
+                  className={inputClass}
+                  autoComplete="tel"
                 />
-              </div>
-              <button
-                type="submit"
-                disabled={requestOtp.isPending}
-                className="w-full bg-secondary text-secondary-foreground font-mono text-xl p-4 border-2 border-secondary hover:bg-transparent hover:text-secondary transition-all disabled:opacity-50 shadow-[0_0_10px_rgba(0,255,65,0.5)]"
+                <input
+                  type="password"
+                  placeholder="PASSWORD (min 8) / كلمة المرور"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  className={inputClass}
+                  autoComplete="new-password"
+                />
+                <button
+                  type="submit"
+                  disabled={
+                    signupRequestOtp.isPending ||
+                    !fullName ||
+                    !email ||
+                    !phone ||
+                    !password
+                  }
+                  className="w-full bg-primary text-primary-foreground font-mono text-xl p-4 border-2 border-primary hover:bg-transparent hover:text-primary transition-all disabled:opacity-50 shadow-[0_0_10px_rgba(255,0,255,0.4)]"
+                >
+                  {signupRequestOtp.isPending ? "SENDING OTP..." : "NEXT / التالي"}
+                </button>
+              </motion.form>
+            )}
+
+            {mode === "signup" && signupStep === "otp" && (
+              <motion.form
+                key="signup-otp"
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -10 }}
+                onSubmit={handleSignupOtp}
+                className="space-y-6"
               >
-                {requestOtp.isPending ? "SENDING..." : "NEXT / التالي"}
-              </button>
-            </form>
-          )}
-          
-          {step === "otp" && (
-            <form onSubmit={handleOtpSubmit} className="space-y-6">
-              <div>
+                <div className="text-center space-y-2">
+                  <p className="font-mono text-xs text-muted-foreground">
+                    OTP sent to{" "}
+                    <span className="text-accent">{phone}</span>
+                  </p>
+                  <p className="font-mono text-xs text-muted-foreground/60">
+                    (simulated — any 4-digit code works)
+                  </p>
+                </div>
                 <input
                   type="text"
-                  placeholder="OTP / رمز التحقق"
+                  inputMode="numeric"
+                  placeholder="0000"
                   value={otp}
-                  onChange={(e) => setOtp(e.target.value)}
-                  className="w-full bg-background border-2 border-accent text-foreground font-mono p-4 text-center text-2xl tracking-widest focus:outline-none focus:border-primary focus:shadow-[0_0_15px_rgba(255,0,255,0.5)] transition-all placeholder:text-muted/50"
-                  maxLength={6}
+                  onChange={(e) => setOtp(e.target.value.replace(/\D/g, "").slice(0, 4))}
+                  className="w-full bg-background border-2 border-accent text-foreground font-mono p-4 text-center text-3xl tracking-[0.4em] focus:outline-none focus:border-primary focus:shadow-[0_0_15px_rgba(255,0,255,0.5)] transition-all"
+                  maxLength={4}
                 />
-              </div>
-              <button
-                type="submit"
-                disabled={verifyOtp.isPending}
-                className="w-full bg-accent text-accent-foreground font-mono text-xl p-4 border-2 border-accent hover:bg-transparent hover:text-accent transition-all disabled:opacity-50 shadow-[0_0_10px_rgba(0,206,209,0.5)]"
-              >
-                {verifyOtp.isPending ? "VERIFYING..." : "VERIFY / تحقق"}
-              </button>
-            </form>
-          )}
-
-          {step === "payment" && (
-            <form onSubmit={handlePaymentSubmit} className="space-y-6">
-              <div className="space-y-4">
-                <div className="border-2 border-muted p-4 space-y-2 text-center">
-                  <h3 className="font-mono text-foreground">SESSION PASS / تصريح الجلسة</h3>
-                  <p className="text-2xl font-mono text-secondary">25 SAR</p>
-                </div>
-                
-                <div className="flex gap-2">
-                  <input
-                    type="text"
-                    placeholder="PROMO CODE"
-                    value={promoCode}
-                    onChange={(e) => setPromoCode(e.target.value.toUpperCase())}
-                    className="flex-1 bg-background border-2 border-muted text-foreground font-mono p-3 text-center uppercase focus:outline-none focus:border-primary transition-all placeholder:text-muted/50"
-                  />
-                  <button
-                    type="button"
-                    onClick={handlePromoCheck}
-                    disabled={validatePromo.isPending || !promoCode}
-                    className="bg-muted text-muted-foreground font-mono px-4 border-2 border-muted hover:border-primary hover:text-primary transition-all disabled:opacity-50"
-                  >
-                    CHECK
-                  </button>
-                </div>
-              </div>
-
-              <button
-                type="submit"
-                disabled={processPayment.isPending}
-                className="w-full bg-primary text-primary-foreground font-mono text-xl p-4 border-2 border-primary hover:bg-transparent hover:text-primary transition-all disabled:opacity-50 shadow-[0_0_10px_rgba(255,0,255,0.5)]"
-              >
-                {processPayment.isPending ? "PROCESSING..." : "PAY / الدفع"}
-              </button>
-            </form>
-          )}
+                <button
+                  type="submit"
+                  disabled={signupVerifyOtp.isPending || otp.length !== 4}
+                  className="w-full bg-accent text-accent-foreground font-mono text-xl p-4 border-2 border-accent hover:bg-transparent hover:text-accent transition-all disabled:opacity-50 shadow-[0_0_10px_rgba(0,206,209,0.5)]"
+                >
+                  {signupVerifyOtp.isPending ? "CREATING..." : "VERIFY / تحقق"}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setSignupStep("details")}
+                  className="w-full text-xs font-mono text-muted-foreground hover:text-foreground transition-colors"
+                >
+                  ← Back
+                </button>
+              </motion.form>
+            )}
+          </AnimatePresence>
         </div>
       </motion.div>
     </Layout>
