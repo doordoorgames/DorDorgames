@@ -34,5 +34,17 @@
     "id": "ss4s34x9lmr0ga6qv",
     "createdAt": "2026-06-30T09:34:42.343Z",
     "updatedAt": "2026-06-30T09:34:42.343Z"
+  },
+  {
+    "fullName": "Carol",
+    "email": "carol@test.com",
+    "phone": "96533333333",
+    "passwordHash": "$2b$10$tDa3fXi1iTykCdevcH2B5Od5RV8phFL6WqEHju0XYyhpGrM4J8/rG",
+    "phoneVerified": true,
+    "trialUsed": true,
+    "remainingMinutes": 0,
+    "id": "ygni2ktibmr0ge5cd",
+    "createdAt": "2026-06-30T09:37:47.149Z",
+    "updatedAt": "2026-06-30T09:37:47.287Z"
   }
 ]

@@ -18,5 +18,15 @@
     "createdAt": "2026-06-30T09:34:42.037Z",
     "expiresAt": "2026-06-30T10:34:42.037Z",
     "open": false
+  },
+  {
+    "id": "5sdzxhqqhmr0ge5g7",
+    "code": "XRJPQ2",
+    "hostPhone": "96533333333",
+    "activeGameId": "game_tfadhloon",
+    "guests": [],
+    "createdAt": "2026-06-30T09:37:47.287Z",
+    "expiresAt": "2026-06-30T10:37:47.287Z",
+    "open": true
   }
 ]

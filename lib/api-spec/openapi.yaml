@@ -185,6 +185,8 @@ paths:
       operationId: closeRoom
       tags: [rooms]
       summary: Close/delete a room
+      security:
+        - BearerAuth: []
       parameters:
         - name: code
           in: path
@@ -194,12 +196,18 @@ paths:
       responses:
         "204":
           description: Closed
+        "401":
+          description: Authentication required
+        "403":
+          description: Not the room owner or no hosting time
 
   /rooms/{code}/game:
     patch:
       operationId: switchRoomGame
       tags: [rooms]
       summary: Switch the active game in a lobby without closing the room
+      security:
+        - BearerAuth: []
       parameters:
         - name: code
           in: path
