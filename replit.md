@@ -33,7 +33,7 @@ A dystopian 90s anime underground arcade gaming platform — mobile-first, portr
 ## Architecture decisions
 
 - No database — lightweight JSON file storage as specified (future-ready for DB swap via the store abstraction)
-- OTP is fully simulated — any 4-digit code works (ready for Twilio integration)
+- OTP uses Twilio Verify (real SMS, 6-digit codes) — requires TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN, TWILIO_VERIFY_SERVICE_SID secrets
 - Payment is simulated — ready for MyFatoorah/Tap integration
 - Promo code `DOORDOOR` is always valid and grants a free 3-hour pass
 - Admin credentials: username `admin`, password `admin999`
@@ -43,7 +43,7 @@ A dystopian 90s anime underground arcade gaming platform — mobile-first, portr
 
 - **Homepage** (`/`): Arcade cartridge grid of all games, bilingual Arabic + English, Coming Soon states
 - **Guest join** (`/join`, `/join/:code`): Nickname-only, no registration required
-- **Host flow** (`/host`): Phone → simulated OTP → payment/promo → dashboard with QR code
+- **Host flow** (`/host`): Name/email/phone/password → Twilio SMS OTP → dashboard with QR code
 - **Host dashboard** (`/host/dashboard`): Active room, QR code, guest list, live game switching
 - **Guest room view** (`/room/:code`): Shows active game, room code, guest list
 - **Admin panel** (`/admin`, `/admin/dashboard`): Games management, rooms, promo codes

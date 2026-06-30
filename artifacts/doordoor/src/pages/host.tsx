@@ -32,7 +32,7 @@ export default function Host() {
   const { toast } = useToast();
 
   const inputClass =
-    "w-full bg-background border-2 border-secondary text-foreground font-mono p-3 text-sm focus:outline-none focus:border-accent focus:shadow-[0_0_15px_rgba(0,206,209,0.4)] transition-all placeholder:text-muted/50";
+    "w-full bg-background border-2 border-secondary text-foreground font-mono p-3 text-sm focus:outline-none focus:border-accent focus:shadow-[0_0_15px_rgba(0,206,209,0.4)] transition-all placeholder:text-zinc-500";
 
   const handleSignupDetails = (e: React.FormEvent) => {
     e.preventDefault();
@@ -207,11 +207,6 @@ export default function Host() {
                 onSubmit={handleSignupDetails}
                 className="space-y-4"
               >
-                <div className="text-center space-y-1">
-                  <p className="font-mono text-xs text-accent">
-                    1 HOUR FREE TRIAL / ساعة مجانية
-                  </p>
-                </div>
                 <input
                   type="text"
                   placeholder="FULL NAME / الاسم الكامل"
@@ -281,15 +276,15 @@ export default function Host() {
                 <input
                   type="text"
                   inputMode="numeric"
-                  placeholder="0000"
+                  placeholder="000000"
                   value={otp}
-                  onChange={(e) => setOtp(e.target.value.replace(/\D/g, "").slice(0, 4))}
-                  className="w-full bg-background border-2 border-accent text-foreground font-mono p-4 text-center text-3xl tracking-[0.4em] focus:outline-none focus:border-primary focus:shadow-[0_0_15px_rgba(255,0,255,0.5)] transition-all"
-                  maxLength={4}
+                  onChange={(e) => setOtp(e.target.value.replace(/\D/g, "").slice(0, 6))}
+                  className="w-full bg-background border-2 border-accent text-foreground font-mono p-4 text-center text-3xl tracking-[0.3em] focus:outline-none focus:border-primary focus:shadow-[0_0_15px_rgba(255,0,255,0.5)] transition-all"
+                  maxLength={6}
                 />
                 <button
                   type="submit"
-                  disabled={signupVerifyOtp.isPending || otp.length !== 4}
+                  disabled={signupVerifyOtp.isPending || otp.length !== 6}
                   className="w-full bg-accent text-accent-foreground font-mono text-xl p-4 border-2 border-accent hover:bg-transparent hover:text-accent transition-all disabled:opacity-50 shadow-[0_0_10px_rgba(0,206,209,0.5)]"
                 >
                   {signupVerifyOtp.isPending ? "CREATING..." : "VERIFY / تحقق"}

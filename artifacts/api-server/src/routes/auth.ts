@@ -2,15 +2,16 @@ import { Router, type IRouter } from "express";
 import { z } from "zod";
 import { store } from "../lib/store.js";
 import {
-  createPendingRegistration,
   getPendingRegistration,
   deletePendingRegistration,
+  storePendingRegistration,
   hashPassword,
   comparePassword,
   signToken,
   requireHost,
   safeHost,
 } from "../lib/auth.js";
+import { sendVerification, checkVerification } from "../lib/twilio.js";
 
 const router: IRouter = Router();
 
@@ -23,7 +24,7 @@ const SignupRequestOtpSchema = z.object({
 
 const SignupVerifyOtpSchema = z.object({
   phone: z.string().min(1),
-  otp: z.string().regex(/^\d{4}$/, "OTP must be exactly 4 digits"),
+  otp: z.string().regex(/^\d{6}$/, "OTP must be exactly 6 digits"),
 });
 
 const LoginSchema = z.object({
@@ -55,13 +56,21 @@ router.post("/auth/signup/request-otp", async (req, res) => {
   }
 
   const passwordHash = await hashPassword(password);
-  const { otp } = createPendingRegistration(fullName, email, phone, passwordHash);
 
-  req.log.info({ phone, otp }, "Signup OTP generated (simulated)");
+  try {
+    await sendVerification(phone);
+  } catch (err: any) {
+    req.log.error({ phone, err: err?.message }, "Failed to send Twilio OTP");
+    res.status(502).json({ error: "Failed to send OTP. Please try again." });
+    return;
+  }
+
+  storePendingRegistration(fullName, email, phone, passwordHash);
+  req.log.info({ phone }, "Signup OTP sent via Twilio Verify");
 
   res.json({
     success: true,
-    message: `OTP sent to ${phone} (simulated — use any 4-digit code)`,
+    message: `OTP sent to ${phone}`,
   });
 });
 
@@ -79,8 +88,22 @@ router.post("/auth/signup/verify-otp", async (req, res) => {
   const pending = getPendingRegistration(phone);
   if (!pending) {
     res.status(400).json({
-      error: "No pending registration found for this phone, or the OTP has expired. Please start signup again.",
+      error: "No pending registration found. Please start signup again.",
     });
+    return;
+  }
+
+  let approved: boolean;
+  try {
+    approved = await checkVerification(phone, otp);
+  } catch (err: any) {
+    req.log.error({ phone, err: err?.message }, "Twilio verify check failed");
+    res.status(502).json({ error: "Failed to verify OTP. Please try again." });
+    return;
+  }
+
+  if (!approved) {
+    res.status(400).json({ error: "Invalid or expired OTP." });
     return;
   }
 

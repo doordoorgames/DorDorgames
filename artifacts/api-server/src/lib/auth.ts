@@ -13,34 +13,31 @@ declare global {
 }
 
 // ---- Pending registrations (in-memory, expire after 10 min) ----
+// OTP lifecycle is managed by Twilio Verify — we only store user details here.
 interface PendingRegistration {
   fullName: string;
   email: string;
   phone: string;
   passwordHash: string;
-  otp: string;
   expiresAt: number;
 }
 
 const pendingRegistrations = new Map<string, PendingRegistration>();
 const OTP_TTL_MS = 10 * 60 * 1000;
 
-export function createPendingRegistration(
+export function storePendingRegistration(
   fullName: string,
   email: string,
   phone: string,
   passwordHash: string,
-): { otp: string } {
-  const otp = String(Math.floor(1000 + Math.random() * 9000));
+): void {
   pendingRegistrations.set(phone, {
     fullName,
     email,
     phone,
     passwordHash,
-    otp,
     expiresAt: Date.now() + OTP_TTL_MS,
   });
-  return { otp };
 }
 
 export function getPendingRegistration(
