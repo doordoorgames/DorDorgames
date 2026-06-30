@@ -1,9 +1,10 @@
+import React from "react";
 import { useLocation, Link } from "wouter";
 
 type NavItem = {
   href: string;
   label: string;
-  icon: (active: boolean) => JSX.Element;
+  icon: (active: boolean) => React.ReactElement;
 };
 
 const NAV_ITEMS: NavItem[] = [

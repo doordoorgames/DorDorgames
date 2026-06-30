@@ -12,7 +12,7 @@ import {
 import { useToast } from "@/hooks/use-toast";
 import { motion } from "framer-motion";
 import { GAMES_CONFIG } from "@/games-config";
-import { PromoCodeInput } from "@workspace/api-client-react/src/generated/api.schemas";
+import type { PromoCodeInput } from "@workspace/api-client-react";
 
 const inputCls =
   "w-full bg-background border border-destructive/50 text-foreground font-mono p-2 text-sm focus:outline-none focus:border-destructive placeholder:text-muted-foreground/40";
