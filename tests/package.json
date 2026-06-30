@@ -1,0 +1,14 @@
+{
+  "name": "@workspace/tests",
+  "version": "0.0.0",
+  "private": true,
+  "scripts": {
+    "test": "playwright test",
+    "test:admin": "playwright test e2e/admin.spec.ts"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.49.0",
+    "@types/node": "catalog:",
+    "nanoid": "^5.1.5"
+  }
+}

@@ -1,4 +1,4 @@
-import { Router, type IRouter } from "express";
+import { Router, type IRouter, type Request, type Response, type NextFunction } from "express";
 import {
   AdminLoginBody,
   CreatePromoCodeBody,
@@ -11,6 +11,15 @@ const router: IRouter = Router();
 const ADMIN_USERNAME = "admin";
 const ADMIN_PASSWORD = "admin999";
 const ADMIN_TOKEN = "doordoor-admin-token-2024";
+
+function requireAdminAuth(req: Request, res: Response, next: NextFunction): void {
+  const auth = req.headers.authorization;
+  if (!auth || auth !== `Bearer ${ADMIN_TOKEN}`) {
+    res.status(401).json({ error: "Unauthorized" });
+    return;
+  }
+  next();
+}
 
 router.post("/admin/login", (req, res) => {
   const body = AdminLoginBody.parse(req.body);
@@ -25,7 +34,7 @@ router.post("/admin/login", (req, res) => {
   res.status(401).json({ error: "Invalid credentials" });
 });
 
-router.get("/admin/stats", (_req, res) => {
+router.get("/admin/stats", requireAdminAuth, (_req, res) => {
   const games = store.games.list();
   const rooms = store.rooms.list();
   const totalGuests = rooms.reduce((sum, r) => sum + r.guests.length, 0);
@@ -37,11 +46,11 @@ router.get("/admin/stats", (_req, res) => {
   });
 });
 
-router.get("/admin/promo-codes", (_req, res) => {
+router.get("/admin/promo-codes", requireAdminAuth, (_req, res) => {
   res.json(store.promoCodes.list());
 });
 
-router.post("/admin/promo-codes", (req, res) => {
+router.post("/admin/promo-codes", requireAdminAuth, (req, res) => {
   const body = CreatePromoCodeBody.parse(req.body);
   const pc = store.promoCodes.create({
     code: body.code,
@@ -50,7 +59,7 @@ router.post("/admin/promo-codes", (req, res) => {
   res.status(201).json(pc);
 });
 
-router.delete("/admin/promo-codes/:code", (req, res) => {
+router.delete("/admin/promo-codes/:code", requireAdminAuth, (req, res) => {
   const { code } = DeletePromoCodeParams.parse(req.params);
   const deleted = store.promoCodes.delete(code);
   if (!deleted) {

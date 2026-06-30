@@ -8,20 +8,16 @@ import {
   useListPromoCodes,
   useCreatePromoCode,
   useDeletePromoCode,
+  useListGames,
+  useCreateGame,
+  useUpdateGame,
 } from "@workspace/api-client-react";
 import { useToast } from "@/hooks/use-toast";
 import { motion } from "framer-motion";
-import { GAMES_CONFIG } from "@/games-config";
 import type { PromoCodeInput } from "@workspace/api-client-react";
 
 const inputCls =
   "w-full bg-background border border-destructive/50 text-foreground font-mono p-2 text-sm focus:outline-none focus:border-destructive placeholder:text-muted-foreground/40";
-
-function normalizeUrl(url: string): string {
-  if (!url) return "";
-  if (url.startsWith("http://") || url.startsWith("https://")) return url;
-  return "https://" + url;
-}
 
 export default function AdminDashboard() {
   const [, setLocation] = useLocation();
@@ -30,20 +26,20 @@ export default function AdminDashboard() {
 
   const [activeTab, setActiveTab] = useState<"games" | "rooms" | "promo">("games");
   const [newPromo, setNewPromo] = useState<Partial<PromoCodeInput>>({ code: "", active: true });
+  const [newGame, setNewGame] = useState({ title: "", titleAr: "", slug: "" });
 
-  const { data: stats } = useGetAdminStats({
-    request: { headers: { Authorization: `Bearer ${token}` } },
-  });
-  const { data: rooms, refetch: refetchRooms } = useListRooms({
-    request: { headers: { Authorization: `Bearer ${token}` } },
-  });
-  const { data: promos, refetch: refetchPromos } = useListPromoCodes({
-    request: { headers: { Authorization: `Bearer ${token}` } },
-  });
+  const authHeader = { headers: { Authorization: `Bearer ${token}` } };
+
+  const { data: stats } = useGetAdminStats({ request: authHeader });
+  const { data: rooms, refetch: refetchRooms } = useListRooms({ request: authHeader });
+  const { data: promos, refetch: refetchPromos } = useListPromoCodes({ request: authHeader });
+  const { data: games, refetch: refetchGames } = useListGames();
 
   const closeRoom = useCloseRoom();
   const createPromo = useCreatePromoCode();
   const deletePromo = useDeletePromoCode();
+  const createGame = useCreateGame();
+  const updateGame = useUpdateGame();
 
   useEffect(() => {
     if (!token) setLocation("/admin");
@@ -81,6 +77,47 @@ export default function AdminDashboard() {
     }
   };
 
+  const handleCreateGame = () => {
+    if (!newGame.title || !newGame.slug) return;
+    createGame.mutate(
+      {
+        data: {
+          title: newGame.title,
+          titleAr: newGame.titleAr || newGame.title,
+          slug: newGame.slug,
+          status: "active",
+          visible: true,
+        },
+      },
+      {
+        onSuccess: () => {
+          toast({ title: "GAME CREATED" });
+          refetchGames();
+          setNewGame({ title: "", titleAr: "", slug: "" });
+        },
+        onError: (err: any) => {
+          toast({ title: "ERROR", description: err.message, variant: "destructive" });
+        },
+      },
+    );
+  };
+
+  const handleToggleStatus = (id: string, currentStatus: string) => {
+    const nextStatus = currentStatus === "active" ? "coming_soon" : "active";
+    updateGame.mutate(
+      { id, data: { status: nextStatus } },
+      {
+        onSuccess: () => {
+          toast({ title: `STATUS → ${nextStatus.toUpperCase().replace("_", " ")}` });
+          refetchGames();
+        },
+        onError: (err: any) => {
+          toast({ title: "ERROR", description: err.message, variant: "destructive" });
+        },
+      },
+    );
+  };
+
   return (
     <Layout>
       <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-6 pb-8">
@@ -108,13 +145,10 @@ export default function AdminDashboard() {
         {stats && (
           <div className="grid grid-cols-2 gap-4">
             {[
-              { label: "TOTAL GAMES", value: GAMES_CONFIG.length },
+              { label: "TOTAL GAMES", value: stats.totalGames },
               { label: "ACTIVE ROOMS", value: stats.activeRooms },
               { label: "TOTAL GUESTS", value: stats.totalGuests },
-              {
-                label: "ACTIVE GAMES",
-                value: GAMES_CONFIG.filter((g) => g.status === "active").length,
-              },
+              { label: "ACTIVE GAMES", value: stats.activeGames },
             ].map((s) => (
               <div key={s.label} className="border border-destructive p-3 bg-destructive/10 text-center">
                 <p className="text-[10px] font-mono text-destructive mb-1">{s.label}</p>
@@ -144,19 +178,50 @@ export default function AdminDashboard() {
         {/* ── GAMES TAB ── */}
         {activeTab === "games" && (
           <div className="space-y-4">
-            <p className="text-[10px] font-mono text-muted-foreground border border-muted-foreground/20 px-3 py-2">
-              Game definitions are managed in{" "}
-              <span className="text-accent">games-config.ts</span>. URLs and status shown below are read from that file.
-            </p>
+            {/* Create game form */}
+            <div className="border border-destructive p-4 space-y-3 bg-background">
+              <h3 className="font-mono text-sm text-destructive">ADD GAME</h3>
+              <input
+                type="text"
+                placeholder="Title (English)"
+                value={newGame.title}
+                onChange={(e) => setNewGame({ ...newGame, title: e.target.value })}
+                className={inputCls}
+                data-testid="game-title-input"
+              />
+              <input
+                type="text"
+                placeholder="Title (Arabic)"
+                value={newGame.titleAr}
+                onChange={(e) => setNewGame({ ...newGame, titleAr: e.target.value })}
+                className={inputCls}
+              />
+              <input
+                type="text"
+                placeholder="Slug (e.g. my-game)"
+                value={newGame.slug}
+                onChange={(e) =>
+                  setNewGame({ ...newGame, slug: e.target.value.toLowerCase().replace(/\s+/g, "-") })
+                }
+                className={inputCls}
+                data-testid="game-slug-input"
+              />
+              <button
+                onClick={handleCreateGame}
+                disabled={createGame.isPending || !newGame.title || !newGame.slug}
+                className="w-full bg-destructive text-destructive-foreground font-mono text-sm py-2 hover:bg-transparent hover:text-destructive border border-destructive transition-colors disabled:opacity-40"
+                data-testid="create-game-button"
+              >
+                {createGame.isPending ? "CREATING..." : "CREATE GAME"}
+              </button>
+            </div>
 
-            {GAMES_CONFIG.map((game) => {
-              const url = normalizeUrl(game.externalUrl);
+            {/* Game list */}
+            {games?.map((game) => {
               const isActive = game.status === "active";
-              const hasUrl = url.length > 0;
 
               return (
-                <div key={game.id} className="border border-border p-4 space-y-3">
-                  {/* Name + status */}
+                <div key={game.id} className="border border-border p-4 space-y-3" data-testid={`game-row-${game.slug}`}>
                   <div className="flex justify-between items-start gap-2">
                     <div className="min-w-0">
                       <h4 className="font-mono text-sm truncate">{game.title}</h4>
@@ -170,53 +235,40 @@ export default function AdminDashboard() {
                           ? "text-primary border-primary"
                           : "text-muted-foreground border-muted-foreground"
                       }`}
+                      data-testid={`game-status-${game.slug}`}
                     >
                       {game.status}
                     </span>
                   </div>
 
-                  {/* Route */}
-                  <div className="flex items-center gap-2">
-                    <span className="text-[9px] font-mono text-muted-foreground/60 uppercase flex-shrink-0">
-                      ROUTE
-                    </span>
-                    <span className="text-[10px] font-mono text-muted-foreground">{game.route}</span>
-                  </div>
+                  {game.route && (
+                    <div className="flex items-center gap-2">
+                      <span className="text-[9px] font-mono text-muted-foreground/60 uppercase flex-shrink-0">
+                        ROUTE
+                      </span>
+                      <span className="text-[10px] font-mono text-muted-foreground">{game.route}</span>
+                    </div>
+                  )}
 
-                  {/* External URL */}
-                  <div className="flex items-start gap-2">
-                    <span className="text-[9px] font-mono text-muted-foreground/60 uppercase flex-shrink-0 mt-0.5">
-                      URL
-                    </span>
-                    <span
-                      className={`text-[10px] font-mono break-all ${
-                        hasUrl ? "text-accent" : "text-muted-foreground/40 italic"
-                      }`}
-                    >
-                      {game.externalUrl || "not set in games-config.ts"}
-                    </span>
-                  </div>
-
-                  {/* Buttons */}
-                  <div className="flex gap-2">
-                    {hasUrl && isActive ? (
-                      <a
-                        href={url}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="flex-1 py-1 border border-primary text-primary text-[10px] font-mono text-center hover:bg-primary/10 transition-colors"
-                      >
-                        OPEN GAME ↗
-                      </a>
-                    ) : (
-                      <div className="flex-1 py-1 border border-muted-foreground/20 text-muted-foreground/30 text-[10px] font-mono text-center cursor-not-allowed">
-                        {!hasUrl ? "NO URL SET" : "COMING SOON"}
-                      </div>
-                    )}
-                  </div>
+                  <button
+                    onClick={() => handleToggleStatus(game.id, game.status)}
+                    disabled={updateGame.isPending}
+                    className={`w-full py-1 border text-[10px] font-mono transition-colors disabled:opacity-40 ${
+                      isActive
+                        ? "border-muted-foreground text-muted-foreground hover:bg-muted-foreground/10"
+                        : "border-primary text-primary hover:bg-primary/10"
+                    }`}
+                    data-testid={`toggle-status-${game.slug}`}
+                  >
+                    {isActive ? "SET COMING SOON" : "SET ACTIVE"}
+                  </button>
                 </div>
               );
             })}
+
+            {(!games || games.length === 0) && (
+              <p className="text-center text-xs font-mono text-muted-foreground py-8">NO GAMES</p>
+            )}
           </div>
         )}
 
