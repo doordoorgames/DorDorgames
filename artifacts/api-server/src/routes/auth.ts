@@ -8,7 +8,7 @@ import {
   hashPassword,
   comparePassword,
   signToken,
-  requireHostIdentity,
+  requireHost,
   safeHost,
 } from "../lib/auth.js";
 
@@ -140,7 +140,7 @@ router.post("/auth/login", async (req, res) => {
   res.json({ token, host: safeHost(host) });
 });
 
-router.get("/auth/me", requireHostIdentity, (req, res) => {
+router.get("/auth/me", requireHost, (req, res) => {
   res.json(safeHost(req.hostAccount!));
 });
 

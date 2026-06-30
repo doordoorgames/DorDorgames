@@ -55,22 +55,56 @@ export default function HostDashboard() {
 
   const [selectedGameId, setSelectedGameId] = useState("");
 
+  const handleLogout = () => {
+    localStorage.removeItem("host_token");
+    setLocation("/");
+  };
+
+  const isNoTimeError =
+    hostError &&
+    (hostError as any)?.response?.status === 403 &&
+    ((hostError as any)?.response?.data?.error as string)?.includes(
+      "No hosting time",
+    );
+
   useEffect(() => {
     if (!token) {
       setLocation("/host");
       return;
     }
-    if (hostError) {
+    if (hostError && !isNoTimeError) {
       localStorage.removeItem("host_token");
       setLocation("/host");
     }
-  }, [token, hostError, setLocation]);
+  }, [token, hostError, isNoTimeError, setLocation]);
 
-  if (!token || hostLoading) {
+  if (!token || (hostLoading && !isNoTimeError)) {
     return (
       <Layout>
         <div className="flex items-center justify-center min-h-[60vh]">
           <p className="font-mono text-secondary animate-pulse">LOADING...</p>
+        </div>
+      </Layout>
+    );
+  }
+
+  if (isNoTimeError) {
+    return (
+      <Layout>
+        <div className="flex flex-col items-center justify-center min-h-[60vh] space-y-6">
+          <div className="border-2 border-destructive p-6 text-center space-y-3 w-full max-w-sm">
+            <p className="font-mono text-destructive text-xl">NO TIME REMAINING</p>
+            <p className="arabic-text text-muted-foreground text-sm">لا يوجد وقت استضافة</p>
+            <p className="font-mono text-xs text-muted-foreground">
+              Your hosting time has run out. Purchase more to continue.
+            </p>
+          </div>
+          <button
+            onClick={handleLogout}
+            className="font-mono text-xs text-muted-foreground underline"
+          >
+            Log out
+          </button>
         </div>
       </Layout>
     );
@@ -116,11 +150,6 @@ export default function HostDashboard() {
     if (activeRoom) {
       switchGame.mutate({ code: activeRoom.code, data: { gameId } });
     }
-  };
-
-  const handleLogout = () => {
-    localStorage.removeItem("host_token");
-    setLocation("/");
   };
 
   const minutesDisplay =

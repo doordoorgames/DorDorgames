@@ -28,5 +28,15 @@
     "createdAt": "2026-06-30T09:37:47.287Z",
     "expiresAt": "2026-06-30T10:37:47.287Z",
     "open": true
+  },
+  {
+    "id": "3bntdnms4mr0gi43z",
+    "code": "ZFC2KB",
+    "hostPhone": "96544444444",
+    "activeGameId": "game_tfadhloon",
+    "guests": [],
+    "createdAt": "2026-06-30T09:40:52.175Z",
+    "expiresAt": "2026-06-30T10:40:52.175Z",
+    "open": false
   }
 ]

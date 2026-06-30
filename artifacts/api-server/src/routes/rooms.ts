@@ -9,7 +9,7 @@ import {
 } from "@workspace/api-zod";
 import { z } from "zod";
 import { store } from "../lib/store.js";
-import { requireHost } from "../lib/auth.js";
+import { requireHost, requireHostIdentity } from "../lib/auth.js";
 
 const router: IRouter = Router();
 
@@ -70,7 +70,7 @@ router.get("/rooms/:code", (req, res) => {
   res.json(roomWithGame(room));
 });
 
-router.delete("/rooms/:code", requireHost, (req, res) => {
+router.delete("/rooms/:code", requireHostIdentity, (req, res) => {
   const { code } = CloseRoomParams.parse(req.params);
   const room = store.rooms.get(code);
   if (!room) {
@@ -85,7 +85,7 @@ router.delete("/rooms/:code", requireHost, (req, res) => {
   res.status(204).send();
 });
 
-router.patch("/rooms/:code/game", requireHost, (req, res) => {
+router.patch("/rooms/:code/game", requireHostIdentity, (req, res) => {
   const { code } = SwitchRoomGameParams.parse(req.params);
   const body = SwitchRoomGameBody.parse(req.body);
   const room = store.rooms.get(code);

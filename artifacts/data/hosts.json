@@ -46,5 +46,17 @@
     "id": "ygni2ktibmr0ge5cd",
     "createdAt": "2026-06-30T09:37:47.149Z",
     "updatedAt": "2026-06-30T09:37:47.287Z"
+  },
+  {
+    "fullName": "Dave",
+    "email": "dave@test.com",
+    "phone": "96544444444",
+    "passwordHash": "$2b$10$1h9PzHl8P2KCR3wqEl5hFej92nFIzSqPCLhTZWAvHbMUjEHJH1xHy",
+    "phoneVerified": true,
+    "trialUsed": true,
+    "remainingMinutes": 0,
+    "id": "1skwsoaksmr0gi3zw",
+    "createdAt": "2026-06-30T09:40:52.028Z",
+    "updatedAt": "2026-06-30T09:40:52.174Z"
   }
 ]
