@@ -47,7 +47,7 @@
     "guests": [],
     "createdAt": "2026-06-30T10:18:08.939Z",
     "expiresAt": "2026-06-30T11:18:08.939Z",
-    "open": true
+    "open": false
   },
   {
     "id": "rj6wogxfqmr0i0j6i",
@@ -57,7 +57,7 @@
     "guests": [],
     "createdAt": "2026-06-30T10:23:11.130Z",
     "expiresAt": "2026-06-30T11:23:11.130Z",
-    "open": true
+    "open": false
   },
   {
     "id": "0d190gtvamr0i83li",
