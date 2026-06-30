@@ -45,7 +45,7 @@ export default function Host() {
           setSignupStep("otp");
           toast({
             title: "OTP SENT",
-            description: `Check ${phone} — use any 4-digit code (simulated).`,
+            description: `Verification code sent to ${phone}.`,
           });
         },
         onError: (err: any) => {
@@ -266,11 +266,8 @@ export default function Host() {
               >
                 <div className="text-center space-y-2">
                   <p className="font-mono text-xs text-muted-foreground">
-                    OTP sent to{" "}
+                    Code sent to{" "}
                     <span className="text-accent">{phone}</span>
-                  </p>
-                  <p className="font-mono text-xs text-muted-foreground/60">
-                    (simulated — any 4-digit code works)
                   </p>
                 </div>
                 <input

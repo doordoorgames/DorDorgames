@@ -130,5 +130,17 @@
     "id": "lajytiy53mr0i7mj7",
     "createdAt": "2026-06-30T10:28:42.067Z",
     "updatedAt": "2026-06-30T10:29:04.181Z"
+  },
+  {
+    "fullName": "Abou Bakar",
+    "email": "aboubakar.dev@gmail.com",
+    "phone": "+923483624912",
+    "passwordHash": "$2b$10$edaUjM1ZU8l2WlGtuJCj8uRxIpg7HjxA1MisA6Z1GM2hRdyOv2swq",
+    "phoneVerified": true,
+    "trialUsed": true,
+    "remainingMinutes": 0,
+    "id": "n4nfscmmnmr0j4t83",
+    "createdAt": "2026-06-30T10:54:30.387Z",
+    "updatedAt": "2026-06-30T10:54:42.906Z"
   }
 ]

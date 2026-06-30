@@ -69,7 +69,7 @@ function BuyTimePanel({
           }
         },
         onError: (err: any) => {
-          const msg = err?.response?.data?.error || err?.message || "Payment failed";
+          const msg = err?.data?.error || err?.message || "Payment failed";
           toast({ title: "PAYMENT FAILED", description: msg, variant: "destructive" });
         },
       },
@@ -350,7 +350,7 @@ export default function HostDashboard() {
         },
         onError: (err: any) => {
           const msg =
-            err?.response?.data?.error || err?.message || "Failed to create room";
+            err?.data?.error || err?.message || "Failed to create room";
           toast({ title: "ERROR", description: msg, variant: "destructive" });
         },
       },
