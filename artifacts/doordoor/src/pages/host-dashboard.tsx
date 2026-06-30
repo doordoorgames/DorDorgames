@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useLocation } from "wouter";
 import { useQueryClient } from "@tanstack/react-query";
 import { Layout } from "@/components/layout";
@@ -19,11 +19,18 @@ import { useToast } from "@/hooks/use-toast";
 import { QRCodeSVG } from "qrcode.react";
 import { motion, AnimatePresence } from "framer-motion";
 
-function BuyTimePanel({ onSuccess }: { onSuccess: (remainingMinutes?: number) => void }) {
+function BuyTimePanel({
+  onSuccess,
+  open,
+  onOpenChange,
+}: {
+  onSuccess: (remainingMinutes?: number) => void;
+  open: boolean;
+  onOpenChange: (v: boolean) => void;
+}) {
   const { toast } = useToast();
   const [promoInput, setPromoInput] = useState("");
   const [promoValidated, setPromoValidated] = useState<{ valid: boolean; message: string } | null>(null);
-  const [showPanel, setShowPanel] = useState(false);
 
   const validatePromo = useValidatePromo();
   const processPayment = useProcessPayment();
@@ -55,7 +62,7 @@ function BuyTimePanel({ onSuccess }: { onSuccess: (remainingMinutes?: number) =>
               title: data.free ? "PROMO APPLIED!" : "PAYMENT SUCCESS",
               description: data.message,
             });
-            setShowPanel(false);
+            onOpenChange(false);
             setPromoInput("");
             setPromoValidated(null);
             onSuccess(data.remainingMinutes);
@@ -72,15 +79,15 @@ function BuyTimePanel({ onSuccess }: { onSuccess: (remainingMinutes?: number) =>
   return (
     <div className="border-2 border-accent/60 bg-accent/5">
       <button
-        onClick={() => setShowPanel((v) => !v)}
+        onClick={() => onOpenChange(!open)}
         className="w-full flex items-center justify-between p-4 font-mono text-sm text-accent hover:bg-accent/10 transition-colors"
       >
         <span>+ BUY MORE TIME / شراء وقت إضافي</span>
-        <span className="text-lg">{showPanel ? "▲" : "▼"}</span>
+        <span className="text-lg">{open ? "▲" : "▼"}</span>
       </button>
 
       <AnimatePresence>
-        {showPanel && (
+        {open && (
           <motion.div
             initial={{ height: 0, opacity: 0 }}
             animate={{ height: "auto", opacity: 1 }}
@@ -159,6 +166,14 @@ function BuyTimePanel({ onSuccess }: { onSuccess: (remainingMinutes?: number) =>
   );
 }
 
+function formatCountdown(minutes: number): string {
+  if (minutes <= 0) return "0m";
+  if (minutes >= 60) {
+    return `${Math.floor(minutes / 60)}h ${minutes % 60}m`;
+  }
+  return `${minutes}m`;
+}
+
 export default function HostDashboard() {
   const [, setLocation] = useLocation();
   const { toast } = useToast();
@@ -198,6 +213,40 @@ export default function HostDashboard() {
   });
 
   const [selectedGameId, setSelectedGameId] = useState("");
+  const [buyTimeOpen, setBuyTimeOpen] = useState(false);
+
+  const [countdown, setCountdown] = useState<number | null>(null);
+  const countdownRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const autoOpenedRef = useRef(false);
+
+  useEffect(() => {
+    if (host?.remainingMinutes !== undefined) {
+      setCountdown(host.remainingMinutes);
+      autoOpenedRef.current = false;
+    }
+  }, [host?.remainingMinutes]);
+
+  useEffect(() => {
+    if (countdown === null) return;
+
+    if (countdownRef.current) clearInterval(countdownRef.current);
+
+    countdownRef.current = setInterval(() => {
+      setCountdown((prev) => {
+        if (prev === null) return prev;
+        const next = Math.max(0, prev - 1);
+        if (next === 0 && !autoOpenedRef.current) {
+          autoOpenedRef.current = true;
+          setBuyTimeOpen(true);
+        }
+        return next;
+      });
+    }, 60_000);
+
+    return () => {
+      if (countdownRef.current) clearInterval(countdownRef.current);
+    };
+  }, [countdown === null ? null : Math.sign(countdown)]);
 
   const handleLogout = () => {
     localStorage.removeItem("host_token");
@@ -223,6 +272,8 @@ export default function HostDashboard() {
   const handleBuyTimeSuccess = (remainingMinutes?: number) => {
     queryClient.invalidateQueries({ queryKey: getGetAuthMeQueryKey() });
     if (remainingMinutes !== undefined) {
+      setCountdown(remainingMinutes);
+      autoOpenedRef.current = false;
       queryClient.setQueryData(getGetAuthMeQueryKey(), (old: any) =>
         old ? { ...old, remainingMinutes } : old,
       );
@@ -251,9 +302,13 @@ export default function HostDashboard() {
             </p>
           </div>
           <div className="w-full max-w-sm">
-            <BuyTimePanel onSuccess={() => {
-              queryClient.invalidateQueries({ queryKey: getGetAuthMeQueryKey() });
-            }} />
+            <BuyTimePanel
+              open={buyTimeOpen}
+              onOpenChange={setBuyTimeOpen}
+              onSuccess={() => {
+                queryClient.invalidateQueries({ queryKey: getGetAuthMeQueryKey() });
+              }}
+            />
           </div>
           <button
             onClick={handleLogout}
@@ -268,12 +323,18 @@ export default function HostDashboard() {
 
   if (!host) return null;
 
+  const displayMinutes = countdown ?? host.remainingMinutes;
+  const isLowTime = displayMinutes <= 30;
+  const isCriticalTime = displayMinutes <= 10 && displayMinutes > 0;
+  const isNoTime = displayMinutes <= 0;
+  const minutesDisplay = formatCountdown(displayMinutes);
+
   const handleStartRoom = () => {
     if (!selectedGameId) {
       toast({ title: "SELECT A GAME", variant: "destructive" });
       return;
     }
-    if (host.remainingMinutes <= 0) {
+    if (displayMinutes <= 0) {
       toast({
         title: "NO TIME REMAINING",
         description: "Purchase more hosting time to start a session.",
@@ -308,13 +369,6 @@ export default function HostDashboard() {
     }
   };
 
-  const minutesDisplay =
-    host.remainingMinutes >= 60
-      ? `${Math.floor(host.remainingMinutes / 60)}h ${host.remainingMinutes % 60}m`
-      : `${host.remainingMinutes}m`;
-
-  const isLowTime = host.remainingMinutes <= 30;
-
   return (
     <Layout>
       <motion.div
@@ -333,17 +387,30 @@ export default function HostDashboard() {
             </p>
           </div>
           <div className="flex flex-col items-end gap-2">
-            <div
+            <motion.div
+              key={displayMinutes}
+              animate={
+                isCriticalTime
+                  ? { scale: [1, 1.06, 1], opacity: [1, 0.7, 1] }
+                  : {}
+              }
+              transition={
+                isCriticalTime
+                  ? { duration: 1.2, repeat: Infinity, ease: "easeInOut" }
+                  : {}
+              }
               className={`font-mono text-xs px-2 py-1 border ${
-                host.remainingMinutes > 30
-                  ? "border-accent text-accent"
-                  : host.remainingMinutes > 0
-                    ? "border-yellow-500 text-yellow-500"
-                    : "border-destructive text-destructive"
+                isNoTime
+                  ? "border-destructive text-destructive"
+                  : isCriticalTime
+                    ? "border-destructive text-destructive shadow-[0_0_8px_rgba(255,0,0,0.4)]"
+                    : displayMinutes > 30
+                      ? "border-accent text-accent"
+                      : "border-yellow-500 text-yellow-500"
               }`}
             >
               ⏱ {minutesDisplay} left
-            </div>
+            </motion.div>
             <button
               onClick={handleLogout}
               className="text-xs font-mono text-destructive border border-destructive px-2 py-1 hover:bg-destructive hover:text-destructive-foreground transition-colors"
@@ -358,20 +425,35 @@ export default function HostDashboard() {
             initial={{ opacity: 0, y: -8 }}
             animate={{ opacity: 1, y: 0 }}
           >
-            {host.remainingMinutes <= 0 && (
+            {isNoTime && (
               <div className="border-2 border-destructive p-3 text-center mb-3">
                 <p className="font-mono text-destructive text-sm">NO HOSTING TIME REMAINING</p>
                 <p className="text-xs text-muted-foreground arabic-text">لا يوجد وقت استضافة متبقٍ</p>
               </div>
             )}
-            {host.remainingMinutes > 0 && host.remainingMinutes <= 30 && (
+            {isCriticalTime && (
+              <motion.div
+                animate={{ opacity: [1, 0.5, 1] }}
+                transition={{ duration: 1.5, repeat: Infinity, ease: "easeInOut" }}
+                className="border border-destructive/70 bg-destructive/5 p-3 text-center mb-3"
+              >
+                <p className="font-mono text-destructive text-xs">
+                  ⚠ CRITICAL — {minutesDisplay} remaining / وقت حرج
+                </p>
+              </motion.div>
+            )}
+            {!isNoTime && !isCriticalTime && (
               <div className="border border-yellow-500/50 bg-yellow-500/5 p-3 text-center mb-3">
                 <p className="font-mono text-yellow-500 text-xs">
                   ⚠ LOW TIME — {minutesDisplay} remaining
                 </p>
               </div>
             )}
-            <BuyTimePanel onSuccess={handleBuyTimeSuccess} />
+            <BuyTimePanel
+              open={buyTimeOpen}
+              onOpenChange={setBuyTimeOpen}
+              onSuccess={handleBuyTimeSuccess}
+            />
           </motion.div>
         )}
 
@@ -492,7 +574,7 @@ export default function HostDashboard() {
               disabled={
                 createRoom.isPending ||
                 !selectedGameId ||
-                host.remainingMinutes <= 0
+                displayMinutes <= 0
               }
               className="w-full bg-primary text-primary-foreground font-mono text-xl p-4 border-2 border-primary hover:bg-transparent hover:text-primary transition-all disabled:opacity-50 shadow-[0_0_10px_rgba(255,0,255,0.5)]"
             >
