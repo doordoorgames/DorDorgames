@@ -412,6 +412,12 @@ export default function HostDashboard() {
               ⏱ {minutesDisplay} left
             </motion.div>
             <button
+              onClick={() => setBuyTimeOpen((v) => !v)}
+              className="text-xs font-mono text-accent border border-accent/60 px-2 py-1 hover:bg-accent hover:text-black transition-colors"
+            >
+              + BUY TIME
+            </button>
+            <button
               onClick={handleLogout}
               className="text-xs font-mono text-destructive border border-destructive px-2 py-1 hover:bg-destructive hover:text-destructive-foreground transition-colors"
             >
@@ -449,13 +455,14 @@ export default function HostDashboard() {
                 </p>
               </div>
             )}
-            <BuyTimePanel
-              open={buyTimeOpen}
-              onOpenChange={setBuyTimeOpen}
-              onSuccess={handleBuyTimeSuccess}
-            />
           </motion.div>
         )}
+
+        <BuyTimePanel
+          open={buyTimeOpen}
+          onOpenChange={setBuyTimeOpen}
+          onSuccess={handleBuyTimeSuccess}
+        />
 
         {activeRoom ? (
           <div className="space-y-8">
