@@ -771,7 +771,7 @@ export const closeRoom = async (
 };
 
 export const getCloseRoomMutationOptions = <
-  TError = ErrorType<unknown>,
+  TError = ErrorType<void>,
   TContext = unknown,
 >(options?: {
   mutation?: UseMutationOptions<
@@ -812,13 +812,13 @@ export type CloseRoomMutationResult = NonNullable<
   Awaited<ReturnType<typeof closeRoom>>
 >;
 
-export type CloseRoomMutationError = ErrorType<unknown>;
+export type CloseRoomMutationError = ErrorType<void>;
 
 /**
  * @summary Close/delete a room
  */
 export const useCloseRoom = <
-  TError = ErrorType<unknown>,
+  TError = ErrorType<void>,
   TContext = unknown,
 >(options?: {
   mutation?: UseMutationOptions<

@@ -722,6 +722,9 @@ components:
           type: string
         expiresAt:
           type: string
+        remainingMinutes:
+          type: integer
+          description: Updated remaining minutes for the host after purchase (only present when called with a valid host token)
 
     AdminCredentials:
       type: object

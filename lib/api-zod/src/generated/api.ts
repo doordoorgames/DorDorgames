@@ -371,6 +371,12 @@ export const ProcessPaymentResponse = zod.object({
   free: zod.boolean(),
   message: zod.string(),
   expiresAt: zod.string().optional(),
+  remainingMinutes: zod
+    .number()
+    .optional()
+    .describe(
+      "Updated remaining minutes for the host after purchase (only present when called with a valid host token)",
+    ),
 });
 
 /**

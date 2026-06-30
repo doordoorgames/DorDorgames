@@ -58,5 +58,17 @@
     "id": "1skwsoaksmr0gi3zw",
     "createdAt": "2026-06-30T09:40:52.028Z",
     "updatedAt": "2026-06-30T09:40:52.174Z"
+  },
+  {
+    "fullName": "Test Host",
+    "email": "testhost@dd.com",
+    "phone": "+96599999999",
+    "passwordHash": "$2b$10$.Uxl84YUD0r.X.krlAUlyunGEAqq3.04HHUyJhiWjMWmoJWvW9G.W",
+    "phoneVerified": true,
+    "trialUsed": true,
+    "remainingMinutes": 420,
+    "id": "oe8oxxw2fmr0hc97c",
+    "createdAt": "2026-06-30T10:04:18.456Z",
+    "updatedAt": "2026-06-30T10:04:29.104Z"
   }
 ]

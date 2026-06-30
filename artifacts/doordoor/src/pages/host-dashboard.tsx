@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { useLocation } from "wouter";
+import { useQueryClient } from "@tanstack/react-query";
 import { Layout } from "@/components/layout";
 import {
   useListGames,
@@ -11,14 +12,157 @@ import {
   useGetRoom,
   useGetAuthMe,
   getGetAuthMeQueryKey,
+  useProcessPayment,
+  useValidatePromo,
 } from "@workspace/api-client-react";
 import { useToast } from "@/hooks/use-toast";
 import { QRCodeSVG } from "qrcode.react";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
+
+function BuyTimePanel({ onSuccess }: { onSuccess: (remainingMinutes?: number) => void }) {
+  const { toast } = useToast();
+  const [promoInput, setPromoInput] = useState("");
+  const [promoValidated, setPromoValidated] = useState<{ valid: boolean; message: string } | null>(null);
+  const [showPanel, setShowPanel] = useState(false);
+
+  const validatePromo = useValidatePromo();
+  const processPayment = useProcessPayment();
+
+  const phone = localStorage.getItem("host_phone") || "";
+
+  const handleValidatePromo = () => {
+    if (!promoInput.trim()) return;
+    validatePromo.mutate(
+      { data: { code: promoInput.trim() } },
+      {
+        onSuccess: (data) => {
+          setPromoValidated({ valid: data.valid, message: data.message || (data.valid ? "Valid promo!" : "Invalid promo code") });
+        },
+        onError: () => {
+          setPromoValidated({ valid: false, message: "Failed to validate promo code" });
+        },
+      },
+    );
+  };
+
+  const handlePay = (promoCode?: string) => {
+    processPayment.mutate(
+      { data: { phone: phone || "unknown", ...(promoCode ? { promoCode } : {}) } },
+      {
+        onSuccess: (data) => {
+          if (data.success) {
+            toast({
+              title: data.free ? "PROMO APPLIED!" : "PAYMENT SUCCESS",
+              description: data.message,
+            });
+            setShowPanel(false);
+            setPromoInput("");
+            setPromoValidated(null);
+            onSuccess(data.remainingMinutes);
+          }
+        },
+        onError: (err: any) => {
+          const msg = err?.response?.data?.error || err?.message || "Payment failed";
+          toast({ title: "PAYMENT FAILED", description: msg, variant: "destructive" });
+        },
+      },
+    );
+  };
+
+  return (
+    <div className="border-2 border-accent/60 bg-accent/5">
+      <button
+        onClick={() => setShowPanel((v) => !v)}
+        className="w-full flex items-center justify-between p-4 font-mono text-sm text-accent hover:bg-accent/10 transition-colors"
+      >
+        <span>+ BUY MORE TIME / شراء وقت إضافي</span>
+        <span className="text-lg">{showPanel ? "▲" : "▼"}</span>
+      </button>
+
+      <AnimatePresence>
+        {showPanel && (
+          <motion.div
+            initial={{ height: 0, opacity: 0 }}
+            animate={{ height: "auto", opacity: 1 }}
+            exit={{ height: 0, opacity: 0 }}
+            transition={{ duration: 0.2 }}
+            className="overflow-hidden"
+          >
+            <div className="px-4 pb-4 space-y-4">
+              <div className="text-center space-y-1 py-2 border-t border-border">
+                <p className="font-mono text-xs text-muted-foreground">3-HOUR HOSTING PASS</p>
+                <p className="font-mono text-3xl text-accent">2 KD</p>
+                <p className="arabic-text text-xs text-muted-foreground">تصفح لمدة 3 ساعات</p>
+              </div>
+
+              <div className="space-y-2">
+                <p className="font-mono text-xs text-muted-foreground">PROMO CODE / كود خصم</p>
+                <div className="flex gap-2">
+                  <input
+                    type="text"
+                    value={promoInput}
+                    onChange={(e) => {
+                      setPromoInput(e.target.value.toUpperCase());
+                      setPromoValidated(null);
+                    }}
+                    placeholder="DOORDOOR"
+                    className="flex-1 bg-background border border-border font-mono text-sm px-3 py-2 text-foreground placeholder:text-muted-foreground/50 focus:outline-none focus:border-accent"
+                  />
+                  <button
+                    onClick={handleValidatePromo}
+                    disabled={!promoInput.trim() || validatePromo.isPending}
+                    className="font-mono text-xs px-3 py-2 border border-accent text-accent hover:bg-accent hover:text-black transition-colors disabled:opacity-50"
+                  >
+                    {validatePromo.isPending ? "..." : "CHECK"}
+                  </button>
+                </div>
+
+                {promoValidated && (
+                  <p className={`font-mono text-xs ${promoValidated.valid ? "text-secondary" : "text-destructive"}`}>
+                    {promoValidated.valid ? "✓ " : "✗ "}{promoValidated.message}
+                  </p>
+                )}
+
+                {promoValidated?.valid && (
+                  <button
+                    onClick={() => handlePay(promoInput.trim())}
+                    disabled={processPayment.isPending}
+                    className="w-full py-3 bg-secondary/10 border-2 border-secondary text-secondary font-mono text-sm hover:bg-secondary hover:text-black transition-colors disabled:opacity-50"
+                  >
+                    {processPayment.isPending ? "ACTIVATING..." : "APPLY PROMO — FREE / مجاناً"}
+                  </button>
+                )}
+              </div>
+
+              <div className="flex items-center gap-3">
+                <div className="flex-1 h-px bg-border" />
+                <p className="font-mono text-xs text-muted-foreground">OR / أو</p>
+                <div className="flex-1 h-px bg-border" />
+              </div>
+
+              <button
+                onClick={() => handlePay()}
+                disabled={processPayment.isPending}
+                className="w-full py-3 bg-primary/10 border-2 border-primary text-primary font-mono text-sm hover:bg-primary hover:text-primary-foreground transition-colors disabled:opacity-50 shadow-[0_0_8px_rgba(255,0,255,0.2)]"
+              >
+                {processPayment.isPending ? "PROCESSING..." : "PAY 2 KD (SIMULATED) / دفع 2 KD"}
+              </button>
+
+              <p className="font-mono text-xs text-muted-foreground text-center">
+                Payment is simulated — no real charge
+              </p>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </div>
+  );
+}
 
 export default function HostDashboard() {
   const [, setLocation] = useLocation();
   const { toast } = useToast();
+  const queryClient = useQueryClient();
 
   const token = localStorage.getItem("host_token");
 
@@ -78,6 +222,15 @@ export default function HostDashboard() {
     }
   }, [token, hostError, isNoTimeError, setLocation]);
 
+  const handleBuyTimeSuccess = (remainingMinutes?: number) => {
+    queryClient.invalidateQueries({ queryKey: getGetAuthMeQueryKey() });
+    if (remainingMinutes !== undefined) {
+      queryClient.setQueryData(getGetAuthMeQueryKey(), (old: any) =>
+        old ? { ...old, remainingMinutes } : old,
+      );
+    }
+  };
+
   if (!token || (hostLoading && !isNoTimeError)) {
     return (
       <Layout>
@@ -98,6 +251,11 @@ export default function HostDashboard() {
             <p className="font-mono text-xs text-muted-foreground">
               Your hosting time has run out. Purchase more to continue.
             </p>
+          </div>
+          <div className="w-full max-w-sm">
+            <BuyTimePanel onSuccess={() => {
+              queryClient.invalidateQueries({ queryKey: getGetAuthMeQueryKey() });
+            }} />
           </div>
           <button
             onClick={handleLogout}
@@ -157,6 +315,8 @@ export default function HostDashboard() {
       ? `${Math.floor(host.remainingMinutes / 60)}h ${host.remainingMinutes % 60}m`
       : `${host.remainingMinutes}m`;
 
+  const isLowTime = host.remainingMinutes <= 30;
+
   return (
     <Layout>
       <motion.div
@@ -177,9 +337,11 @@ export default function HostDashboard() {
           <div className="flex flex-col items-end gap-2">
             <div
               className={`font-mono text-xs px-2 py-1 border ${
-                host.remainingMinutes > 0
+                host.remainingMinutes > 30
                   ? "border-accent text-accent"
-                  : "border-destructive text-destructive"
+                  : host.remainingMinutes > 0
+                    ? "border-yellow-500 text-yellow-500"
+                    : "border-destructive text-destructive"
               }`}
             >
               ⏱ {minutesDisplay} left
@@ -193,15 +355,26 @@ export default function HostDashboard() {
           </div>
         </div>
 
-        {host.remainingMinutes <= 0 && !activeRoom && (
-          <div className="border-2 border-destructive p-4 text-center space-y-2">
-            <p className="font-mono text-destructive text-sm">
-              NO HOSTING TIME REMAINING
-            </p>
-            <p className="text-xs text-muted-foreground arabic-text">
-              لا يوجد وقت استضافة متبقٍ
-            </p>
-          </div>
+        {isLowTime && (
+          <motion.div
+            initial={{ opacity: 0, y: -8 }}
+            animate={{ opacity: 1, y: 0 }}
+          >
+            {host.remainingMinutes <= 0 && (
+              <div className="border-2 border-destructive p-3 text-center mb-3">
+                <p className="font-mono text-destructive text-sm">NO HOSTING TIME REMAINING</p>
+                <p className="text-xs text-muted-foreground arabic-text">لا يوجد وقت استضافة متبقٍ</p>
+              </div>
+            )}
+            {host.remainingMinutes > 0 && host.remainingMinutes <= 30 && (
+              <div className="border border-yellow-500/50 bg-yellow-500/5 p-3 text-center mb-3">
+                <p className="font-mono text-yellow-500 text-xs">
+                  ⚠ LOW TIME — {minutesDisplay} remaining
+                </p>
+              </div>
+            )}
+            <BuyTimePanel onSuccess={handleBuyTimeSuccess} />
+          </motion.div>
         )}
 
         {activeRoom ? (
