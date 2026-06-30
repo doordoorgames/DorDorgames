@@ -23,7 +23,7 @@ const SignupRequestOtpSchema = z.object({
 
 const SignupVerifyOtpSchema = z.object({
   phone: z.string().min(1),
-  otp: z.string().regex(/^\d{4}$/, "OTP must be exactly  digits"),
+  otp: z.string().regex(/^\d{4}$/, "OTP must be exactly 4 digits"),
 });
 
 const LoginSchema = z.object({

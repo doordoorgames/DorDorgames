@@ -70,30 +70,40 @@ router.get("/rooms/:code", (req, res) => {
   res.json(roomWithGame(room));
 });
 
-router.delete("/rooms/:code", (req, res) => {
+router.delete("/rooms/:code", requireHost, (req, res) => {
   const { code } = CloseRoomParams.parse(req.params);
-  const closed = store.rooms.close(code);
-  if (!closed) {
+  const room = store.rooms.get(code);
+  if (!room) {
     res.status(404).json({ error: "Room not found" });
     return;
   }
+  if (room.hostPhone !== req.hostAccount!.phone) {
+    res.status(403).json({ error: "You do not own this room" });
+    return;
+  }
+  store.rooms.close(code);
   res.status(204).send();
 });
 
-router.patch("/rooms/:code/game", (req, res) => {
+router.patch("/rooms/:code/game", requireHost, (req, res) => {
   const { code } = SwitchRoomGameParams.parse(req.params);
   const body = SwitchRoomGameBody.parse(req.body);
+  const room = store.rooms.get(code);
+  if (!room) {
+    res.status(404).json({ error: "Room not found" });
+    return;
+  }
+  if (room.hostPhone !== req.hostAccount!.phone) {
+    res.status(403).json({ error: "You do not own this room" });
+    return;
+  }
   const game = store.games.get(body.gameId);
   if (!game) {
     res.status(404).json({ error: "Game not found" });
     return;
   }
-  const room = store.rooms.update(code, { activeGameId: body.gameId });
-  if (!room) {
-    res.status(404).json({ error: "Room not found" });
-    return;
-  }
-  res.json(roomWithGame(room));
+  const updated = store.rooms.update(code, { activeGameId: body.gameId });
+  res.json(roomWithGame(updated));
 });
 
 router.post("/rooms/:code/join", (req, res) => {

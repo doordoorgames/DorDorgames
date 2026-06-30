@@ -10,5 +10,29 @@
     "id": "0xkhvo26zmr0g3vvm",
     "createdAt": "2026-06-30T09:29:48.322Z",
     "updatedAt": "2026-06-30T09:30:00.797Z"
+  },
+  {
+    "fullName": "Alice Host",
+    "email": "alice@test.com",
+    "phone": "96511111111",
+    "passwordHash": "$2b$10$/RhR0pYtQXhgpYAd/Upq9uoq53oU5oQfa4YX8TA3tZOcykKMxC4lq",
+    "phoneVerified": true,
+    "trialUsed": true,
+    "remainingMinutes": 0,
+    "id": "t0x19mgf6mr0ga6cc",
+    "createdAt": "2026-06-30T09:34:41.820Z",
+    "updatedAt": "2026-06-30T09:34:42.036Z"
+  },
+  {
+    "fullName": "Bob",
+    "email": "bob@test.com",
+    "phone": "96522222222",
+    "passwordHash": "$2b$10$UfRPrhIj0SHj2IrZxG8uVOuTNtRqOJcvCsIv6z3a.XAa9wXMr8b1q",
+    "phoneVerified": true,
+    "trialUsed": true,
+    "remainingMinutes": 60,
+    "id": "ss4s34x9lmr0ga6qv",
+    "createdAt": "2026-06-30T09:34:42.343Z",
+    "updatedAt": "2026-06-30T09:34:42.343Z"
   }
 ]

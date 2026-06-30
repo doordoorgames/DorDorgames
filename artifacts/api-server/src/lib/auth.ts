@@ -74,9 +74,12 @@ export async function comparePassword(
 }
 
 // ---- JWT helpers ----
-const JWT_SECRET =
-  process.env.SESSION_SECRET ??
-  "doordoor-dev-secret-change-in-production";
+if (!process.env.SESSION_SECRET) {
+  throw new Error(
+    "SESSION_SECRET environment variable is required but not set. Set it before starting the server.",
+  );
+}
+const JWT_SECRET: string = process.env.SESSION_SECRET;
 const JWT_EXPIRY = "7d";
 
 interface JwtPayload {
