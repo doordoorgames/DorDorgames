@@ -50,7 +50,7 @@ export default function Host() {
         },
         onError: (err: any) => {
           const msg =
-            err?.response?.data?.error ||
+            err?.data?.error ||
             err?.message ||
             "Something went wrong";
           toast({ title: "ERROR", description: msg, variant: "destructive" });
@@ -76,7 +76,7 @@ export default function Host() {
         },
         onError: (err: any) => {
           const msg =
-            err?.response?.data?.error || err?.message || "Invalid OTP";
+            err?.data?.error || err?.message || "Invalid OTP";
           toast({ title: "INVALID OTP", description: msg, variant: "destructive" });
         },
       },
@@ -97,7 +97,7 @@ export default function Host() {
         },
         onError: (err: any) => {
           const msg =
-            err?.response?.data?.error ||
+            err?.data?.error ||
             err?.message ||
             "Invalid credentials";
           toast({ title: "LOGIN FAILED", description: msg, variant: "destructive" });

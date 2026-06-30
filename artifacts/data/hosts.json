@@ -70,5 +70,65 @@
     "id": "oe8oxxw2fmr0hc97c",
     "createdAt": "2026-06-30T10:04:18.456Z",
     "updatedAt": "2026-06-30T10:04:29.104Z"
+  },
+  {
+    "fullName": "Test Host Signup",
+    "email": "testhostsignup_abc123@example.com",
+    "phone": "+96512345670",
+    "passwordHash": "$2b$10$mjC1pv8gKb4LidZGnEoClONgYGM7vmR.BAOxLmJ9XjIdP4npOMx92",
+    "phoneVerified": true,
+    "trialUsed": true,
+    "remainingMinutes": 60,
+    "id": "240mhhw3omr0hp4rg",
+    "createdAt": "2026-06-30T10:14:19.228Z",
+    "updatedAt": "2026-06-30T10:14:19.228Z"
+  },
+  {
+    "fullName": "Login Test Host",
+    "email": "logintesthost_xyz789@example.com",
+    "phone": "+96599887766",
+    "passwordHash": "$2b$10$Vi7mzRdanukrGzEfEzbiiOa8cP0IgAwr65Fk449F0zOHKsDJbDN3m",
+    "phoneVerified": true,
+    "trialUsed": true,
+    "remainingMinutes": 60,
+    "id": "op4rmia13mr0hqk82",
+    "createdAt": "2026-06-30T10:15:25.921Z",
+    "updatedAt": "2026-06-30T10:15:25.921Z"
+  },
+  {
+    "fullName": "Zero Time Host",
+    "email": "zerotime_qrst456@example.com",
+    "phone": "+96511223344",
+    "passwordHash": "$2b$10$wHSU21Gyc.niOb08TXr9juMuFv8u58Wn7zXfEiQNTjNLvIRou2qjC",
+    "phoneVerified": true,
+    "trialUsed": true,
+    "remainingMinutes": 0,
+    "id": "3x16rytzomr0htgw8",
+    "createdAt": "2026-06-30T10:17:41.576Z",
+    "updatedAt": "2026-06-30T10:18:08.938Z"
+  },
+  {
+    "fullName": "Zero Time Host Two",
+    "email": "zerotime_revise88@example.com",
+    "phone": "+96533445566",
+    "passwordHash": "$2b$10$r/fjeeIBMJrEeX5pNYukBu6aSvi7ZJRJwsYoQqhLzgqm3JrAyJx9W",
+    "phoneVerified": true,
+    "trialUsed": true,
+    "remainingMinutes": 0,
+    "id": "45cmjb42kmr0i00ti",
+    "createdAt": "2026-06-30T10:22:47.334Z",
+    "updatedAt": "2026-06-30T10:23:11.129Z"
+  },
+  {
+    "fullName": "No Time Host",
+    "email": "notime_final99@example.com",
+    "phone": "+96555443322",
+    "passwordHash": "$2b$10$k6n3ImIPVGvAdwaLJ6xqa.HzKGxLgE2uIpmMV8ml2nLtVgbmDh/R.",
+    "phoneVerified": true,
+    "trialUsed": true,
+    "remainingMinutes": 0,
+    "id": "lajytiy53mr0i7mj7",
+    "createdAt": "2026-06-30T10:28:42.067Z",
+    "updatedAt": "2026-06-30T10:29:04.181Z"
   }
 ]

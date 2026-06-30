@@ -206,10 +206,8 @@ export default function HostDashboard() {
 
   const isNoTimeError =
     hostError &&
-    (hostError as any)?.response?.status === 403 &&
-    ((hostError as any)?.response?.data?.error as string)?.includes(
-      "No hosting time",
-    );
+    (hostError as any)?.status === 403 &&
+    ((hostError as any)?.data?.error as string)?.includes("No hosting time");
 
   useEffect(() => {
     if (!token) {
