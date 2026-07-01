@@ -23,10 +23,12 @@ function BuyTimePanel({
   onSuccess,
   open,
   onOpenChange,
+  phone,
 }: {
   onSuccess: (remainingMinutes?: number) => void;
   open: boolean;
   onOpenChange: (v: boolean) => void;
+  phone: string;
 }) {
   const { toast } = useToast();
   const [promoInput, setPromoInput] = useState("");
@@ -34,8 +36,6 @@ function BuyTimePanel({
 
   const validatePromo = useValidatePromo();
   const processPayment = useProcessPayment();
-
-  const phone = localStorage.getItem("host_phone") || "";
 
   const handleValidatePromo = () => {
     if (!promoInput.trim()) return;
@@ -305,6 +305,7 @@ export default function HostDashboard() {
             <BuyTimePanel
               open={buyTimeOpen}
               onOpenChange={setBuyTimeOpen}
+              phone={host?.phone ?? ""}
               onSuccess={() => {
                 queryClient.invalidateQueries({ queryKey: getGetAuthMeQueryKey() });
               }}
@@ -461,6 +462,7 @@ export default function HostDashboard() {
         <BuyTimePanel
           open={buyTimeOpen}
           onOpenChange={setBuyTimeOpen}
+          phone={host?.phone ?? ""}
           onSuccess={handleBuyTimeSuccess}
         />
 
