@@ -8,7 +8,7 @@ import {
   hashPassword,
   comparePassword,
   signToken,
-  requireHost,
+  requireHostIdentity,
   safeHost,
 } from "../lib/auth.js";
 import { sendVerification, checkVerification } from "../lib/twilio.js";
@@ -163,7 +163,7 @@ router.post("/auth/login", async (req, res) => {
   res.json({ token, host: safeHost(host) });
 });
 
-router.get("/auth/me", requireHost, (req, res) => {
+router.get("/auth/me", requireHostIdentity, (req, res) => {
   res.json(safeHost(req.hostAccount!));
 });
 

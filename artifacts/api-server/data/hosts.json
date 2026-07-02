@@ -7,8 +7,8 @@
     "passwordHash": "$2b$10$OHKozKc8YBBB0Xr4CszNaO1vMNKmEiog3xxlz2xxUsELZOAbaFhL2",
     "phoneVerified": true,
     "trialUsed": true,
-    "remainingMinutes": 180,
+    "remainingMinutes": 0,
     "createdAt": "2026-06-30T11:17:06.687Z",
-    "updatedAt": "2026-06-30T11:17:06.687Z"
+    "updatedAt": "2026-07-02T22:30:08.630Z"
   }
 ]

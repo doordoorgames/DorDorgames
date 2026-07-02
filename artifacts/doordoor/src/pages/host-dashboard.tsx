@@ -214,65 +214,51 @@ export default function HostDashboard() {
 
   const [selectedGameId, setSelectedGameId] = useState("");
   const [buyTimeOpen, setBuyTimeOpen] = useState(false);
-
-  const [countdown, setCountdown] = useState<number | null>(null);
-  const countdownRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const [now, setNow] = useState(() => Date.now());
   const autoOpenedRef = useRef(false);
 
   useEffect(() => {
-    if (host?.remainingMinutes !== undefined) {
-      setCountdown(host.remainingMinutes);
-      autoOpenedRef.current = false;
-    }
-  }, [host?.remainingMinutes]);
+    const id = setInterval(() => setNow(Date.now()), 30_000);
+    return () => clearInterval(id);
+  }, []);
+
+  // While a room is active, remaining time is the room's real expiry (wall-clock
+  // truth). A host's credit balance is fully spent the moment a room is created
+  // (see POST /rooms), so it must never be used to gate access to an active room.
+  const roomMinutesLeft = activeRoom
+    ? Math.max(0, Math.ceil((new Date(activeRoom.expiresAt).getTime() - now) / 60000))
+    : null;
+  const displayMinutes = activeRoom ? (roomMinutesLeft ?? 0) : (host?.remainingMinutes ?? 0);
 
   useEffect(() => {
-    if (countdown === null) return;
-
-    if (countdownRef.current) clearInterval(countdownRef.current);
-
-    countdownRef.current = setInterval(() => {
-      setCountdown((prev) => {
-        if (prev === null) return prev;
-        const next = Math.max(0, prev - 1);
-        if (next === 0 && !autoOpenedRef.current) {
-          autoOpenedRef.current = true;
-          setBuyTimeOpen(true);
-        }
-        return next;
-      });
-    }, 60_000);
-
-    return () => {
-      if (countdownRef.current) clearInterval(countdownRef.current);
-    };
-  }, [countdown === null ? null : Math.sign(countdown)]);
+    if (activeRoom && displayMinutes <= 0 && !autoOpenedRef.current) {
+      autoOpenedRef.current = true;
+      setBuyTimeOpen(true);
+    }
+    if (displayMinutes > 0) {
+      autoOpenedRef.current = false;
+    }
+  }, [activeRoom, displayMinutes]);
 
   const handleLogout = () => {
     localStorage.removeItem("host_token");
     setLocation("/");
   };
 
-  const isNoTimeError =
-    hostError &&
-    (hostError as any)?.status === 403 &&
-    ((hostError as any)?.data?.error as string)?.includes("No hosting time");
-
   useEffect(() => {
     if (!token) {
       setLocation("/host");
       return;
     }
-    if (hostError && !isNoTimeError) {
+    if (hostError) {
       localStorage.removeItem("host_token");
       setLocation("/host");
     }
-  }, [token, hostError, isNoTimeError, setLocation]);
+  }, [token, hostError, setLocation]);
 
   const handleBuyTimeSuccess = (remainingMinutes?: number) => {
     queryClient.invalidateQueries({ queryKey: getGetAuthMeQueryKey() });
     if (remainingMinutes !== undefined) {
-      setCountdown(remainingMinutes);
       autoOpenedRef.current = false;
       queryClient.setQueryData(getGetAuthMeQueryKey(), (old: any) =>
         old ? { ...old, remainingMinutes } : old,
@@ -280,7 +266,7 @@ export default function HostDashboard() {
     }
   };
 
-  if (!token || (hostLoading && !isNoTimeError)) {
+  if (!token || hostLoading) {
     return (
       <Layout>
         <div className="flex items-center justify-center min-h-[60vh]">
@@ -290,7 +276,14 @@ export default function HostDashboard() {
     );
   }
 
-  if (isNoTimeError) {
+  if (!host) return null;
+
+  const isLowTime = displayMinutes <= 30;
+  const isCriticalTime = displayMinutes <= 10 && displayMinutes > 0;
+  const isNoTime = displayMinutes <= 0;
+  const minutesDisplay = formatCountdown(displayMinutes);
+
+  if (!activeRoom && isNoTime) {
     return (
       <Layout>
         <div className="flex flex-col items-center justify-center min-h-[60vh] space-y-6">
@@ -306,9 +299,7 @@ export default function HostDashboard() {
               open={buyTimeOpen}
               onOpenChange={setBuyTimeOpen}
               phone={host?.phone ?? ""}
-              onSuccess={() => {
-                queryClient.invalidateQueries({ queryKey: getGetAuthMeQueryKey() });
-              }}
+              onSuccess={handleBuyTimeSuccess}
             />
           </div>
           <button
@@ -321,14 +312,6 @@ export default function HostDashboard() {
       </Layout>
     );
   }
-
-  if (!host) return null;
-
-  const displayMinutes = countdown ?? host.remainingMinutes;
-  const isLowTime = displayMinutes <= 30;
-  const isCriticalTime = displayMinutes <= 10 && displayMinutes > 0;
-  const isNoTime = displayMinutes <= 0;
-  const minutesDisplay = formatCountdown(displayMinutes);
 
   const handleStartRoom = () => {
     if (!selectedGameId) {

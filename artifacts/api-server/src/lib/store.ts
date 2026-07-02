@@ -1,9 +1,13 @@
 import fs from "fs";
 import path from "path";
-import { fileURLToPath } from "url";
 
-const __dirname = path.dirname(fileURLToPath(import.meta.url));
-const DATA_DIR = path.join(__dirname, "../../data");
+// NOTE: do not derive this from import.meta.url / __dirname. The production
+// build bundles the whole server into a single flat dist/index.mjs, which
+// collapses the src/lib nesting and makes any "../../data" relative path
+// resolve one directory too high (artifacts/data instead of
+// artifacts/api-server/data). process.cwd() is stable across dev (tsx) and
+// the built bundle, since both are always launched from the package root.
+const DATA_DIR = path.join(process.cwd(), "data");
 
 function ensureDataDir() {
   if (!fs.existsSync(DATA_DIR)) {

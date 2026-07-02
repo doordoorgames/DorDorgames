@@ -1,4 +1,5 @@
-import { Switch, Route, Router as WouterRouter } from "wouter";
+import { useEffect } from "react";
+import { Switch, Route, Router as WouterRouter, useLocation } from "wouter";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -19,9 +20,28 @@ setAuthTokenGetter(() => localStorage.getItem("host_token"));
 
 const queryClient = new QueryClient();
 
+const HOST_ALLOWED_PATHS = ["/host", "/host/dashboard"];
+
+// A logged-in host is locked to their own pages — they cannot browse to
+// the homepage, join screen, or admin panel while a host session is active.
+function HostRouteGuard() {
+  const [location, setLocation] = useLocation();
+
+  useEffect(() => {
+    const token = localStorage.getItem("host_token");
+    if (!token) return;
+    if (!HOST_ALLOWED_PATHS.includes(location)) {
+      setLocation("/host/dashboard");
+    }
+  }, [location, setLocation]);
+
+  return null;
+}
+
 function Router() {
   return (
     <AnimatePresence mode="wait">
+      <HostRouteGuard />
       <Switch>
         {/* Platform routes */}
         <Route path="/" component={Home} />

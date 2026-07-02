@@ -1,0 +1,2 @@
+- [Bundled server DATA_DIR resolution](bundled-server-data-dir.md) — never derive data/config paths from import.meta.url/__dirname in an esbuild-bundled Node server; use process.cwd().
+- [Trial-credit vs active-session time](trial-credit-vs-session-time.md) — don't gate dashboard/session access on a spendable credit balance that gets fully drained at session start.
