@@ -19,7 +19,7 @@ test.describe("Admin panel — game management", () => {
     await page.waitForURL("**/admin/dashboard", { timeout: 10_000 });
 
     await expect(page.getByText("ADMIN_OS")).toBeVisible();
-    await expect(page.getByText("GAMES")).toBeVisible();
+    await expect(page.getByRole("button", { name: "GAMES" })).toBeVisible();
   });
 
   test("admin can create a new game and see it appear in the games list", async ({ page }) => {
@@ -39,9 +39,9 @@ test.describe("Admin panel — game management", () => {
     await page.fill('[data-testid="game-slug-input"]', slug);
     await page.click('[data-testid="create-game-button"]');
 
-    await expect(page.getByText("GAME CREATED")).toBeVisible({ timeout: 8_000 });
+    await expect(page.getByText("GAME CREATED", { exact: true })).toBeVisible({ timeout: 8_000 });
 
-    await expect(page.getByText(title)).toBeVisible({ timeout: 8_000 });
+    await expect(page.getByRole("heading", { name: title })).toBeVisible({ timeout: 8_000 });
   });
 
   test("admin can toggle a game's status between active and coming_soon", async ({ page }) => {
@@ -63,7 +63,7 @@ test.describe("Admin panel — game management", () => {
     const gamesTab = page.getByRole("button", { name: "GAMES" });
     await gamesTab.click();
 
-    await expect(page.getByText(title)).toBeVisible({ timeout: 8_000 });
+    await expect(page.getByRole("heading", { name: title })).toBeVisible({ timeout: 8_000 });
 
     const statusBadge = page.locator(`[data-testid="game-status-${slug}"]`);
     await expect(statusBadge).toHaveText("active");
