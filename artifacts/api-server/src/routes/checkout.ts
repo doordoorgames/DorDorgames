@@ -8,13 +8,13 @@ import { verifyToken } from "../lib/auth.js";
 
 const router: IRouter = Router();
 
-function resolveHostFromRequest(req: Parameters<typeof router.post>[1] extends (req: infer R, ...args: never[]) => unknown ? R : never): string | null {
+async function resolveHostFromRequest(req: Parameters<typeof router.post>[1] extends (req: infer R, ...args: never[]) => unknown ? R : never): Promise<string | null> {
   const authHeader = req.headers.authorization;
   if (!authHeader?.startsWith("Bearer ")) return null;
   const token = authHeader.slice(7);
   const payload = verifyToken(token);
   if (!payload?.sub) return null;
-  const host = store.hosts.get(payload.sub);
+  const host = await store.hosts.get(payload.sub);
   if (!host?.phoneVerified) return null;
   return host.id;
 }
@@ -39,15 +39,15 @@ router.post("/checkout/validate-promo", (req, res) => {
   });
 });
 
-router.post("/checkout/pay", (req, res) => {
+router.post("/checkout/pay", async (req, res) => {
   const body = ProcessPaymentBody.parse(req.body);
   const expiresAt = new Date(Date.now() + 3 * 60 * 60 * 1000).toISOString();
   const MINUTES_PER_PASS = 180;
 
-  const hostId = resolveHostFromRequest(req as any);
+  const hostId = await resolveHostFromRequest(req as any);
 
-  const creditHost = (id: string) => {
-    const updated = store.hosts.addTime(id, MINUTES_PER_PASS);
+  const creditHost = async (id: string) => {
+    const updated = await store.hosts.addTime(id, MINUTES_PER_PASS);
     return updated?.remainingMinutes;
   };
 
@@ -61,7 +61,7 @@ router.post("/checkout/pay", (req, res) => {
       if (!isBuiltIn && stored) {
         store.promoCodes.incrementUsage(code);
       }
-      const remainingMinutes = hostId ? creditHost(hostId) : undefined;
+      const remainingMinutes = hostId ? await creditHost(hostId) : undefined;
       req.log.info({ hostId, promo: code }, "Promo checkout — time credited");
       res.json({
         success: true,
@@ -74,7 +74,7 @@ router.post("/checkout/pay", (req, res) => {
     }
   }
 
-  const remainingMinutes = hostId ? creditHost(hostId) : undefined;
+  const remainingMinutes = hostId ? await creditHost(hostId) : undefined;
   req.log.info({ phone: body.phone, hostId }, "Simulated payment processed");
   res.json({
     success: true,

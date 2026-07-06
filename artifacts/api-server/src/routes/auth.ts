@@ -43,13 +43,13 @@ router.post("/auth/signup/request-otp", async (req, res) => {
   }
   const { fullName, email, phone, password } = result.data;
 
-  const byPhone = store.hosts.getByPhone(phone);
+  const byPhone = await store.hosts.getByPhone(phone);
   if (byPhone?.phoneVerified) {
     res.status(409).json({ error: "Phone number is already registered" });
     return;
   }
 
-  const byEmail = store.hosts.getByEmail(email);
+  const byEmail = await store.hosts.getByEmail(email);
   if (byEmail?.phoneVerified) {
     res.status(409).json({ error: "Email address is already registered" });
     return;
@@ -107,14 +107,14 @@ router.post("/auth/signup/verify-otp", async (req, res) => {
     return;
   }
 
-  const existingVerified = store.hosts.getByPhone(phone);
+  const existingVerified = await store.hosts.getByPhone(phone);
   if (existingVerified?.phoneVerified) {
     deletePendingRegistration(phone);
     res.status(409).json({ error: "Phone number is already registered" });
     return;
   }
 
-  const host = store.hosts.create({
+  const host = await store.hosts.create({
     fullName: pending.fullName,
     email: pending.email,
     phone: pending.phone,
@@ -139,7 +139,7 @@ router.post("/auth/login", async (req, res) => {
   }
   const { identifier, password } = result.data;
 
-  const host = store.hosts.getByIdentifier(identifier);
+  const host = await store.hosts.getByIdentifier(identifier);
   if (!host) {
     res.status(401).json({ error: "Invalid credentials" });
     return;

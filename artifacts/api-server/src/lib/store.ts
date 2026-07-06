@@ -1,5 +1,6 @@
 import fs from "fs";
 import path from "path";
+import { getSupabase } from "./supabase.js";
 
 // NOTE: do not derive this from import.meta.url / __dirname. The production
 // build bundles the whole server into a single flat dist/index.mjs, which
@@ -98,6 +99,143 @@ export interface PromoCode {
 }
 
 const BUILT_IN_PROMO_CODES = ["DOORDOOR"];
+
+// ---- Hosts (Supabase-backed) ----
+// Host accounts live in Supabase (table: public.hosts), not in the local
+// JSON files, so account data survives redeploys/restarts and is not tied
+// to this container's filesystem. See
+// artifacts/api-server/supabase/migrations/0001_create_hosts_table.sql.
+interface HostRow {
+  id: string;
+  full_name: string;
+  email: string;
+  phone: string;
+  password_hash: string;
+  phone_verified: boolean;
+  trial_used: boolean;
+  remaining_minutes: number;
+  created_at: string;
+  updated_at: string;
+}
+
+function rowToHost(row: HostRow): Host {
+  return {
+    id: row.id,
+    fullName: row.full_name,
+    email: row.email,
+    phone: row.phone,
+    passwordHash: row.password_hash,
+    phoneVerified: row.phone_verified,
+    trialUsed: row.trial_used,
+    remainingMinutes: row.remaining_minutes,
+    createdAt: row.created_at,
+    updatedAt: row.updated_at,
+  };
+}
+
+function assertNoError<T>(
+  result: { data: T | null; error: { message: string } | null },
+  context: string,
+): T {
+  if (result.error) {
+    throw new Error(`Supabase hosts.${context} failed: ${result.error.message}`);
+  }
+  if (result.data === null) {
+    throw new Error(`Supabase hosts.${context} returned no data`);
+  }
+  return result.data;
+}
+
+const hostsStore = {
+  async list(): Promise<Host[]> {
+    const result = await getSupabase().from("hosts").select("*");
+    return assertNoError(result, "list").map((row) => rowToHost(row as HostRow));
+  },
+  async get(id: string): Promise<Host | undefined> {
+    const result = await getSupabase()
+      .from("hosts")
+      .select("*")
+      .eq("id", id)
+      .maybeSingle();
+    const row = assertNoError(result, "get");
+    return row ? rowToHost(row) : undefined;
+  },
+  async getByPhone(phone: string): Promise<Host | undefined> {
+    const result = await getSupabase()
+      .from("hosts")
+      .select("*")
+      .eq("phone", phone)
+      .maybeSingle();
+    const row = assertNoError(result, "getByPhone");
+    return row ? rowToHost(row) : undefined;
+  },
+  async getByEmail(email: string): Promise<Host | undefined> {
+    const result = await getSupabase()
+      .from("hosts")
+      .select("*")
+      .ilike("email", email)
+      .maybeSingle();
+    const row = assertNoError(result, "getByEmail");
+    return row ? rowToHost(row) : undefined;
+  },
+  async getByIdentifier(identifier: string): Promise<Host | undefined> {
+    const byEmail = await this.getByEmail(identifier);
+    if (byEmail) return byEmail;
+    return this.getByPhone(identifier);
+  },
+  async create(input: Omit<Host, "id" | "createdAt" | "updatedAt">): Promise<Host> {
+    const result = await getSupabase()
+      .from("hosts")
+      .insert({
+        full_name: input.fullName,
+        email: input.email,
+        phone: input.phone,
+        password_hash: input.passwordHash,
+        phone_verified: input.phoneVerified,
+        trial_used: input.trialUsed,
+        remaining_minutes: input.remainingMinutes,
+      })
+      .select("*")
+      .single();
+    return rowToHost(assertNoError(result, "create"));
+  },
+  async update(
+    id: string,
+    updates: Partial<Omit<Host, "id" | "createdAt">>,
+  ): Promise<Host | undefined> {
+    const patch: Record<string, unknown> = { updated_at: new Date().toISOString() };
+    if (updates.fullName !== undefined) patch.full_name = updates.fullName;
+    if (updates.email !== undefined) patch.email = updates.email;
+    if (updates.phone !== undefined) patch.phone = updates.phone;
+    if (updates.passwordHash !== undefined) patch.password_hash = updates.passwordHash;
+    if (updates.phoneVerified !== undefined) patch.phone_verified = updates.phoneVerified;
+    if (updates.trialUsed !== undefined) patch.trial_used = updates.trialUsed;
+    if (updates.remainingMinutes !== undefined) patch.remaining_minutes = updates.remainingMinutes;
+
+    const result = await getSupabase()
+      .from("hosts")
+      .update(patch)
+      .eq("id", id)
+      .select("*")
+      .maybeSingle();
+    const row = assertNoError(result, "update");
+    return row ? rowToHost(row) : undefined;
+  },
+  async deductTime(id: string, minutes: number): Promise<Host | undefined> {
+    const current = await this.get(id);
+    if (!current) return undefined;
+    return this.update(id, {
+      remainingMinutes: Math.max(0, current.remainingMinutes - minutes),
+    });
+  },
+  async addTime(id: string, minutes: number): Promise<Host | undefined> {
+    const current = await this.get(id);
+    if (!current) return undefined;
+    return this.update(id, {
+      remainingMinutes: current.remainingMinutes + minutes,
+    });
+  },
+};
 
 export const store = {
   games: {
@@ -218,77 +356,7 @@ export const store = {
     },
   },
 
-  hosts: {
-    list(): Host[] {
-      return readJson<Host[]>("hosts.json", []);
-    },
-    get(id: string): Host | undefined {
-      return this.list().find((h) => h.id === id);
-    },
-    getByPhone(phone: string): Host | undefined {
-      return this.list().find((h) => h.phone === phone);
-    },
-    getByEmail(email: string): Host | undefined {
-      return this.list().find(
-        (h) => h.email.toLowerCase() === email.toLowerCase(),
-      );
-    },
-    getByIdentifier(identifier: string): Host | undefined {
-      const lower = identifier.toLowerCase();
-      return this.list().find(
-        (h) => h.email.toLowerCase() === lower || h.phone === identifier,
-      );
-    },
-    create(input: Omit<Host, "id" | "createdAt" | "updatedAt">): Host {
-      const hosts = this.list();
-      const now = new Date().toISOString();
-      const host: Host = {
-        ...input,
-        id: generateId(),
-        createdAt: now,
-        updatedAt: now,
-      };
-      hosts.push(host);
-      writeJson("hosts.json", hosts);
-      return host;
-    },
-    update(
-      id: string,
-      updates: Partial<Omit<Host, "id" | "createdAt">>,
-    ): Host | undefined {
-      const hosts = readJson<Host[]>("hosts.json", []);
-      const idx = hosts.findIndex((h) => h.id === id);
-      if (idx === -1) return undefined;
-      hosts[idx] = {
-        ...hosts[idx],
-        ...updates,
-        updatedAt: new Date().toISOString(),
-      };
-      writeJson("hosts.json", hosts);
-      return hosts[idx];
-    },
-    deductTime(id: string, minutes: number): Host | undefined {
-      const hosts = readJson<Host[]>("hosts.json", []);
-      const idx = hosts.findIndex((h) => h.id === id);
-      if (idx === -1) return undefined;
-      hosts[idx].remainingMinutes = Math.max(
-        0,
-        hosts[idx].remainingMinutes - minutes,
-      );
-      hosts[idx].updatedAt = new Date().toISOString();
-      writeJson("hosts.json", hosts);
-      return hosts[idx];
-    },
-    addTime(id: string, minutes: number): Host | undefined {
-      const hosts = readJson<Host[]>("hosts.json", []);
-      const idx = hosts.findIndex((h) => h.id === id);
-      if (idx === -1) return undefined;
-      hosts[idx].remainingMinutes += minutes;
-      hosts[idx].updatedAt = new Date().toISOString();
-      writeJson("hosts.json", hosts);
-      return hosts[idx];
-    },
-  },
+  hosts: hostsStore,
 
   promoCodes: {
     list(): PromoCode[] {

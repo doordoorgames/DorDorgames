@@ -98,7 +98,7 @@ export function verifyToken(token: string): JwtPayload | null {
 }
 
 // ---- Auth middleware helpers ----
-function resolveHost(req: Parameters<RequestHandler>[0], res: Parameters<RequestHandler>[1]): Host | null {
+async function resolveHost(req: Parameters<RequestHandler>[0], res: Parameters<RequestHandler>[1]): Promise<Host | null> {
   const authHeader = req.headers.authorization;
   if (!authHeader?.startsWith("Bearer ")) {
     res.status(401).json({ error: "Authentication required" });
@@ -110,7 +110,7 @@ function resolveHost(req: Parameters<RequestHandler>[0], res: Parameters<Request
     res.status(401).json({ error: "Invalid or expired token" });
     return null;
   }
-  const host = store.hosts.get(payload.sub);
+  const host = await store.hosts.get(payload.sub);
   if (!host) {
     res.status(401).json({ error: "Host account not found" });
     return null;
@@ -123,16 +123,16 @@ function resolveHost(req: Parameters<RequestHandler>[0], res: Parameters<Request
 }
 
 /** JWT + phoneVerified — identity check only. Use for /auth/me. */
-export const requireHostIdentity: RequestHandler = (req, res, next) => {
-  const host = resolveHost(req, res);
+export const requireHostIdentity: RequestHandler = async (req, res, next) => {
+  const host = await resolveHost(req, res);
   if (!host) return;
   req.hostAccount = host;
   next();
 };
 
 /** JWT + phoneVerified + remainingMinutes > 0 — use for room mutations. */
-export const requireHost: RequestHandler = (req, res, next) => {
-  const host = resolveHost(req, res);
+export const requireHost: RequestHandler = async (req, res, next) => {
+  const host = await resolveHost(req, res);
   if (!host) return;
   if (host.remainingMinutes <= 0) {
     res.status(403).json({ error: "No hosting time remaining. Please purchase more time." });

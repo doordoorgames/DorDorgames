@@ -31,7 +31,7 @@ router.get("/rooms", (_req, res) => {
   res.json(rooms);
 });
 
-router.post("/rooms", requireHost, (req, res) => {
+router.post("/rooms", requireHost, async (req, res) => {
   const bodyResult = CreateRoomBody.safeParse(req.body);
   if (!bodyResult.success) {
     res.status(400).json({ error: "gameId is required" });
@@ -54,7 +54,7 @@ router.post("/rooms", requireHost, (req, res) => {
   }
 
   const roomMinutes = Math.min(host.remainingMinutes, 180);
-  store.hosts.deductTime(host.id, roomMinutes);
+  await store.hosts.deductTime(host.id, roomMinutes);
 
   const room = store.rooms.create(host.phone, gameId, roomMinutes);
   res.status(201).json(roomWithGame(room));
