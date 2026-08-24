@@ -16,6 +16,7 @@ if (Number.isNaN(port) || port <= 0) {
   throw new Error(`Invalid PORT value: "${rawPort}"`);
 }
 
+const host = "0.0.0.0";
 const SWEEP_INTERVAL_MS = 60_000;
 
 function sweepExpiredRooms() {
@@ -28,13 +29,13 @@ function sweepExpiredRooms() {
 sweepExpiredRooms();
 const sweepTimer = setInterval(sweepExpiredRooms, SWEEP_INTERVAL_MS);
 
-const server = app.listen(port, (err) => {
+const server = app.listen(port, host, (err) => {
   if (err) {
     logger.error({ err }, "Error listening on port");
     process.exit(1);
   }
 
-  logger.info({ port }, "Server listening");
+  logger.info({ host, port }, "Server listening");
 });
 
 function shutdown(signal: NodeJS.Signals) {
