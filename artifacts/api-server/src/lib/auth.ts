@@ -71,13 +71,17 @@ export async function comparePassword(
 }
 
 // ---- JWT helpers ----
-if (!process.env.SESSION_SECRET) {
-  throw new Error(
-    "SESSION_SECRET environment variable is required but not set. Set it before starting the server.",
-  );
-}
-const JWT_SECRET: string = process.env.SESSION_SECRET;
 const JWT_EXPIRY = "7d";
+
+function getJwtSecret(): string {
+  const secret = process.env.SESSION_SECRET;
+  if (!secret) {
+    throw new Error(
+      "SESSION_SECRET environment variable is required for auth routes but is not set.",
+    );
+  }
+  return secret;
+}
 
 interface JwtPayload {
   sub: string;
@@ -86,12 +90,12 @@ interface JwtPayload {
 }
 
 export function signToken(hostId: string): string {
-  return jwt.sign({ sub: hostId }, JWT_SECRET, { expiresIn: JWT_EXPIRY });
+  return jwt.sign({ sub: hostId }, getJwtSecret(), { expiresIn: JWT_EXPIRY });
 }
 
 export function verifyToken(token: string): JwtPayload | null {
   try {
-    return jwt.verify(token, JWT_SECRET) as JwtPayload;
+    return jwt.verify(token, getJwtSecret()) as JwtPayload;
   } catch {
     return null;
   }
