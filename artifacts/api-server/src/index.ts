@@ -26,9 +26,9 @@ function sweepExpiredRooms() {
 }
 
 sweepExpiredRooms();
-setInterval(sweepExpiredRooms, SWEEP_INTERVAL_MS);
+const sweepTimer = setInterval(sweepExpiredRooms, SWEEP_INTERVAL_MS);
 
-app.listen(port, (err) => {
+const server = app.listen(port, (err) => {
   if (err) {
     logger.error({ err }, "Error listening on port");
     process.exit(1);
@@ -36,3 +36,19 @@ app.listen(port, (err) => {
 
   logger.info({ port }, "Server listening");
 });
+
+function shutdown(signal: NodeJS.Signals) {
+  logger.info({ signal }, "Shutting down server");
+  clearInterval(sweepTimer);
+  server.close((err) => {
+    if (err) {
+      logger.error({ err }, "Error closing server");
+      process.exit(1);
+    }
+
+    process.exit(0);
+  });
+}
+
+process.on("SIGTERM", shutdown);
+process.on("SIGINT", shutdown);
