@@ -13,8 +13,8 @@
     ]
   },
   "deploy": {
-    "startCommand": "pnpm start",
-    "healthcheckPath": "/api/healthz",
+    "startCommand": "cd artifacts/api-server && node --enable-source-maps ./dist/index.mjs",
+    "healthcheckPath": "/",
     "healthcheckTimeout": 100
   }
 }
