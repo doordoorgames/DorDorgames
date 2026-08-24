@@ -1,0 +1,20 @@
+{
+  "$schema": "https://railway.com/railway.schema.json",
+  "build": {
+    "builder": "RAILPACK",
+    "buildCommand": "pnpm --filter @workspace/api-server build",
+    "watchPatterns": [
+      "artifacts/api-server/**",
+      "lib/**",
+      "package.json",
+      "pnpm-lock.yaml",
+      "pnpm-workspace.yaml",
+      "tsconfig*.json"
+    ]
+  },
+  "deploy": {
+    "startCommand": "pnpm --filter @workspace/api-server start",
+    "healthcheckPath": "/api/healthz",
+    "healthcheckTimeout": 100
+  }
+}
