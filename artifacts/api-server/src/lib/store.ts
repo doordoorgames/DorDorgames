@@ -541,7 +541,7 @@ function getDefaultGames(): Game[] {
       visible: true,
       pricingText: "2 KD / 3 hours",
       route: "/charades",
-      externalUrl: "https://forehead-game.replit.app/charades",
+      externalUrl: "https://charades.dordor.games",
       createdAt: now,
     },
   ];
