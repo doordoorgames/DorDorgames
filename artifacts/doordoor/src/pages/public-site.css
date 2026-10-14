@@ -1,0 +1,1145 @@
+@import url("https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800&family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap");
+
+.dd-public {
+  background: #080812;
+  color: #fff;
+  min-height: 100vh;
+  font:
+    16px/1.65 Inter,
+    sans-serif;
+  letter-spacing: 0;
+  overflow-wrap: anywhere;
+}
+.dd-public[lang="ar"] {
+  font-family: Cairo, sans-serif;
+}
+.dd-public * {
+  box-sizing: border-box;
+  letter-spacing: 0;
+}
+.dd-container {
+  width: min(1320px, calc(100% - 64px));
+  margin-inline: auto;
+}
+.dd-public h1,
+.dd-public h2,
+.dd-public h3 {
+  font-family: "Space Grotesk", Cairo, sans-serif;
+  line-height: 1.12;
+  font-weight: 700;
+  margin: 0 0 20px;
+}
+.dd-public[lang="ar"] h1,
+.dd-public[lang="ar"] h2,
+.dd-public[lang="ar"] h3 {
+  font-family: Cairo, sans-serif;
+  line-height: 1.5;
+}
+.dd-public h2 {
+  font-size: 36px;
+}
+.dd-public h3 {
+  font-size: 20px;
+}
+.dd-public p {
+  color: #b8b4cc;
+  margin: 0 0 24px;
+}
+.dd-public a {
+  text-decoration: none;
+  color: inherit;
+}
+.dd-public button {
+  font: inherit;
+  cursor: pointer;
+}
+.dd-public a:focus-visible,
+.dd-public button:focus-visible,
+.dd-public summary:focus-visible {
+  outline: 2px solid #ffca36;
+  outline-offset: 5px;
+}
+.dd-header {
+  min-height: 96px;
+  display: flex;
+  align-items: center;
+  gap: 24px;
+  position: relative;
+  z-index: 20;
+}
+.dd-brand {
+  display: inline-flex;
+  flex-shrink: 0;
+}
+.dd-brand img {
+  width: 104px;
+  height: 72px;
+  object-fit: contain;
+}
+.dd-nav {
+  display: flex;
+  align-items: center;
+  gap: 26px;
+  margin-inline-start: auto;
+  font-size: 14px;
+}
+.dd-nav > a:hover,
+.dd-text-link:hover {
+  color: #ffca36;
+}
+.dd-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  min-height: 50px;
+  padding: 14px 22px;
+  border: 1px solid #f30ccb;
+  border-radius: 6px;
+  background: linear-gradient(110deg, #ba27eb, #f30ccb 70%, #ff4e9d);
+  color: #fff !important;
+  font-weight: 700;
+  font-size: 14px;
+  text-align: center;
+  transition:
+    background 0.18s,
+    transform 0.18s;
+}
+.dd-button:hover {
+  background: #cf0aae;
+  transform: translateY(-2px);
+}
+.dd-secondary {
+  background: #121124;
+  border-color: #77728d;
+}
+.dd-secondary:hover {
+  background: #242039;
+}
+.dd-language,
+.dd-menu {
+  background: none;
+  color: #fff;
+  border: 1px solid #474257;
+  border-radius: 6px;
+  min-height: 40px;
+  padding: 6px 10px;
+}
+.dd-menu {
+  display: none;
+}
+.dd-hero {
+  background:
+    linear-gradient(90deg, rgba(8, 8, 18, 0.96), rgba(8, 8, 18, 0.8)),
+    url("/images/hero-city.jpg") center/cover;
+  position: relative;
+  border-bottom: 1px solid #332643;
+}
+.dd-hero-inner {
+  min-height: 520px;
+  display: grid;
+  grid-template-columns: 1.2fr 1fr;
+  align-items: center;
+  gap: 56px;
+  padding-block: 48px;
+}
+.dd-hero-copy {
+  max-width: 660px;
+}
+.dd-hero h1 {
+  font-size: 64px;
+  max-width: 650px;
+}
+.dd-hero p:not(.dd-eyebrow) {
+  font-size: 20px;
+  color: #e0dcec;
+}
+.dd-hero-logo {
+  width: 100%;
+  max-width: 390px;
+  max-height: 340px;
+  object-fit: contain;
+  justify-self: center;
+}
+.dd-public .dd-eyebrow {
+  font-size: 12px;
+  font-weight: 700;
+  color: #ffca36;
+  margin-bottom: 18px;
+}
+.dd-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 14px;
+  margin: 30px 0 18px;
+}
+.dd-hero small {
+  color: #dad5e5;
+  font-size: 14px;
+}
+.dd-benefits {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 24px;
+  padding-block: 30px;
+  border-bottom: 1px solid #302b40;
+}
+.dd-benefits > div {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 14px;
+}
+.dd-benefits svg {
+  color: #ffca36;
+  flex-shrink: 0;
+}
+.dd-section {
+  padding-block: 80px;
+  scroll-margin-top: 24px;
+}
+.dd-games {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 20px;
+  margin-top: 34px;
+}
+.dd-game {
+  min-width: 0;
+}
+.dd-game img {
+  width: 100%;
+  aspect-ratio: 3/4;
+  object-fit: cover;
+  border-radius: 8px;
+  border: 1px solid #40304e;
+  transition: transform 0.2s;
+}
+.dd-game > a {
+  display: block;
+  overflow: hidden;
+  border-radius: 8px;
+}
+.dd-game > a:hover img {
+  transform: scale(1.035);
+}
+.dd-game h3 {
+  font-size: 18px;
+  margin: 16px 0 12px;
+  min-height: 42px;
+}
+.dd-game > div {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  font-size: 14px;
+  color: #c8c2d9;
+}
+.dd-game > div a {
+  display: inline-flex;
+  gap: 5px;
+  align-items: center;
+}
+.dd-game > div a:last-child {
+  color: #ffca36;
+}
+.dd-how {
+  background: linear-gradient(120deg, #161020, #11101d 65%, #1d1620);
+  border-block: 1px solid #302b40;
+}
+.dd-how-heading {
+  display: flex;
+  align-items: end;
+  justify-content: space-between;
+  gap: 28px;
+}
+.dd-how-heading h2 {
+  margin-bottom: 0;
+  max-width: 680px;
+}
+.dd-how-kicker {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: #b8b4cc;
+  font-size: 11px;
+  flex-shrink: 0;
+  padding-bottom: 6px;
+}
+.dd-how-kicker svg {
+  color: #ffca36;
+}
+.dd-how ol {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  padding: 0;
+  margin: 48px 0 32px;
+  list-style: none;
+  gap: 28px;
+}
+.dd-how li {
+  position: relative;
+  min-width: 0;
+}
+.dd-how li:not(:last-child)::after {
+  content: "";
+  position: absolute;
+  inset-block-start: 28px;
+  inset-inline-start: 68px;
+  inset-inline-end: 0;
+  height: 1px;
+  background: linear-gradient(90deg, #a44cc477, #f30ccb22);
+  pointer-events: none;
+}
+.dd-step-node {
+  width: 56px;
+  height: 56px;
+  display: grid;
+  place-items: center;
+  border: 1px solid #8750a3;
+  border-radius: 8px;
+  background: linear-gradient(135deg, #6b308b66, #e346ae12);
+  color: #efb4ff;
+  box-shadow: inset 0 1px 0 #ffffff12;
+  transition:
+    transform 0.25s,
+    border-color 0.25s;
+}
+.dd-how li:hover .dd-step-node {
+  transform: translateY(-4px);
+  border-color: #f30ccb;
+}
+.dd-how li:last-child .dd-step-node {
+  color: #ffdb70;
+  border-color: #927438;
+  background: linear-gradient(135deg, #7b5c2b66, #e39c4612);
+}
+.dd-how .dd-step-number {
+  color: #bd96cc;
+  font-family: "Space Grotesk", sans-serif;
+  font-size: 11px;
+  display: block;
+  margin-top: 20px;
+}
+.dd-how h3 {
+  margin: 8px 0 10px;
+  font-size: 18px;
+}
+.dd-how .dd-step-copy p {
+  font-size: 13px;
+  line-height: 1.7;
+  max-width: 220px;
+  margin: 0;
+  color: #a9a2bc;
+}
+.dd-how-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 24px;
+  padding-top: 24px;
+  border-top: 1px solid #ffffff12;
+}
+.dd-how-footer p {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 0;
+  font-size: 14px;
+}
+.dd-how-footer p svg {
+  flex-shrink: 0;
+  color: #ffca36;
+}
+.dd-how-footer .dd-text-link {
+  color: #eebcf3;
+  font-size: 13px;
+}
+.dd-packages {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 24px;
+  margin: 40px 0 30px;
+  align-items: stretch;
+}
+.dd-package {
+  padding: 28px;
+  border: 1px solid #59406c;
+  border-radius: 8px;
+  background: linear-gradient(145deg, #322044, #191426 58%, #10101b);
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  position: relative;
+  overflow: hidden;
+  box-shadow: 0 12px 36px #0003;
+}
+.dd-package.recommended {
+  border: 1px solid #f30ccb;
+  padding: 28px;
+  background: linear-gradient(145deg, #542049, #26152f 50%, #14121e);
+  box-shadow: 0 0 28px #f30ccb12;
+}
+.dd-package.ultimate {
+  border-color: #998042;
+  background: linear-gradient(145deg, #403023, #241b2b 48%, #13111d);
+}
+.dd-package-label {
+  color: #b8b4cc;
+  font-size: 11px;
+  font-weight: 700;
+  min-height: 26px;
+}
+.recommended .dd-package-label {
+  color: #f777df;
+}
+.ultimate .dd-package-label {
+  color: #ffca36;
+}
+.dd-package h2 {
+  font-size: 26px;
+  margin-bottom: 20px;
+}
+.dd-public .dd-price {
+  font-size: 32px;
+  line-height: 1.3;
+  color: #fff;
+  font-weight: 700;
+  margin-bottom: 12px;
+}
+.dd-public .dd-hours {
+  font-size: 42px;
+  font-weight: 700;
+  color: #fff;
+  margin-bottom: 20px;
+}
+.dd-hours span {
+  font-size: 16px;
+  font-weight: 400;
+  color: #b8b4cc;
+}
+.dd-bonus {
+  color: #ffca36;
+  font-size: 12px;
+  margin-bottom: 12px;
+}
+.dd-package ul {
+  list-style: none;
+  padding: 0;
+  margin: 18px 0 24px;
+}
+.dd-package li {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  color: #d2cce0;
+  font-size: 14px;
+  margin-bottom: 12px;
+}
+.dd-package li svg {
+  width: 17px;
+  height: 22px;
+  flex-shrink: 0;
+  color: #f777df;
+}
+.dd-package .dd-button {
+  margin-top: auto;
+  width: 100%;
+}
+.dd-public .dd-notice {
+  color: #ffca36;
+  font-size: 12px;
+  border-inline-start: 2px solid #ffca36;
+  padding-inline-start: 12px;
+}
+.dd-text-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 600;
+  font-size: 14px;
+}
+.dd-page-intro {
+  max-width: 820px;
+  margin: 0 auto 52px;
+  text-align: center;
+}
+.dd-page-intro h1 {
+  font-size: 54px;
+}
+.dd-page-intro strong {
+  display: block;
+  color: #ffca36;
+  font-size: 14px;
+  margin-bottom: 18px;
+}
+.dd-blocks {
+  display: grid;
+  grid-template-columns: 1.2fr 1fr;
+  gap: 80px;
+  padding-block: 55px 85px;
+  border-top: 1px solid #302b40;
+}
+.dd-blocks dl {
+  margin: 0;
+  align-self: center;
+}
+.dd-blocks dl > div {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: 1px solid #3e354f;
+  padding: 20px 0;
+  gap: 20px;
+}
+.dd-blocks dd {
+  font-weight: 700;
+  font-size: 24px;
+  color: #ffca36;
+}
+.dd-purchase-title {
+  font-size: 48px;
+}
+.dd-purchase-grid {
+  display: grid;
+  grid-template-columns: 1.3fr 1fr;
+  gap: 70px;
+  margin-top: 44px;
+}
+.dd-purchase-details {
+  min-width: 0;
+}
+.dd-purchase-details h2 {
+  font-size: 30px;
+}
+.dd-order {
+  background: linear-gradient(145deg, #38213f, #1c162b 55%, #12101e);
+  border: 1px solid #a44e9e;
+  border-radius: 8px;
+  padding: 32px;
+  align-self: start;
+  min-width: 0;
+}
+.dd-order > svg {
+  color: #ffca36;
+  margin-bottom: 20px;
+}
+.dd-order h2 {
+  font-size: 24px;
+}
+.dd-order .dd-button {
+  width: 100%;
+  font-size: 12px;
+}
+.dd-button:disabled {
+  cursor: not-allowed;
+  background: #45374c;
+  color: #cbc2d0 !important;
+  border-color: #66576e;
+  transform: none;
+}
+.dd-public .dd-payment-state {
+  font-size: 13px;
+  margin: 16px 0 0;
+}
+.dd-facts {
+  margin: 20px 0 30px;
+}
+.dd-facts > div {
+  display: flex;
+  justify-content: space-between;
+  gap: 20px;
+  padding: 14px 0;
+  border-bottom: 1px solid #3e354f;
+}
+.dd-facts dt {
+  color: #b8b4cc;
+}
+.dd-facts dd {
+  margin: 0;
+  font-weight: 600;
+  text-align: end;
+}
+.dd-total {
+  font-size: 20px;
+}
+.dd-host-note {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+}
+.dd-host-note svg {
+  flex-shrink: 0;
+  color: #ffca36;
+}
+.dd-purchase-information {
+  border-top: 1px solid #3e354f;
+  padding-top: 50px;
+  margin-top: 64px;
+}
+.dd-package-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 24px;
+  color: #b9a9cb;
+  font-size: 10px;
+  font-weight: 600;
+}
+.dd-package-icon {
+  width: 42px;
+  height: 42px;
+  display: grid;
+  place-items: center;
+  border: 1px solid #9e6ab169;
+  background: linear-gradient(135deg, #ae5ee32e, #ee4db510);
+  border-radius: 8px;
+  color: #edb5ff;
+}
+.ultimate .dd-package-icon {
+  color: #ffca36;
+  border-color: #a8924e88;
+  background: linear-gradient(135deg, #ffca3629, #ffca3605);
+}
+.dd-block-visual {
+  padding-block: 14px;
+  border-block: 1px solid #ffffff15;
+  margin-bottom: 16px;
+}
+.dd-block-tokens {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-bottom: 9px;
+}
+.dd-block-tokens > span {
+  width: 28px;
+  height: 29px;
+  display: grid;
+  place-items: center;
+  border: 1px solid #a45ac8;
+  background: linear-gradient(135deg, #9d35f54d, #f30ccb24);
+  color: #ecc9ff;
+  border-radius: 4px;
+  transition:
+    transform 0.2s,
+    background 0.2s;
+}
+.dd-block-tokens > .bonus {
+  border-color: #d2a638;
+  background: linear-gradient(135deg, #ffca3640, #ffca3612);
+  color: #ffdf80;
+}
+.dd-package:hover .dd-block-tokens > span {
+  transform: translateY(-2px);
+}
+.dd-block-visual > span {
+  color: #b8b4cc;
+  font-size: 12px;
+}
+.dd-package .dd-price {
+  font-size: 32px;
+  margin-bottom: 8px;
+}
+.dd-package .dd-hours {
+  margin-bottom: 20px;
+  line-height: 1.2;
+}
+.dd-package .dd-bonus {
+  margin-bottom: 0;
+}
+.dd-package .dd-notice {
+  font-size: 11px;
+  line-height: 1.6;
+}
+.dd-package::before {
+  content: "";
+  position: absolute;
+  inset-block-start: 0;
+  inset-inline: 24px;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, #f6c9ff, transparent);
+  opacity: 0.6;
+}
+.dd-hero-art {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+}
+.dd-hero-art img {
+  mix-blend-mode: screen;
+  animation: dd-float 6s ease-in-out infinite;
+}
+.dd-hero-caption {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  color: #e6c8f3;
+  font-size: 11px;
+  text-align: center;
+}
+.dd-pass-label {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: #eaa6f7;
+  font-size: 12px;
+  font-weight: 600;
+  margin-bottom: 24px;
+}
+.dd-purchase-details {
+  border-top: 2px solid #ac4dd4;
+  padding-top: 24px;
+}
+.dd-purchase-details .dd-block-visual {
+  margin: 24px 0 0;
+  padding-block: 20px;
+}
+.dd-pass-facts {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0 24px;
+}
+.dd-pass-facts > div {
+  flex-direction: column;
+  gap: 6px;
+}
+.dd-pass-facts dd {
+  font-size: 26px;
+  text-align: start;
+  color: #fff;
+}
+.dd-pass-facts dt {
+  font-size: 13px;
+}
+.dd-order .dd-order-caption {
+  font-size: 13px;
+  margin-bottom: 24px;
+}
+.dd-order .dd-total {
+  border-top: 1px dashed #bc77b866;
+  border-bottom: 0;
+  padding-top: 24px;
+  margin-top: 12px;
+}
+.dd-order .dd-total dd {
+  color: #f5bbef;
+}
+.dd-game img {
+  transition:
+    transform 0.35s,
+    border-color 0.35s,
+    filter 0.35s;
+}
+.dd-game > a:hover img {
+  border-color: #f30ccb;
+  filter: brightness(1.12);
+}
+.dd-benefits > div {
+  transition: color 0.2s;
+}
+.dd-benefits > div:hover {
+  color: #ffd780;
+}
+@keyframes dd-float {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-10px);
+  }
+}
+@media (max-width: 760px) {
+  .dd-hero-art {
+    display: none;
+  }
+  .dd-package-top {
+    margin-bottom: 18px;
+  }
+  .dd-pass-facts {
+    gap: 0 16px;
+  }
+  .dd-purchase-grid {
+    margin-top: 24px;
+  }
+  .dd-package .dd-price {
+    font-size: 30px;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .dd-hero-art img {
+    animation: none;
+  }
+  .dd-package:hover .dd-block-tokens > span {
+    transform: none;
+  }
+}
+.dd-purchase-information h2 {
+  font-size: 28px;
+}
+.dd-purchase-information details {
+  border-bottom: 1px solid #3e354f;
+  padding: 18px 0;
+}
+.dd-purchase-information summary {
+  cursor: pointer;
+  font-weight: 600;
+}
+.dd-purchase-information details p {
+  margin: 16px 0 0;
+}
+.dd-empty {
+  padding: 40px 0;
+}
+.dd-footer {
+  border-top: 1px solid #302b40;
+  padding-block: 28px;
+  display: flex;
+  align-items: center;
+  gap: 28px;
+  flex-wrap: wrap;
+  font-size: 13px;
+}
+.dd-footer p {
+  margin: 0;
+  margin-inline-end: auto;
+}
+.dd-footer .dd-brand img {
+  width: 80px;
+  height: 55px;
+}
+@media (min-width: 1000px) and (max-width: 1199px) {
+  .dd-games {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+  .dd-nav {
+    gap: 15px;
+    font-size: 12px;
+  }
+  .dd-header {
+    gap: 16px;
+  }
+  .dd-hero h1 {
+    font-size: 54px;
+  }
+}
+@media (max-width: 999px) {
+  .dd-container {
+    width: calc(100% - 40px);
+  }
+  .dd-header {
+    min-height: 80px;
+  }
+  .dd-nav {
+    gap: 14px;
+    font-size: 12px;
+  }
+  .dd-nav .dd-button {
+    padding: 10px;
+    font-size: 12px;
+  }
+  .dd-brand img {
+    width: 80px;
+    height: 60px;
+  }
+  .dd-header {
+    gap: 12px;
+  }
+  .dd-hero-inner {
+    gap: 24px;
+    min-height: 490px;
+  }
+  .dd-hero h1 {
+    font-size: 46px;
+  }
+  .dd-hero-logo {
+    max-width: 290px;
+  }
+  .dd-games {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+  .dd-benefits {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .dd-package {
+    padding: 20px;
+  }
+  .dd-package.recommended {
+    padding: 19px;
+  }
+  .dd-public .dd-price {
+    font-size: 28px;
+  }
+  .dd-package h2 {
+    font-size: 22px;
+  }
+  .dd-package .dd-button {
+    padding: 12px;
+    font-size: 12px;
+  }
+  .dd-blocks {
+    gap: 36px;
+  }
+  .dd-purchase-grid {
+    gap: 30px;
+  }
+  .dd-order {
+    padding: 24px;
+  }
+  .dd-how ol {
+    gap: 16px;
+  }
+}
+@media (max-width: 760px) {
+  .dd-header {
+    min-height: 76px;
+  }
+  .dd-language {
+    margin-inline-start: auto;
+  }
+  .dd-menu {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+  }
+  .dd-nav {
+    display: none;
+    position: absolute;
+    top: 76px;
+    inset-inline: 0;
+    background: #121124;
+    border: 1px solid #51415f;
+    padding: 20px;
+    box-shadow: 0 16px 30px #0008;
+    font-size: 16px;
+  }
+  .dd-nav.is-open {
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 18px;
+  }
+  .dd-hero-inner {
+    grid-template-columns: 1fr;
+    min-height: 0;
+    padding-block: 48px;
+    gap: 0;
+  }
+  .dd-hero h1 {
+    font-size: 42px;
+    max-width: 460px;
+  }
+  .dd-hero p:not(.dd-eyebrow) {
+    font-size: 17px;
+  }
+  .dd-hero-logo {
+    display: none;
+  }
+  .dd-hero {
+    background-position: 60% center;
+  }
+  .dd-hero .dd-eyebrow {
+    font-size: 10px;
+  }
+  .dd-actions {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 10px;
+  }
+  .dd-actions .dd-button {
+    font-size: 12px;
+    padding: 12px 8px;
+  }
+  .dd-hero small {
+    font-size: 12px;
+  }
+  .dd-section {
+    padding-block: 48px;
+  }
+  .dd-public h2 {
+    font-size: 28px;
+  }
+  .dd-games {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 24px 14px;
+  }
+  .dd-game h3 {
+    font-size: 16px;
+    min-height: 36px;
+  }
+  .dd-benefits {
+    gap: 20px 14px;
+    padding-block: 24px;
+  }
+  .dd-benefits > div {
+    font-size: 12px;
+    gap: 8px;
+  }
+  .dd-benefits svg {
+    width: 20px;
+  }
+  .dd-how ol {
+    grid-template-columns: 1fr;
+    gap: 26px;
+    margin: 32px 0;
+  }
+  .dd-how li {
+    display: flex;
+    align-items: flex-start;
+    gap: 20px;
+    padding: 0;
+  }
+  .dd-how-heading {
+    display: block;
+  }
+  .dd-how-kicker {
+    margin-top: 18px;
+  }
+  .dd-step-node {
+    width: 48px;
+    height: 48px;
+    flex-shrink: 0;
+  }
+  .dd-how li:not(:last-child)::after {
+    inset-inline-start: 23px;
+    inset-inline-end: auto;
+    inset-block-start: 58px;
+    width: 1px;
+    height: calc(100% - 42px);
+    background: linear-gradient(#a44cc477, #f30ccb22);
+  }
+  .dd-how .dd-step-number {
+    margin-top: 0;
+    font-size: 10px;
+  }
+  .dd-how h3 {
+    font-size: 17px;
+    margin: 4px 0 8px;
+  }
+  .dd-how .dd-step-copy p {
+    max-width: none;
+    font-size: 12px;
+  }
+  .dd-how-footer {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 16px;
+  }
+  .dd-how-footer p {
+    font-size: 12px;
+  }
+  .dd-packages {
+    grid-template-columns: 1fr;
+    gap: 20px;
+    margin-top: 28px;
+  }
+  .dd-package,
+  .dd-package.recommended {
+    padding: 26px;
+  }
+  .dd-package h2 {
+    font-size: 26px;
+  }
+  .dd-public .dd-price {
+    font-size: 36px;
+  }
+  .dd-package-label {
+    min-height: 26px;
+  }
+  .dd-package .dd-button {
+    min-height: 52px;
+    font-size: 14px;
+  }
+  .dd-page-intro {
+    margin-bottom: 30px;
+    text-align: start;
+  }
+  .dd-page-intro h1 {
+    font-size: 38px;
+  }
+  .dd-blocks {
+    grid-template-columns: 1fr;
+    gap: 12px;
+    padding-block: 40px;
+  }
+  .dd-blocks dd {
+    font-size: 20px;
+  }
+  .dd-purchase-title {
+    font-size: 36px;
+  }
+  .dd-purchase-grid {
+    grid-template-columns: 1fr;
+    gap: 30px;
+    margin-top: 30px;
+  }
+  .dd-purchase-details h2 {
+    font-size: 24px;
+  }
+  .dd-order h2 {
+    font-size: 24px;
+  }
+  .dd-total {
+    font-size: 18px;
+  }
+  .dd-facts {
+    font-size: 14px;
+  }
+  .dd-purchase-information {
+    margin-top: 44px;
+    padding-top: 32px;
+  }
+  .dd-footer {
+    gap: 16px;
+    align-items: center;
+  }
+  .dd-footer p {
+    flex-basis: calc(100% - 100px);
+    margin: 0;
+  }
+  .dd-footer > a:not(.dd-brand) {
+    font-size: 12px;
+  }
+  .dd-public[lang="ar"] .dd-hero h1 {
+    font-size: 38px;
+  }
+}
+@media (min-width: 761px) and (max-width: 1100px) {
+  .dd-language {
+    margin-inline-start: auto;
+  }
+  .dd-menu {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+  }
+  .dd-nav {
+    display: none;
+    position: absolute;
+    top: 80px;
+    inset-inline: 0;
+    background: #121124;
+    border: 1px solid #51415f;
+    padding: 20px;
+    font-size: 16px;
+  }
+  .dd-nav.is-open {
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 18px;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .dd-public * {
+    transition: none !important;
+    scroll-behavior: auto !important;
+  }
+}

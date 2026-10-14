@@ -6,7 +6,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { AnimatePresence } from "framer-motion";
 import { setAuthTokenGetter, setBaseUrl } from "@workspace/api-client-react";
 import NotFound from "@/pages/not-found";
-import Home from "@/pages/home";
+import { PublicHome as Home, Pricing, Purchase } from "@/pages/public-site";
 import Join from "@/pages/join";
 import Host from "@/pages/host";
 import HostDashboard from "@/pages/host-dashboard";
@@ -21,7 +21,7 @@ setAuthTokenGetter(() => localStorage.getItem("host_token"));
 
 const queryClient = new QueryClient();
 
-const HOST_ALLOWED_PATHS = ["/host", "/host/dashboard"];
+const HOST_ALLOWED_PATHS = ["/host", "/host/dashboard", "/pricing", "/purchase"];
 
 // A logged-in host is locked to their own pages — they cannot browse to
 // the homepage, join screen, or admin panel while a host session is active.
@@ -46,6 +46,8 @@ function Router() {
       <Switch>
         {/* Platform routes */}
         <Route path="/" component={Home} />
+        <Route path="/pricing" component={Pricing} />
+        <Route path="/purchase" component={Purchase} />
         <Route path="/join" component={Join} />
         <Route path="/join/:code" component={Join} />
         <Route path="/host" component={Host} />
