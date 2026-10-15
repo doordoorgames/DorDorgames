@@ -5,11 +5,10 @@ import { BottomNav } from "@/components/bottom-nav";
 
 function ShelvedGameCard({ game, index }: { game: GameConfig; index: number }) {
   const imageUrl = game.imageUrl;
+  const [, navigate] = useLocation();
 
   function handleClick() {
-    if (game.externalUrl) {
-      window.location.href = game.externalUrl;
-    }
+    navigate(`/pricing?game=${encodeURIComponent(game.id)}`);
   }
 
   return (

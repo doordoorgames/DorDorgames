@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { useLocation, useParams } from "wouter";
 import { Layout } from "@/components/layout";
 import { useGetRoom, getGetRoomQueryKey } from "@workspace/api-client-react";
+import { getGameByRoute } from "@/games-config";
 import { motion } from "framer-motion";
 
 export default function RoomView() {
@@ -72,6 +73,13 @@ export default function RoomView() {
     return null;
   }
 
+  const playableGame = room.activeGame?.route
+    ? getGameByRoute(room.activeGame.route)
+    : undefined;
+  const gameUrl = playableGame?.status === "active" && playableGame.launchMode !== "coming_soon"
+    ? playableGame.externalUrl
+    : undefined;
+
   return (
     <Layout>
       <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-6">
@@ -97,10 +105,10 @@ export default function RoomView() {
           </div>
         </div>
 
-        {room.activeGame?.route && (
+        {gameUrl && (
           <div className="text-center">
             <a 
-              href={room.activeGame.route} 
+              href={gameUrl}
               target="_blank" 
               rel="noopener noreferrer"
               className="inline-block w-full bg-secondary text-secondary-foreground font-mono text-xl p-4 border-2 border-secondary hover:bg-transparent hover:text-secondary transition-all shadow-[0_0_10px_rgba(0,255,65,0.5)]"

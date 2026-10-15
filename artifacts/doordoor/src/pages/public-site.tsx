@@ -54,11 +54,7 @@ function PublicLayout({ children }: { children: (ar: boolean) => ReactNode }) {
           <a href="/#games">{t("Games", "الألعاب")}</a>
           <a href="/#how-it-works">{t("How It Works", "كيف تلعب")}</a>
           <Link href="/pricing">{t("Pricing", "الأسعار")}</Link>
-          <Link href="/join">{t("Join Game", "انضم للعبة")}</Link>
           <Link href="/host">{t("Login", "تسجيل الدخول")}</Link>
-          <Link className="dd-button" href="/host">
-            {t("Host a Game", "استضف لعبة")}
-          </Link>
         </nav>
         <button
           className="dd-language"
@@ -549,13 +545,14 @@ export function PublicHome() {
                 {ids.map((id) => {
                   const g = games.find((game) => game.id === id);
                   if (!g) return null;
+                  const pricingUrl = `/pricing?game=${encodeURIComponent(id)}`;
                   return (
                     <article className="dd-game" key={id}>
                       <Link
-                        href={g.route}
+                        href={pricingUrl}
                         aria-label={t(
-                          `Open ${g.title}`,
-                          `افتح ${arabicNames[id]}`,
+                          `View hosting options for ${g.title}`,
+                          `عرض باقات استضافة ${arabicNames[id]}`,
                         )}
                       >
                         <img
@@ -567,12 +564,9 @@ export function PublicHome() {
                       <h3>{ar ? arabicNames[id] : g.title}</h3>
                       <p>{ar ? g.descriptionAr : g.description}</p>
                       <div>
-                        <Link href={g.route}>
-                          {t("Play", "العب")}
-                          <ArrowUpRight size={16} />
-                        </Link>
-                        <Link href={`/pricing?game=${encodeURIComponent(id)}`}>
+                        <Link href={pricingUrl}>
                           {t("Host Game", "استضف اللعبة")}
+                          <ArrowUpRight size={16} />
                         </Link>
                       </div>
                     </article>
@@ -887,4 +881,3 @@ export function Purchase() {
     </PublicLayout>
   );
 }
-
