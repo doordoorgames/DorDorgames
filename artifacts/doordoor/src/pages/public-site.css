@@ -185,14 +185,25 @@
   border-bottom: 1px solid #302b40;
 }
 .dd-benefits > div {
-  display: flex;
-  align-items: center;
-  gap: 12px;
+  display: grid;
+  grid-template-columns: auto 1fr;
+  align-items: start;
+  gap: 5px 12px;
   font-size: 14px;
+}
+.dd-benefits strong {
+  line-height: 1.3;
+}
+.dd-benefits span {
+  grid-column: 2;
+  color: #9f99b2;
+  font-size: 12px;
+  line-height: 1.5;
 }
 .dd-benefits svg {
   color: #ffca36;
   flex-shrink: 0;
+  grid-row: 1 / span 2;
 }
 .dd-section {
   padding-block: 80px;
@@ -225,8 +236,15 @@
 }
 .dd-game h3 {
   font-size: 18px;
-  margin: 16px 0 12px;
+  margin: 16px 0 7px;
   min-height: 42px;
+}
+.dd-game > p {
+  min-height: 42px;
+  margin: 0 0 14px;
+  color: #9f99b2;
+  font-size: 12px;
+  line-height: 1.5;
 }
 .dd-game > div {
   display: flex;
@@ -519,6 +537,8 @@
   padding: 32px;
   align-self: start;
   min-width: 0;
+  position: sticky;
+  top: 24px;
 }
 .dd-order > svg {
   color: #ffca36;
@@ -541,6 +561,72 @@
 .dd-public .dd-payment-state {
   font-size: 13px;
   margin: 16px 0 0;
+}
+.dd-selected-game {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: #ffca36;
+  font-weight: 600;
+}
+.dd-customer-form {
+  margin-top: 42px;
+  padding-top: 32px;
+  border-top: 1px solid #3e354f;
+}
+.dd-customer-form h2 {
+  margin-bottom: 22px;
+}
+.dd-form-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 18px;
+}
+.dd-form-grid label {
+  display: grid;
+  gap: 8px;
+  color: #d7d2e1;
+  font-size: 13px;
+  font-weight: 600;
+}
+.dd-form-grid label:last-child {
+  grid-column: 1 / -1;
+}
+.dd-form-grid input {
+  width: 100%;
+  min-height: 48px;
+  border: 1px solid #443852;
+  border-radius: 6px;
+  background: #100f1d;
+  color: #fff;
+  padding: 0 14px;
+}
+.dd-form-grid input:focus-visible {
+  outline: 2px solid #f30ccb;
+  outline-offset: 2px;
+}
+.dd-customer-form > p {
+  margin-top: 18px;
+  font-size: 12px;
+}
+.dd-order-meta {
+  display: grid;
+  gap: 6px;
+  margin: -12px 0 24px;
+  color: #aaa3b9;
+  font-size: 12px;
+}
+.dd-policy-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 16px;
+  margin-top: 20px;
+  font-size: 12px;
+}
+.dd-policy-links a {
+  color: #d6c7e6;
+  text-decoration: underline;
+  text-underline-offset: 3px;
 }
 .dd-facts {
   margin: 20px 0 30px;
@@ -793,6 +879,27 @@
 .dd-purchase-information details p {
   margin: 16px 0 0;
 }
+.dd-faq {
+  border-top: 1px solid #302b40;
+}
+.dd-faq-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0 40px;
+  margin-top: 28px;
+}
+.dd-faq details {
+  border-bottom: 1px solid #3e354f;
+  padding: 20px 0;
+}
+.dd-faq summary {
+  cursor: pointer;
+  font-weight: 650;
+}
+.dd-faq details p {
+  margin: 14px 0 0;
+  font-size: 14px;
+}
 .dd-empty {
   padding: 40px 0;
 }
@@ -979,7 +1086,7 @@
   }
   .dd-benefits > div {
     font-size: 12px;
-    gap: 8px;
+    gap: 4px 8px;
   }
   .dd-benefits svg {
     width: 20px;
@@ -1079,6 +1186,16 @@
     gap: 30px;
     margin-top: 30px;
   }
+  .dd-order {
+    position: static;
+  }
+  .dd-form-grid,
+  .dd-faq-grid {
+    grid-template-columns: 1fr;
+  }
+  .dd-form-grid label:last-child {
+    grid-column: auto;
+  }
   .dd-purchase-details h2 {
     font-size: 24px;
   }
@@ -1137,9 +1254,29 @@
     gap: 18px;
   }
 }
+@media (min-width: 761px) and (max-width: 900px) {
+  .dd-packages {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .dd-package.ultimate {
+    grid-column: 1 / -1;
+  }
+}
+@media (max-width: 380px) {
+  .dd-actions,
+  .dd-games,
+  .dd-benefits {
+    grid-template-columns: 1fr;
+  }
+  .dd-game h3,
+  .dd-game > p {
+    min-height: 0;
+  }
+}
 @media (prefers-reduced-motion: reduce) {
   .dd-public * {
     transition: none !important;
     scroll-behavior: auto !important;
   }
 }
+

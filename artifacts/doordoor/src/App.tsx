@@ -21,7 +21,13 @@ setAuthTokenGetter(() => localStorage.getItem("host_token"));
 
 const queryClient = new QueryClient();
 
-const HOST_ALLOWED_PATHS = ["/host", "/host/dashboard", "/pricing", "/purchase"];
+const HOST_ALLOWED_PATHS = [
+  "/host",
+  "/host/dashboard",
+  "/pricing",
+  "/checkout",
+  "/purchase",
+];
 
 // A logged-in host is locked to their own pages — they cannot browse to
 // the homepage, join screen, or admin panel while a host session is active.
@@ -47,6 +53,7 @@ function Router() {
         {/* Platform routes */}
         <Route path="/" component={Home} />
         <Route path="/pricing" component={Pricing} />
+        <Route path="/checkout" component={Purchase} />
         <Route path="/purchase" component={Purchase} />
         <Route path="/join" component={Join} />
         <Route path="/join/:code" component={Join} />
@@ -91,3 +98,4 @@ function App() {
 }
 
 export default App;
+

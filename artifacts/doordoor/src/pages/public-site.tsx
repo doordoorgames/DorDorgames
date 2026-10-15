@@ -5,6 +5,7 @@ import {
   ArrowUpRight,
   Check,
   Clock3,
+  CreditCard,
   Layers3,
   Sparkles,
   Crown,
@@ -16,6 +17,7 @@ import {
   X,
 } from "lucide-react";
 import { useLiveGames } from "@/hooks/use-live-games";
+import { getGameById } from "@/games-config";
 import { UpdateBanner } from "@/components/update-banner";
 import {
   HOSTING_PACKAGES,
@@ -90,7 +92,7 @@ function PublicLayout({ children }: { children: (ar: boolean) => ReactNode }) {
           )}
         </p>
         <Link href="/pricing">{t("Hosting packages", "باقات الاستضافة")}</Link>
-        <Link href="/purchase#purchase-information">
+        <Link href="/checkout#purchase-information">
           {t("Purchase information", "معلومات الشراء")}
         </Link>
       </footer>
@@ -125,7 +127,7 @@ function BlockVisual({
   );
 }
 
-function Packages({ ar }: { ar: boolean }) {
+function Packages({ ar, game }: { ar: boolean; game?: string | null }) {
   const reduced = useReducedMotion();
   const t = (en: string, arabic: string) => (ar ? arabic : en);
   return (
@@ -154,9 +156,9 @@ function Packages({ ar }: { ar: boolean }) {
           </div>
           <div className="dd-package-label">
             {p.id === "game-night"
-              ? t("THE GAME NIGHT FAVORITE", "الخيار الموصى به")
+              ? t("RECOMMENDED", "موصى به")
               : p.id === "ultimate"
-                ? t("KEEP THE PARTY GOING", "خلّ الحفلة تستمر")
+                ? t("BEST VALUE", "أفضل قيمة")
                 : t("START SOMETHING FUN", "ابدأ المرح")}
           </div>
           <h2>{ar ? p.nameAr : p.name}</h2>
@@ -211,9 +213,16 @@ function Packages({ ar }: { ar: boolean }) {
               )}
             </p>
           )}
-          <Link className="dd-button" href={`/purchase?package=${p.id}`}>
+          <Link
+            className="dd-button"
+            href={`/checkout?package=${p.id}${game ? `&game=${encodeURIComponent(game)}` : ""}`}
+          >
             {t(
-              `CHOOSE ${p.id === "ultimate" ? "ULTIMATE" : p.name.toUpperCase()}`,
+              p.id === "starter"
+                ? "GET STARTED"
+                : p.id === "game-night"
+                  ? "GET GAME NIGHT"
+                  : "GET ULTIMATE",
               `اختر ${p.nameAr}`,
             )}
             <ArrowUpRight size={18} />
@@ -356,6 +365,63 @@ function HowItWorks({ ar }: { ar: boolean }) {
   );
 }
 
+function Faq({ ar }: { ar: boolean }) {
+  const t = (en: string, arabic: string) => (ar ? arabic : en);
+  const provisional = t(
+    "This rule is awaiting business approval and will be confirmed before payments go live.",
+    "هذه القاعدة بانتظار اعتماد الإدارة وسيتم تأكيدها قبل تفعيل الدفع.",
+  );
+  const items = [
+    [
+      t("What is a hosting block?", "ما هو بلوك الاستضافة؟"),
+      t(
+        "One block gives the host two hours of access to available Dordor games.",
+        "البلوك الواحد يمنح المضيف ساعتين للوصول إلى ألعاب دور دور المتاحة.",
+      ),
+    ],
+    [
+      t("Do participants need to pay?", "هل يحتاج المشاركون للدفع؟"),
+      t(
+        "No. Only the host purchases hosting time. Participants join the room for free.",
+        "لا. المضيف فقط يشتري وقت الاستضافة، والمشاركون ينضمون إلى الغرفة مجاناً.",
+      ),
+    ],
+    [
+      t("Can I play different games?", "هل يمكنني لعب ألعاب مختلفة؟"),
+      t(
+        "A hosting pass provides access to available games while your hosting session is active.",
+        "تمنحك باقة الاستضافة وصولاً إلى الألعاب المتاحة أثناء جلسة الاستضافة النشطة.",
+      ),
+    ],
+    [t("When does my hosting time start?", "متى يبدأ وقت الاستضافة؟"), provisional],
+    [t("Can I use blocks on different days?", "هل يمكن استخدام البلوكات في أيام مختلفة؟"), provisional],
+    [t("What happens when my time expires?", "ماذا يحدث عند انتهاء الوقت؟"), provisional],
+    [t("Do unused blocks expire?", "هل تنتهي صلاحية البلوكات غير المستخدمة؟"), provisional],
+    [
+      t("Can I purchase more blocks?", "هل يمكنني شراء بلوكات إضافية؟"),
+      t(
+        "Yes. You can return to the pricing page to purchase another hosting pass.",
+        "نعم. يمكنك العودة إلى صفحة الأسعار لشراء باقة استضافة إضافية.",
+      ),
+    ],
+  ];
+
+  return (
+    <section className="dd-section dd-container dd-faq">
+      <p className="dd-eyebrow">{t("GOOD TO KNOW", "معلومات مهمة")}</p>
+      <h2>{t("FREQUENTLY ASKED QUESTIONS", "الأسئلة الشائعة")}</h2>
+      <div className="dd-faq-grid">
+        {items.map(([question, answer]) => (
+          <details key={question}>
+            <summary>{question}</summary>
+            <p>{answer}</p>
+          </details>
+        ))}
+      </div>
+    </section>
+  );
+}
+
 export function PublicHome() {
   const { games, updateAvailable } = useLiveGames();
   const ids = ["spy", "tfadhloon", "forehead", "guessthecharacter", "charades"];
@@ -383,14 +449,14 @@ export function PublicHome() {
                   </p>
                   <h1>
                     {t(
-                      "GOOD FRIENDS. GREAT GAME NIGHTS.",
-                      "ربعك. ألعابك. ليلة ما تنسى.",
+                      "THE GAME NIGHT STARTS HERE.",
+                      "ليلة الألعاب تبدأ هنا.",
                     )}
                   </h1>
                   <p>
                     {t(
-                      "Five party games. One host. Everyone in on the fun.",
-                      "خمس ألعاب جماعية. مضيف واحد. والوناسة للجميع.",
+                      "Play together. Laugh together. Make memories.",
+                      "العبوا معاً. اضحكوا معاً. واصنعوا ذكريات.",
                     )}
                   </p>
                   <div className="dd-actions">
@@ -431,16 +497,45 @@ export function PublicHome() {
               aria-label={t("Benefits", "المميزات")}
             >
               {[
-                [Gamepad2, t("Multiplayer Party Games", "ألعاب جماعية")],
-                [Clock3, t("Flexible Hosting Time", "وقت استضافة مرن")],
-                [Users, t("Friends Join Free", "الأصدقاء ينضمون مجاناً")],
-                [ShieldCheck, t("Instant Game Access", "وصول فوري للألعاب")],
-              ].map(([Icon, label], i) => {
+                [
+                  Gamepad2,
+                  t("Multiplayer Party Games", "ألعاب جماعية"),
+                  t(
+                    "Made for groups, gatherings, and game nights.",
+                    "مصممة للقروبات والجمعات وليالي اللعب.",
+                  ),
+                ],
+                [
+                  Clock3,
+                  t("Flexible Hosting Time", "وقت استضافة مرن"),
+                  t(
+                    "Use your hosting blocks when your group is ready.",
+                    "استخدم بلوكات الاستضافة عندما تكون جمعتكم جاهزة.",
+                  ),
+                ],
+                [
+                  Users,
+                  t("Friends Join Free", "الأصدقاء ينضمون مجاناً"),
+                  t(
+                    "Only the host pays. Everyone else joins free.",
+                    "المضيف فقط يدفع، والبقية ينضمون مجاناً.",
+                  ),
+                ],
+                [
+                  ShieldCheck,
+                  t("Instant Game Access", "وصول فوري للألعاب"),
+                  t(
+                    "Choose a game, open a room, and start the fun.",
+                    "اختر لعبة وافتح غرفة وابدأ الوناسة.",
+                  ),
+                ],
+              ].map(([Icon, label, detail], i) => {
                 const BenefitIcon = Icon as typeof Gamepad2;
                 return (
                   <div key={i}>
                     <BenefitIcon size={24} />
-                    <span>{label as string}</span>
+                    <strong>{label as string}</strong>
+                    <span>{detail as string}</span>
                   </div>
                 );
               })}
@@ -470,12 +565,15 @@ export function PublicHome() {
                         />
                       </Link>
                       <h3>{ar ? arabicNames[id] : g.title}</h3>
+                      <p>{ar ? g.descriptionAr : g.description}</p>
                       <div>
                         <Link href={g.route}>
                           {t("Play", "العب")}
                           <ArrowUpRight size={16} />
                         </Link>
-                        <Link href="/pricing">{t("Host", "استضف")}</Link>
+                        <Link href={`/pricing?game=${encodeURIComponent(id)}`}>
+                          {t("Host Game", "استضف اللعبة")}
+                        </Link>
                       </div>
                     </article>
                   );
@@ -509,6 +607,7 @@ export function PublicHome() {
 }
 
 export function Pricing() {
+  const game = new URLSearchParams(window.location.search).get("game");
   return (
     <PublicLayout>
       {(ar) => (
@@ -539,9 +638,10 @@ export function Pricing() {
                   : "We sell hosting time, not individual games. One block equals two hours."}
               </p>
             </div>
-            <Packages ar={ar} />
+            <Packages ar={ar} game={game} />
           </section>
           <HostingBlocks ar={ar} />
+          <Faq ar={ar} />
         </>
       )}
     </PublicLayout>
@@ -549,7 +649,10 @@ export function Pricing() {
 }
 
 export function Purchase() {
-  const requested = new URLSearchParams(window.location.search).get("package");
+  const params = new URLSearchParams(window.location.search);
+  const requested = params.get("package");
+  const selectedGame = params.get("game");
+  const game = selectedGame ? getGameById(selectedGame) : undefined;
   const selected = HOSTING_PACKAGES.find((p) => p.id === requested);
   return (
     <PublicLayout>
@@ -561,7 +664,7 @@ export function Purchase() {
               {t("YOUR NEXT GAME NIGHT", "ليلة ألعابك القادمة")}
             </p>
             <h1 className="dd-purchase-title">
-              {t("YOUR HOSTING PASS", "باقة استضافتك")}
+              {t("SECURE YOUR GAME NIGHT", "احجز ليلة ألعابك")}
             </h1>
             {!selected ? (
               <div className="dd-empty">
@@ -634,6 +737,12 @@ export function Purchase() {
                       "شراء وقت استضافة لمرة واحدة. الوصول للألعاب المتاحة أثناء الاستضافة.",
                     )}
                   </p>
+                  {game && (
+                    <p className="dd-selected-game">
+                      <Gamepad2 size={18} />
+                      {t("Selected game", "اللعبة المختارة")}: {ar ? game.titleAr : game.title}
+                    </p>
+                  )}
                   <p className="dd-host-note">
                     <Users />
                     {t(
@@ -644,6 +753,42 @@ export function Purchase() {
                   <Link className="dd-text-link" href="/pricing">
                     {t("Change package", "تغيير الباقة")}
                   </Link>
+                  <div
+                    className="dd-customer-form"
+                    aria-labelledby="customer-details-title"
+                  >
+                    <h2 id="customer-details-title">
+                      {t("Customer details", "بيانات العميل")}
+                    </h2>
+                    <div className="dd-form-grid">
+                      <label>
+                        {t("Full name", "الاسم الكامل")}
+                        <input type="text" autoComplete="name" />
+                      </label>
+                      <label>
+                        {t("Email address", "البريد الإلكتروني")}
+                        <input
+                          type="email"
+                          autoComplete="email"
+                          inputMode="email"
+                        />
+                      </label>
+                      <label>
+                        {t("Mobile number", "رقم الهاتف")}
+                        <input
+                          type="tel"
+                          autoComplete="tel"
+                          inputMode="tel"
+                        />
+                      </label>
+                    </div>
+                    <p>
+                      {t(
+                        "Payment will be completed securely on MyFatoorah. Dordor Games does not collect or store card details.",
+                        "سيتم الدفع بأمان عبر ماي فاتورة. دور دور لا تجمع أو تخزن بيانات البطاقة.",
+                      )}
+                    </p>
+                  </div>
                 </div>
                 <aside className="dd-order">
                   <ShieldCheck size={28} />
@@ -664,6 +809,15 @@ export function Purchase() {
                       <dd dir="auto">{packagePrice(selected.price, ar)}</dd>
                     </div>
                   </dl>
+                  <div className="dd-order-meta">
+                    <span>{t("One-time payment", "دفعة واحدة")}</span>
+                    <span>
+                      {t(
+                        "Additional fees: none shown",
+                        "رسوم إضافية: لا يوجد مبلغ معروض",
+                      )}
+                    </span>
+                  </div>
                   {selected.provisional && (
                     <p className="dd-notice">
                       {t(
@@ -673,8 +827,8 @@ export function Purchase() {
                     </p>
                   )}
                   <button className="dd-button" disabled>
-                    <ShieldCheck size={18} />
-                    {t("PROCEED TO SECURE PAYMENT", "المتابعة للدفع الآمن")}
+                    <CreditCard size={18} />
+                    {t("PAY SECURELY", "ادفع بأمان")}
                   </button>
                   <p className="dd-payment-state" role="status">
                     {t(
@@ -682,6 +836,15 @@ export function Purchase() {
                       "سيتوفر الدفع الآمن بعد تفعيل بوابة الدفع.",
                     )}
                   </p>
+                  <nav
+                    className="dd-policy-links"
+                    aria-label={t("Purchase policies", "سياسات الشراء")}
+                  >
+                    <a href="#terms">{t("Terms", "الشروط")}</a>
+                    <a href="#privacy">{t("Privacy", "الخصوصية")}</a>
+                    <a href="#refunds">{t("Refunds", "الاسترداد")}</a>
+                    <a href="#support">{t("Support", "الدعم")}</a>
+                  </nav>
                 </aside>
               </div>
             )}
@@ -697,13 +860,17 @@ export function Purchase() {
                 )}
               </p>
               {[
-                ["Terms and Conditions", "الشروط والأحكام"],
-                ["Refund and Cancellation Policy", "سياسة الاسترداد والإلغاء"],
-                ["Privacy Policy", "سياسة الخصوصية"],
-                ["Customer Support", "دعم العملاء"],
-                ["Merchant contact details", "بيانات التواصل مع التاجر"],
-              ].map(([en, arabic]) => (
-                <details key={en}>
+                ["terms", "Terms and Conditions", "الشروط والأحكام"],
+                [
+                  "refunds",
+                  "Refund and Cancellation Policy",
+                  "سياسة الاسترداد والإلغاء",
+                ],
+                ["privacy", "Privacy Policy", "سياسة الخصوصية"],
+                ["support", "Customer Support", "دعم العملاء"],
+                ["merchant", "Merchant contact details", "بيانات التواصل مع التاجر"],
+              ].map(([id, en, arabic]) => (
+                <details id={id} key={id}>
                   <summary>{t(en, arabic)}</summary>
                   <p>
                     {t(
@@ -720,3 +887,4 @@ export function Purchase() {
     </PublicLayout>
   );
 }
+
