@@ -1,0 +1,210 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Tfadhloon - Lobby</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Playpen+Sans+Arabic:wght@400&family=Sniglet:wght@400&display=block" rel="stylesheet" />
+    <link rel="prefetch" href="tfadhloon-gameplay.html" />
+    <link rel="preload" as="style" href="tfadhloon-gameplay.css?v=20260806-preload-score1" />
+    <link rel="preload" as="script" href="tfadhloon-gameplay.js?v=20260806-preload-score1" />
+    <link rel="preload" as="image" href="gallary/leaderboard-icon.png" />
+    <link rel="preload" as="image" href="buttons/blob-circle.webp" />
+    <link rel="preload" as="image" href="buttons/blob-thin.webp" />
+    <link rel="preload" as="image" href="buttons/blob-square.webp" />
+    <link rel="preload" as="image" href="buttons/blob-wide-1.webp" />
+    <link rel="preload" as="image" href="buttons/blob-wide-2.webp" />
+    <link rel="preload" as="image" href="buttons/blob-tall.webp" />
+    <link rel="preload" as="image" href="buttons/blob-triangle.svg" />
+    <link rel="preload" as="image" href="buttons/blob-crescent.svg" />
+    <link rel="preload" as="image" href="buttons/blob-cloud.svg" />
+    <link rel="preload" as="image" href="buttons/blob-star.svg" />
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.6/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+      crossorigin="anonymous"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css"
+    />
+    <link href="custom/custom.css?v=20260806-preload-crash3" rel="stylesheet" type="text/css" />
+    <script src="custom/lang.js"></script>
+    <link rel="stylesheet" href="./tfadhloon-lobby.css?v=20260910-question-modes1" />
+    <link rel="stylesheet" href="./tfadhloon-theme.css?v=20260816-clickable-scroll-cue1" />
+  </head>
+
+  <body class="tf-lobby-page">
+
+
+    <div class="tf-app-shell">
+      <header class="tf-topbar" aria-label="Page controls">
+        <div class="tf-topbar-start">
+          <button id="backBtn" class="back-btn small-button compact shape-3">
+            <i class="bi bi-arrow-left"></i>
+            <span id="backBtnText">Back</span>
+          </button>
+        </div>
+        <div class="tf-topbar-center" aria-hidden="true"></div>
+        <div class="tf-topbar-end">
+          <div id="langSwitcherContainer" class="language-switcher-container" style="display: none">
+            <div class="language-blob-group" role="group" aria-label="Language">
+              <button type="button" class="language-option language-blob menu-button compact shape-2" data-lang="ar" aria-label="العربية">ع</button>
+              <button type="button" class="language-option language-blob menu-button compact shape-1" data-lang="en" aria-label="English">EN</button>
+            </div>
+          </div>
+        </div>
+      </header>
+      <main class="tf-app-content">
+        <div class="ad-banner">
+      <div class="ad-content">
+        <img
+          class="ad-img"
+          src=""
+          alt="Ad Image"
+          style="
+            max-height: 44px;
+            max-width: 76px;
+            display: none;
+            border-radius: 6px;
+            background: #fff;
+            margin-inline-end: 10px;
+          "
+        />
+        <span class="ad-text"></span>
+      </div>
+    </div>
+
+    <div class="text-center w-100 tf-screen-content tf-lobby-content">
+      <h3 id="waitingPlayersText"></h3>
+
+      <p class="mb-1">
+        <strong id="accessCodeLabel"></strong>
+        <span id="accessCode"></span>
+      </p>
+
+      <hr id="hostSettingsHR" style="display: none" />
+      <p id="hostSettingsLabel" class="mb-1" style="display: none"></p>
+
+      <!-- Hidden select keeps the question-limit value — do NOT remove -->
+      <select
+        id="questionLimitSelect"
+        style="display: none"
+      >
+        <option value="5"></option>
+        <option value="10"></option>
+        <option value="20"></option>
+        <option value="30"></option>
+        <option value="40"></option>
+        <option value="80"></option>
+        <option value="100"></option>
+      </select>
+
+      <!-- Host action buttons — half-size, 2x2 grid -->
+      <div class="lobby-action-grid">
+        <!-- Category Selection Button -->
+        <button
+          id="categorySelectionBtn"
+          class="menu-button compact shape-3 mt-2"
+          style="display: none"
+        >
+          <i class="bi bi-grid-3x3-gap" style="margin-right: 8px"></i>
+          <span id="categorySelectionBtnText"></span>
+        </button>
+
+        <!-- New Question Limit Button — replaces the old visible select -->
+        <button
+          id="questionLimitBtn"
+          class="menu-button compact shape-4 mt-2"
+          style="display: none"
+        >
+          <i class="bi bi-list-ol" style="margin-right: 8px"></i>
+          <span id="questionLimitBtnText">5 Questions</span>
+        </button>
+
+        <fieldset id="questionDistributionSetting" class="question-distribution-setting" style="display: none">
+          <legend id="questionDistributionLegend">Question distribution</legend>
+          <label class="question-distribution-option">
+            <input type="radio" name="questionDistributionMode" value="same" />
+            <span class="question-distribution-mark" aria-hidden="true"></span>
+            <span id="sameQuestionModeLabel">Everyone answers the same question</span>
+          </label>
+          <label class="question-distribution-option">
+            <input type="radio" name="questionDistributionMode" value="different" checked />
+            <span class="question-distribution-mark" aria-hidden="true"></span>
+            <span id="differentQuestionModeLabel">Everyone answers a different question</span>
+          </label>
+        </fieldset>
+
+        <button
+          id="startGameBtn"
+          class="menu-button full-width shape-2"
+          style="display: none"
+        ></button>
+      </div>
+
+      <p id="questionLimitDisplay" class="text-primary mt-2" style="display:none"></p>
+      <p id="statusText" class="text-secondary mt-1" style="display:none"></p>
+
+      <p class="mb-1 players-heading"><strong id="adminSettingsLabel"></strong></p>
+      <div id="playersContainer" class="mb-3"></div>
+
+      <!-- QR Join Card — shown whenever a room code exists -->
+      <div id="qrJoinCard" class="qr-join-card" style="display:none">
+        <div id="qrCodeEl" class="qr-code-box"></div>
+        <p id="qrLabelMain" class="qr-label-main"></p>
+      </div>
+        </div>
+      </main>
+    </div>
+<script
+      src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.6/dist/js/bootstrap.bundle.min.js"
+      crossorigin="anonymous"
+    ></script>
+
+    <button
+      id="micBtn"
+      class="small-button icon shape-3"
+      style="
+        position: fixed;
+        bottom: 20px;
+        right: 20px;
+        z-index: 999;
+        width: 60px;
+        height: 60px;
+        font-size: 24px;
+      "
+    >
+      <i id="micIcon" class="bi bi-mic-mute-fill"></i>
+    </button>
+
+    <button
+      id="speakerBtn"
+      class="small-button icon shape-4"
+      style="
+        position: fixed;
+        bottom: 90px;
+        right: 20px;
+        z-index: 999;
+        width: 60px;
+        height: 60px;
+        font-size: 24px;
+      "
+    >
+      <i id="speakerIcon" class="bi bi-volume-up-fill"></i>
+    </button>
+
+    <script src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js" crossorigin="anonymous"></script>
+    <script src="backgrounds-config.js"></script>
+    <script src="wave-bg.js"></script>
+    <script src="theme-engine.js?v=20260806-feedback-palette1"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+    <script src="supabase-client.js"></script>
+    <script src="tfadhloon-ui.js?v=20260816-clickable-scroll-cue1"></script>
+    <script src="tfadhloon-lobby.js?v=20260910-question-modes1"></script>
+    <script src="voiceChat.js"></script>
+  </body>
+</html>

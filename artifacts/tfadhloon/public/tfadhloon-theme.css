@@ -1,0 +1,3668 @@
+/* ============================================================
+   TFADHLOON — DYNAMIC BLOB BUTTON/CARD SYSTEM
+   Shape comes from a CSS mask-image (organic blob PNG/WEBP art),
+   never from clip-path or border-radius. Color is computed at
+   runtime by theme-engine.js to match/complement the page's flat
+   background (see backgrounds-config.js). Shape is chosen
+   DETERMINISTICALLY by role (see theme-engine.js) — never random.
+   NO shadows on shapes. Text uses one sharp proportional readability shadow.
+   NO borders. NO gradients. NO glassmorphism.
+   ============================================================ */
+
+:root {
+  --tf-font-ar: "Playpen Sans Arabic", cursive;
+  --tf-font-en: "Sniglet", cursive;
+  --tf-font-active: var(--tf-font-en);
+  --tf-logo-yellow: #F2F459;
+  --game-yellow: var(--tf-logo-yellow);
+  --game-white: #FFFFFF;
+  --tf-feedback-success: #1F6455;
+  --tf-feedback-error: #681A43;
+  --tf-text-shadow: -0.06em 0.06em 0 rgba(0, 0, 0, 0.65);
+
+  /* Sizing tokens — big, playful, cartoony, consistent */
+  --main-button-width: min(88vw, 680px);
+  /* Literal "2/3 of the display width" CTAs: homepage Start/Join and every
+     lobby action button (category / suggest / question-limit / start). */
+  --cta-width: min(66.666vw, 900px);
+  --main-button-height: clamp(78px, 10vh, 112px);
+  --choice-button-height: clamp(140px, 20vh, 240px);
+  --category-tile-height: clamp(72px, 10vh, 110px);
+  --button-gap: clamp(16px, 3vh, 28px);
+
+  --font-title: clamp(54px, 12vw, 110px);
+  --font-main-button: clamp(26px, 6vw, 44px);
+  --font-category-button: clamp(20px, 4.6vw, 34px);
+  --font-utility-button: clamp(16px, 3.5vw, 24px);
+}
+
+/* ── ALIAS CLASS SYSTEM ────────────────────────────────────────
+   Same rules as .menu-button/.small-button/etc, exposed under the
+   role-based names too, so new markup can opt in directly. ── */
+.blob-panel { }
+.blob-grid { }
+.blob-choice { }
+
+/* ── #F2F459/YELLOW TITLES ────────────────────────────────────── */
+.alert-title,
+.category-dialog-title,
+.qlimit-title,
+.suggestion-dialog-title,
+#chooseHeader,
+#waitingHeader,
+.game-container h2,
+.scores-title,
+.locations-title {
+  color: var(--game-yellow) !important;
+  font-weight: 900 !important;
+  font-family: var(--tf-font-active) !important;
+  font-size: clamp(1.6rem, 5.5vw, 3rem);
+  line-height: 1.1;
+  text-shadow: var(--tf-text-shadow) !important;
+  -webkit-text-stroke: 0 !important;
+  background: none !important;
+  -webkit-text-fill-color: var(--game-yellow);
+}
+
+/* Page hero titles get the full huge treatment */
+#waitingPlayersText,
+.category-dialog-title {
+  font-size: var(--font-title);
+}
+
+/* ── TEAL/PLAYFUL PILL LABELS (status text) — flat, no shape mask ── */
+#roundProgress,
+#turnProgress {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: fit-content;
+  margin: 0 auto 10px auto;
+  background: none !important;
+  color: var(--game-white) !important;
+  font-weight: 800 !important;
+  font-family: var(--tf-font-active) !important;
+  border: none !important;
+  box-shadow: none !important;
+  text-shadow: var(--tf-text-shadow) !important;
+  padding: 6px 18px !important;
+  font-size: clamp(1rem, 2.6vw, 1.4rem);
+}
+
+/* ── BUTTONS / CARDS — shape is a runtime mask-image, color is
+   runtime background-color; both set by theme-engine.js. This
+   block only defines layout, text and the "no hard edges" rules. ── */
+.menu-button,
+.small-button,
+.guess-option,
+.alert-container,
+.category-dialog-container,
+.qlimit-container,
+.suggestion-dialog-container {
+  border: none !important;
+  border-radius: 0 !important;
+  box-shadow: none !important;
+  outline: none !important;
+  text-shadow: var(--tf-text-shadow) !important;
+  -webkit-text-stroke: 0 !important;
+  filter: none !important;
+  clip-path: none !important;
+  background-image: none !important;
+  color: var(--game-white) !important;
+  font-family: var(--tf-font-active) !important;
+  transition: transform 0.15s ease-out, filter 0.15s ease-out;
+}
+
+.menu-button,
+.small-button {
+  font-weight: 800 !important;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  line-height: 1.08;
+  white-space: normal;
+  overflow: visible;
+  word-break: normal;
+  -webkit-tap-highlight-color: transparent;
+  padding: 18px 26px;
+}
+
+/* ── MAIN CTA BUTTONS — big, chunky, cartoony, consistent widths ── */
+.menu-button {
+  width: var(--main-button-width);
+  max-width: 100%;
+  min-height: var(--main-button-height);
+  font-size: var(--font-main-button);
+  font-weight: 900 !important;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.menu-button.full-width {
+  width: var(--cta-width);
+}
+
+/* ── ASPECT-RATIO LOCK FOR FORCED-SHAPE BUTTONS ──────────────────
+   mask-size:100%_100% stretches the blob art to fill whatever box
+   it's given. If the button's own width:height ratio doesn't match
+   the blob art's *natural* ratio, the organic curves get squashed
+   almost flat and the shape reads as "cropped"/rectangular. Locking
+   height to the art's real aspect ratio (instead of a fixed
+   min-height) keeps the whole blob visible, uncropped, at any width. */
+#newGameBtn,
+#joinGameBtn {
+  aspect-ratio: 1453 / 843; /* blob-wide-1.webp natural ratio */
+  height: auto !important;
+  min-height: 0 !important;
+}
+
+/* ── LOBBY ACTION BUTTON STACK — category / suggest / question-limit /
+   start all share the exact same big "2/3 of the display" width so
+   they read as one consistent stack, uncropped. ── */
+#categorySelectionBtn,
+#suggestCategoryBtn,
+#questionLimitBtn,
+#langToggleBtn,
+#startGameBtn {
+  width: var(--cta-width) !important;
+  max-width: 100%;
+  min-width: 0 !important;
+  aspect-ratio: 1187 / 843; /* blob-wide-2.webp natural ratio */
+  height: auto !important;
+  min-height: 0 !important;
+  font-size: var(--font-main-button) !important;
+  margin-left: auto !important;
+  margin-right: auto !important;
+  margin-top: 14px !important;
+  padding: 18px 26px !important;
+}
+
+/* ── LOBBY ACTION GRID — half-size buttons, 2 columns x 2 rows,
+   category next to the question-limit button. Higher specificity
+   (class + id) so it wins over the full-width stack rule above. ── */
+.lobby-action-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px 12px;
+  width: var(--cta-width);
+  max-width: 100%;
+  margin: 14px auto 0;
+}
+
+.lobby-action-grid #categorySelectionBtn,
+.lobby-action-grid #suggestCategoryBtn,
+.lobby-action-grid #questionLimitBtn,
+.lobby-action-grid #langToggleBtn,
+.lobby-action-grid #startGameBtn {
+  width: 100% !important;
+  min-width: 0 !important;
+  margin-left: 0 !important;
+  margin-right: 0 !important;
+  margin-top: 0 !important;
+  font-size: calc(var(--font-main-button) * 0.6) !important;
+  padding: 10px 8px !important;
+}
+
+/* Start game button always spans the full grid width */
+.lobby-action-grid #startGameBtn {
+  grid-column: 1 / -1;
+}
+
+/* ── SHORT UTILITY BUTTONS (thin blob) — bigger than before, still compact ── */
+.menu-button.compact,
+.small-button {
+  width: auto;
+  min-width: 160px;
+  min-height: 64px;
+  font-size: var(--font-utility-button);
+  padding: 16px 28px;
+  margin-left: 8px;
+  margin-right: 8px;
+}
+
+.small-button.icon {
+  width: 60px;
+  height: 60px;
+  min-width: 0;
+  min-height: 0;
+  padding: 0;
+  font-size: 22px;
+  margin: 0;
+}
+
+.menu-button:disabled,
+.small-button:disabled,
+.menu-button.disabled,
+.small-button.disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+
+.menu-button:active,
+.small-button:active {
+  transform: scale(0.97);
+}
+
+/* ── ANSWER CARDS (Would-You-Rather Option A / Option B) ──────── */
+#optionsContainer {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--button-gap);
+  max-width: var(--main-button-width);
+  margin: 0 auto;
+}
+
+.guess-option {
+  width: var(--main-button-width);
+  max-width: 100%;
+  font-weight: 800 !important;
+  padding: 30px 34px;
+  margin: 0 !important;
+  font-size: var(--font-main-button);
+  text-align: center;
+  min-height: var(--choice-button-height);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transform: scale(1);
+  text-wrap: balance;
+  line-height: 1.15;
+  animation: cardAppear 0.2s ease-out both;
+}
+
+@keyframes cardAppear {
+  from { transform: scale(0.95); opacity: 0.6; }
+  to   { transform: scale(1); opacity: 1; }
+}
+
+.guess-option.selected {
+  transform: scale(0.98);
+  filter: brightness(1.2) drop-shadow(0 0 14px rgba(255, 255, 255, 0.55));
+}
+
+.guess-option.locked {
+  opacity: 0.45;
+  pointer-events: none;
+}
+
+/* ── DIALOG / OVERLAY SURFACES — big, clean cartoon panels ─────── */
+.alert-container,
+.category-dialog-container,
+.qlimit-container,
+.suggestion-dialog-container {
+  width: min(92vw, 720px);
+  max-width: 720px;
+  padding: 44px 40px;
+  margin: 0 auto;
+}
+
+.alert-message,
+.category-selected-status,
+.qlimit-subtitle,
+.suggestion-dialog-container p {
+  color: var(--game-white) !important;
+  font-size: clamp(1rem, 2.6vw, 1.3rem);
+  line-height: 1.4;
+}
+
+/* ── CATEGORY / OPTION GRID TILES — big square-ish tiles, neat grid ── */
+.category-grid,
+.qlimit-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: var(--button-gap);
+  width: 100%;
+  padding: 8px 0;
+}
+
+.category-dialog-btn,
+.qlimit-option {
+  width: 100% !important;
+  min-height: var(--category-tile-height) !important;
+  font-size: var(--font-category-button) !important;
+  font-weight: 800 !important;
+  padding: 18px 20px !important;
+  margin: 0 !important;
+  display: flex !important;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  line-height: 1.1;
+  cursor: pointer;
+  color: var(--game-white) !important;
+  transition: transform 0.18s ease-out, filter 0.18s ease-out;
+}
+
+.category-dialog-btn.selected,
+.qlimit-option.selected {
+  transform: scale(1.06);
+  filter: brightness(1.25) drop-shadow(0 0 16px rgba(255, 255, 255, 0.6));
+}
+
+.category-empty-message {
+  color: var(--game-white) !important;
+  font-size: var(--font-category-button);
+  text-align: center;
+  padding: 30px 10px;
+  grid-column: 1 / -1;
+}
+
+/* ── SIZE / LAYOUT MODIFIERS — dimensions only ────────────────── */
+@media (min-width: 768px) {
+  .menu-button,
+  .guess-option,
+  .alert-container,
+  .category-dialog-container,
+  .qlimit-container,
+  .suggestion-dialog-container {
+    max-width: 720px;
+  }
+}
+
+@media (max-width: 480px) {
+  :root {
+    --font-title: clamp(40px, 11vw, 64px);
+  }
+}
+
+/* On very narrow phones: collapse lobby grid to single column */
+@media (max-width: 430px) {
+  .lobby-action-grid {
+    grid-template-columns: 1fr;
+  }
+  .lobby-action-grid #startGameBtn {
+    grid-column: auto;
+  }
+  :root {
+    --cta-width: min(88vw, 900px);
+    --main-button-width: min(92vw, 680px);
+  }
+}
+
+/* ── ANIMATION SAFETY — kill any legacy shadow/glow keyframes ── */
+.menu-button, .menu-button *, .small-button, .small-button * {
+  animation-name: none !important;
+}
+
+/* ── GLOBAL SAFETY NET ──────────────────────────────────────────
+   Legacy per-page CSS still attaches hard black box-shadows,
+   text-shadows, borders and outlines to alert/dialog chrome
+   (alert-icon, alert-title, alert-body, back-button, etc).
+   Catch every one of them by class-name substring so the
+   "no black shadows, no outlines/strokes" rule holds everywhere,
+   without needing to enumerate every legacy class by hand. ── */
+[class*="alert"],
+[class*="dialog"],
+[class*="qlimit"],
+[class*="suggestion"],
+[class*="category"],
+[class*="back-button"],
+[class*="btn"],
+.guess-option,
+.menu-button,
+.small-button,
+h1, h2, h3, h4, h5 {
+  box-shadow: none !important;
+  border: none !important;
+  outline: none !important;
+  -webkit-text-stroke: 0 !important;
+}
+
+/* Non-button chrome (headers, alert/dialog panels, titles) stays flat
+   with no text-shadow. Buttons are the one exception — see the
+   "BUTTON TEXT READABILITY" block near the end of this file, which
+   restores a strong black text-shadow specifically on button labels
+   so text stays legible against a background-blended button fill. */
+[class*="alert"]:not(.menu-button):not(.small-button),
+[class*="dialog"]:not(.menu-button):not(.small-button),
+[class*="qlimit"]:not(.menu-button):not(.small-button),
+[class*="suggestion"]:not(.menu-button):not(.small-button),
+[class*="category"]:not(.menu-button):not(.small-button),
+[class*="back-button"]:not(.menu-button):not(.small-button),
+h1, h2, h3, h4, h5 {
+  text-shadow: var(--tf-text-shadow) !important;
+}
+
+.alert-overlay,
+.category-dialog-overlay,
+.qlimit-overlay,
+.suggestion-dialog-overlay {
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+}
+
+/* ── TEXT RENDERING — CLEAN, NO OUTLINE/STROKE/SHADOW ──────────────
+   Legacy per-page CSS puts hard black text-shadows/strokes on dozens
+   of one-off IDs/headers, buttons and dialogs (#chooseHeader,
+   #playersHeader, #roundProgress, category buttons, toasts, etc).
+   Rather than chase every one, ban text-shadow and -webkit-text-stroke
+   everywhere in the game — every piece of text (including button
+   labels, headers, dialogs and Arabic text) renders using only the
+   font itself: no shadow, no stroke, no glow/emboss/bevel/simulated
+   border. Text color relies on the existing #F2F459/yellow/white palette
+   for contrast instead of shadow effects. ── */
+.menu-button,
+.small-button,
+.guess-option,
+.language-toggle,
+.language-option {
+  color: var(--game-white) !important;
+}
+body,
+body * {
+  text-shadow: var(--tf-text-shadow) !important;
+  -webkit-text-stroke: 0 !important;
+}
+
+html body input::placeholder,
+html body textarea::placeholder {
+  text-shadow: var(--tf-text-shadow) !important;
+}
+
+/* Decorative icon glyphs are not typography and retain their existing rendering. */
+html body .bi,
+html body .bi::before,
+html body .bi::after {
+  text-shadow: none !important;
+}
+
+
+/* ── RELEASE UI POLISH: viewport safety and centered questions ── */
+html,
+body {
+  width: 100%;
+  max-width: 100vw;
+  overflow-x: hidden;
+  overscroll-behavior-x: none;
+  touch-action: pan-y pinch-zoom;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+html::-webkit-scrollbar,
+body::-webkit-scrollbar,
+*::-webkit-scrollbar {
+  width: 0;
+  height: 0;
+  display: none;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+img,
+svg,
+video,
+canvas {
+  max-width: 100%;
+  height: auto;
+}
+
+body > *,
+.container,
+.game-container,
+.text-center.w-100,
+[class*="card"],
+[class*="panel"] {
+  max-width: 100%;
+}
+
+/* Question prompt/card text stays geometrically centered in both languages. */
+#questionSectionprime,
+.question-card,
+.question-text,
+[data-question-card] {
+  width: 100%;
+  max-width: var(--main-button-width);
+  min-height: clamp(64px, 10vh, 112px);
+  margin-inline: auto;
+  padding-block: 14px;
+  padding-inline: clamp(20px, 6vw, 44px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center !important;
+  text-wrap: balance;
+  overflow-wrap: anywhere;
+}
+
+/* Keep the host controls two columns on every usable phone width. */
+@media (min-width: 320px) {
+  .lobby-action-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .lobby-action-grid #startGameBtn {
+    grid-column: 1 / -1;
+  }
+}
+
+
+/* ============================================================
+   UI POLISH V1 — shared premium presentation system
+   Presentation only: no gameplay or data behavior lives here.
+   ============================================================ */
+:root {
+  --tf-space-1: 4px;
+  --tf-space-2: 8px;
+  --tf-space-3: 12px;
+  --tf-space-4: 16px;
+  --tf-space-5: 24px;
+  --tf-space-6: 32px;
+  --tf-space-7: 48px;
+  --tf-control-min-height: 56px;
+  --tf-icon-size: 22px;
+  --tf-motion-fast: 120ms;
+  --tf-motion-round: 280ms;
+  --tf-panel-width: min(92vw, 680px);
+  --tf-surface: #701444;
+  --tf-surface-deep: #4d0c31;
+  --tf-accent: #F2F459;
+  --tf-success: #21b866;
+  --tf-danger: #d94b62;
+}
+
+.tf-sr-only {
+  position: fixed !important;
+  width: 1px !important;
+  height: 1px !important;
+  padding: 0 !important;
+  margin: -1px !important;
+  overflow: hidden !important;
+  clip: rect(0, 0, 0, 0) !important;
+  white-space: nowrap !important;
+}
+
+button,
+[role="button"] {
+  min-height: var(--tf-control-min-height);
+  transition:
+    transform var(--tf-motion-fast) ease-out,
+    opacity var(--tf-motion-fast) ease-out,
+    filter var(--tf-motion-fast) ease-out !important;
+  touch-action: manipulation;
+}
+
+button:not(:disabled):hover,
+[role="button"]:not([aria-disabled="true"]):hover {
+  filter: brightness(1.06);
+}
+
+button.is-pressed,
+button:not(:disabled):active,
+[role="button"].is-pressed {
+  transform: scale(0.965) !important;
+  filter: brightness(0.96);
+}
+
+button:disabled,
+button[aria-busy="true"],
+[role="button"][aria-disabled="true"] {
+  opacity: 0.5 !important;
+  cursor: not-allowed !important;
+  filter: saturate(0.7) !important;
+}
+
+button:focus-visible,
+[role="button"]:focus-visible,
+input:focus-visible {
+  outline: 3px solid var(--tf-accent) !important;
+  outline-offset: 4px !important;
+}
+
+button i,
+[role="button"] i {
+  width: var(--tf-icon-size);
+  height: var(--tf-icon-size);
+  font-size: var(--tf-icon-size);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 var(--tf-icon-size);
+}
+
+.is-loading {
+  pointer-events: none;
+}
+
+.tf-button-spinner {
+  width: 17px;
+  height: 17px;
+  display: inline-block;
+  margin-inline-end: var(--tf-space-2);
+  background: currentColor;
+  animation: tfSpinner 650ms steps(4, end) infinite;
+  transform: rotate(45deg);
+}
+
+@keyframes tfSpinner {
+  to { transform: rotate(405deg); }
+}
+
+/* Branded loading state */
+.tf-ui-state {
+  position: fixed;
+  inset: 0;
+  z-index: 12000;
+  display: grid;
+  place-items: center;
+  padding: var(--tf-space-5);
+  background: rgba(34, 4, 23, 0.9);
+  opacity: 0;
+  transition: opacity 160ms ease-out;
+}
+
+.tf-ui-state.is-visible {
+  opacity: 1;
+}
+
+.tf-ui-state-card {
+  width: var(--tf-panel-width);
+  min-height: 240px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--tf-space-3);
+  text-align: center;
+  padding: var(--tf-space-6);
+  color: white;
+  background: var(--tf-surface);
+  -webkit-mask-image: url('buttons/blob-wide-1.webp');
+  mask-image: url('buttons/blob-wide-1.webp');
+  -webkit-mask-size: 100% 100%;
+  mask-size: 100% 100%;
+}
+
+.tf-ui-orbit {
+  display: flex;
+  gap: var(--tf-space-2);
+  min-height: 28px;
+  align-items: center;
+}
+
+.tf-ui-orbit span {
+  width: 12px !important;
+  height: 12px !important;
+  min-width: 12px !important;
+  min-height: 12px !important;
+  aspect-ratio: 1 / 1 !important;
+  border: 0 !important;
+  border-radius: 999px !important;
+  clip-path: circle(50%);
+  background: var(--tf-accent) !important;
+  box-shadow: none !important;
+  opacity: 1 !important;
+  filter: none !important;
+  animation: tfDot 900ms ease-in-out infinite;
+}
+
+.tf-ui-orbit span:nth-child(2) { animation-delay: 120ms; }
+.tf-ui-orbit span:nth-child(3) { animation-delay: 240ms; }
+
+@keyframes tfDot {
+  0%, 100% { transform: translateY(0); opacity: 1; filter: none; }
+  50% { transform: translateY(-9px); opacity: 1; filter: none; }
+}
+
+.tf-ui-state-title,
+.tf-empty-title,
+.tf-end-title {
+  margin: 0;
+  color: var(--tf-accent) !important;
+  font-size: clamp(1.65rem, 5vw, 2.5rem) !important;
+  line-height: 1.15;
+}
+
+.tf-ui-state-message,
+.tf-empty-message,
+.tf-end-subtitle {
+  margin: 0;
+  color: white;
+  font-size: clamp(1rem, 3vw, 1.2rem);
+  line-height: 1.5;
+}
+
+/* Realtime and connection status */
+.tf-ui-banner {
+  position: fixed;
+  top: max(12px, env(safe-area-inset-top));
+  left: 50%;
+  z-index: 13000;
+  width: min(calc(100vw - 24px), 640px);
+  min-height: 52px;
+  transform: translateX(-50%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--tf-space-3);
+  padding: 12px 18px;
+  color: white;
+  background: var(--tf-surface-deep);
+  font-weight: 800;
+  text-align: center;
+  animation: tfBannerIn 220ms ease-out both;
+}
+
+.tf-ui-banner.is-error { background: var(--tf-danger); }
+.tf-ui-banner.is-success { background: var(--tf-success); }
+
+.tf-ui-banner-action {
+  min-height: 36px;
+  padding: 6px 12px;
+  color: var(--tf-surface-deep);
+  background: var(--tf-accent);
+  border: 0;
+  font: inherit;
+}
+
+@keyframes tfBannerIn {
+  from { opacity: 0; transform: translate(-50%, -16px); }
+  to { opacity: 1; transform: translate(-50%, 0); }
+}
+
+/* Empty / invalid-room recovery */
+.tf-empty-state {
+  width: var(--tf-panel-width);
+  min-height: min(62vh, 520px);
+  margin: max(110px, 12vh) auto var(--tf-space-6);
+  padding: var(--tf-space-7) var(--tf-space-6);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--tf-space-4);
+  text-align: center;
+  color: white;
+  background: var(--tf-surface);
+  -webkit-mask-image: url('buttons/blob-wide-1.webp');
+  mask-image: url('buttons/blob-wide-1.webp');
+  -webkit-mask-size: 100% 100%;
+  mask-size: 100% 100%;
+  animation: tfStateIn 280ms ease-out both;
+}
+
+.tf-empty-icon {
+  width: 60px;
+  height: 60px;
+  display: grid;
+  place-items: center;
+  color: var(--tf-surface-deep);
+  background: var(--tf-accent);
+  font-size: 2rem;
+  font-weight: 900;
+  transform: rotate(3deg);
+}
+
+.tf-empty-action {
+  margin-top: var(--tf-space-2) !important;
+}
+
+/* Round transition */
+.tf-round-enter {
+  animation: tfRoundIn var(--tf-motion-round) ease-out both;
+}
+
+@keyframes tfRoundIn {
+  from { opacity: 0; transform: translateY(14px) scale(0.985); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+/* Premium end-game presentation */
+.tf-game-ended .tf-app-shell,
+.tf-game-ended > .voice-controls {
+  display: none !important;
+}
+
+.tf-end-screen {
+  position: relative;
+  width: var(--tf-panel-width);
+  min-height: 0;
+  margin: 0 auto var(--tf-space-6);
+  padding: clamp(34px, 6vw, 64px) clamp(22px, 5vw, 48px);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--tf-space-4);
+  text-align: center;
+  color: white;
+  background: var(--tf-surface);
+  -webkit-mask-image: url('buttons/blob-wide-1.webp');
+  mask-image: url('buttons/blob-wide-1.webp');
+  -webkit-mask-size: 100% 100%;
+  mask-size: 100% 100%;
+  overflow: hidden;
+  animation: tfStateIn 320ms ease-out both;
+}
+
+.tf-game-ended {
+  padding-top: max(12px, env(safe-area-inset-top)) !important;
+}
+
+.tf-winner-mark {
+  font-size: clamp(2.6rem, 8vw, 4.6rem);
+  line-height: 1;
+  animation: tfWinnerPop 460ms ease-out both;
+}
+
+.tf-final-leaderboard {
+  width: min(100%, 480px);
+  display: grid;
+  gap: var(--tf-space-2);
+  margin: var(--tf-space-2) 0;
+}
+
+.tf-final-player {
+  min-height: 54px;
+  display: grid;
+  grid-template-columns: 44px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: var(--tf-space-3);
+  padding: 10px 16px;
+  background: rgba(0, 0, 0, 0.18);
+  text-align: start;
+  font-weight: 800;
+}
+
+.tf-final-player.is-winner {
+  color: var(--tf-surface-deep);
+  background: var(--tf-accent);
+}
+
+.tf-final-rank {
+  font-size: 1.15rem;
+  font-weight: 900;
+}
+
+.tf-final-score {
+  font-variant-numeric: tabular-nums;
+  font-weight: 900;
+}
+
+.tf-end-actions {
+  width: min(100%, 480px);
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--tf-space-3);
+}
+
+.tf-end-actions .menu-button {
+  width: 100% !important;
+  min-width: 0 !important;
+  min-height: 58px !important;
+  margin: 0 !important;
+  padding: 10px !important;
+  font-size: clamp(0.9rem, 3vw, 1.1rem) !important;
+}
+
+.tf-end-actions .tf-return-home {
+  grid-column: 1 / -1;
+  justify-self: center;
+  width: min(100%, 380px) !important;
+  min-height: 72px !important;
+  padding: 14px clamp(30px, 9vw, 54px) !important;
+  box-sizing: border-box;
+  overflow: visible !important;
+  white-space: nowrap;
+  text-align: center;
+  direction: inherit;
+}
+
+[dir="rtl"] .tf-end-actions .tf-return-home {
+  text-align: center;
+}
+
+.tf-celebration {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.tf-celebration span {
+  position: absolute;
+  left: var(--x);
+  top: -24px;
+  width: 9px;
+  height: 16px;
+  background: var(--tf-accent);
+  animation: tfCelebrate 1800ms calc(var(--i) * 55ms) ease-in both;
+}
+
+.tf-celebration span:nth-child(3n) { background: #8ee9b6; }
+.tf-celebration span:nth-child(3n + 1) { background: #ffffff; }
+
+@keyframes tfStateIn {
+  from { opacity: 0; transform: translateY(18px) scale(0.98); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+@keyframes tfWinnerPop {
+  0% { opacity: 0; transform: scale(0.7) rotate(-8deg); }
+  70% { transform: scale(1.08) rotate(2deg); }
+  100% { opacity: 1; transform: scale(1) rotate(0); }
+}
+
+@keyframes tfCelebrate {
+  0% { opacity: 0; transform: translateY(0) rotate(0); }
+  12% { opacity: 1; }
+  100% { opacity: 0; transform: translateY(82vh) rotate(300deg); }
+}
+
+/* Consistent panel and modal rhythm */
+.alert-container,
+.category-dialog-container,
+.qlimit-container,
+.suggestion-dialog-container {
+  width: var(--tf-panel-width) !important;
+  padding: clamp(24px, 5vw, 40px) !important;
+}
+
+.alert-header,
+.category-dialog-header,
+.qlimit-header,
+.suggestion-dialog-header {
+  padding: var(--tf-space-4) var(--tf-space-5) !important;
+}
+
+.alert-body,
+.suggestion-form {
+  padding: var(--tf-space-5) !important;
+}
+
+.alert-footer,
+.suggestion-dialog-footer {
+  gap: var(--tf-space-3) !important;
+  padding: var(--tf-space-4) var(--tf-space-5) !important;
+}
+
+@media (max-width: 520px) {
+  :root {
+    --tf-space-7: 36px;
+    --tf-control-min-height: 52px;
+  }
+
+  .tf-ui-state-card {
+    min-height: 210px;
+    padding: var(--tf-space-5);
+  }
+
+  .tf-empty-state,
+  .tf-end-screen {
+    width: calc(100vw - 20px);
+  }
+
+  .tf-end-actions {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 1ms !important;
+    animation-iteration-count: 1 !important;
+    scroll-behavior: auto !important;
+    transition-duration: 1ms !important;
+  }
+}
+
+
+.tf-round-leaving {
+  opacity: 0.35;
+  transform: translateY(-8px) scale(0.99);
+  transition:
+    opacity 140ms ease-in,
+    transform 140ms ease-in;
+  pointer-events: none;
+}
+
+
+button.selected,
+button[aria-pressed="true"],
+.guess-option.selected {
+  filter: brightness(1.12) !important;
+  transform: scale(0.985);
+}
+
+#waitingPlayersText::after {
+  content: " · · ·";
+  display: inline-block;
+  min-width: 44px;
+  color: var(--tf-accent);
+  letter-spacing: 2px;
+  animation: tfWaitingPulse 1100ms ease-in-out infinite;
+}
+
+@keyframes tfWaitingPulse {
+  0%, 100% { opacity: 0.35; transform: translateY(0); }
+  50% { opacity: 1; transform: translateY(-2px); }
+}
+
+/* Gameplay answer alignment: one centered shared width on every viewport. */
+#optionsContainer {
+  width: var(--main-button-width);
+  max-width: calc(100% - 24px);
+  margin-inline: auto !important;
+  box-sizing: border-box;
+}
+
+#optionsContainer > .guess-option {
+  width: 100% !important;
+  max-width: 100% !important;
+  margin-inline: auto !important;
+  box-sizing: border-box;
+}
+
+/* Compact gameplay hierarchy: question and answers remain above the fold. */
+#chooseHeader,
+#waitingHeader {
+  width: min(88vw, 560px);
+  margin: 4px auto 8px !important;
+  font-size: clamp(1.15rem, 4.2vw, 1.75rem) !important;
+  line-height: 1.12 !important;
+}
+
+html[lang="en"] #chooseHeader,
+html[lang="en"] #waitingHeader {
+  width: min(50vw, 360px);
+  max-width: 50vw;
+  font-size: clamp(0.95rem, 3.4vw, 1.35rem) !important;
+  white-space: nowrap;
+  word-break: normal;
+  overflow-wrap: normal;
+}
+
+#roundProgress,
+#turnProgress {
+  margin-bottom: 3px !important;
+  padding-block: 2px !important;
+  line-height: 1.1 !important;
+}
+
+#questionSectionprime {
+  min-height: clamp(58px, 8vh, 88px);
+  padding-block: 8px;
+  font-size: clamp(1.25rem, 4.8vw, 2rem);
+  line-height: 1.25;
+}
+
+#optionsContainer {
+  gap: clamp(10px, 1.8vh, 16px);
+  margin-top: 4px;
+  margin-bottom: 8px;
+}
+
+#optionsContainer > .guess-option {
+  min-height: clamp(112px, 16vh, 170px);
+  padding-block: clamp(20px, 3.5vh, 30px);
+}
+
+@media (max-height: 740px) {
+  #chooseHeader,
+  #waitingHeader {
+    margin-block: 2px 5px !important;
+  }
+
+  #questionSectionprime {
+    min-height: 54px;
+    padding-block: 5px;
+  }
+
+  #optionsContainer > .guess-option {
+    min-height: clamp(104px, 15vh, 126px);
+  }
+}
+
+/* Universal text containment: wrapping is preferred to clipping or overflow. */
+p,
+h1,
+h2,
+h3,
+h4,
+h5,
+h6,
+label,
+textarea,
+.alert-message,
+.tf-ui-state-message {
+  max-width: 100%;
+  overflow-wrap: anywhere;
+  word-break: normal;
+}
+
+/* Button labels use their own containment rules instead of prose wrapping. */
+button:not(.guess-option),
+[role="button"]:not(.guess-option),
+.menu-button:not(.guess-option),
+.small-button {
+  max-width: 100%;
+  white-space: nowrap !important;
+  overflow-wrap: normal !important;
+  word-break: keep-all !important;
+  text-align: center !important;
+  align-items: center;
+  justify-content: center;
+  line-height: 1.05 !important;
+}
+
+button:not(.guess-option) > span,
+[role="button"]:not(.guess-option) > span {
+  max-width: 100%;
+  white-space: inherit !important;
+  overflow-wrap: normal !important;
+  word-break: inherit !important;
+}
+
+#chooseHeader,
+#waitingHeader {
+  max-width: calc(100vw - 32px) !important;
+  width: min(92vw, 620px) !important;
+  white-space: normal !important;
+  overflow: visible;
+}
+
+/* A generic database heading is redundant with the gameplay instruction. */
+#questionSectionprime:empty {
+  display: none !important;
+}
+
+/* Plain, vertically stacked player names in lobby and gameplay. */
+#playersContainer {
+  width: 100%;
+  display: flex !important;
+  flex-direction: column !important;
+  flex-wrap: nowrap !important;
+  align-items: center !important;
+  justify-content: flex-start !important;
+  gap: 8px !important;
+}
+
+#playersContainer .player-box,
+#playersContainer .player-box.is-current-player {
+  width: 100% !important;
+  max-width: min(88vw, 360px) !important;
+  min-width: 0 !important;
+  min-height: 0 !important;
+  height: auto !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  color: #fff !important;
+  background: transparent !important;
+  border: 0 !important;
+  outline: 0 !important;
+  box-shadow: none !important;
+  transform: none !important;
+  -webkit-mask-image: none !important;
+  mask-image: none !important;
+  font-family: var(--tf-font-active);
+  font-size: clamp(1rem, 3.8vw, 1.25rem);
+  font-weight: 700;
+  line-height: 1.35;
+  text-align: center;
+}
+
+#playersContainer .remove-player-btn {
+  width: auto !important;
+  height: auto !important;
+  min-width: 32px !important;
+  min-height: 32px !important;
+  margin: 0 !important;
+  padding: 2px 6px !important;
+  color: #fff !important;
+  background: transparent !important;
+  -webkit-mask-image: none !important;
+  mask-image: none !important;
+  font-size: 0.85rem !important;
+}
+
+/* Full-width gameplay status: centered by normal flow, with no horizontal offset. */
+body > .container.text-center {
+  width: 100% !important;
+  max-width: 100% !important;
+  margin-inline: 0 !important;
+  padding-inline: 0 !important;
+}
+
+#chooseHeader,
+#waitingHeader {
+  position: static !important;
+  inset: auto !important;
+  left: auto !important;
+  right: auto !important;
+  translate: none !important;
+  transform: none !important;
+  width: 100% !important;
+  max-width: 100% !important;
+  margin-left: 0 !important;
+  margin-right: 0 !important;
+  padding-inline: 16px !important;
+  box-sizing: border-box;
+  text-align: center !important;
+  align-self: stretch;
+}
+
+
+/* ── GAMEPLAY ANSWER FEEDBACK ─────────────────────────────── */
+.guess-option {
+  position: relative;
+  opacity: 1 !important;
+}
+
+.guess-option.selected,
+.guess-option.selected:disabled {
+  opacity: 1 !important;
+  transform: scale(1.025) !important;
+  filter: brightness(1.18) saturate(1.12) !important;
+  cursor: default !important;
+  z-index: 2;
+}
+
+.guess-option.selected::after {
+  content: none;
+  display: none;
+}
+
+.guess-option.is-inert,
+.guess-option.is-inert:hover,
+.guess-option.is-inert:active,
+.guess-option.is-inert:focus {
+  opacity: 1 !important;
+  transform: none !important;
+  filter: saturate(0.55) brightness(0.82) !important;
+  animation: none !important;
+  transition: none !important;
+  pointer-events: none !important;
+  cursor: default !important;
+}
+
+.guess-option:disabled {
+  opacity: 1 !important;
+}
+
+@keyframes tfSelectionPop {
+  0% { transform: scale(0.72); opacity: 0; }
+  65% { transform: scale(1.12); opacity: 1; }
+  100% { transform: scale(1); opacity: 1; }
+}
+
+.personal-result-toast {
+  position: fixed;
+  top: 18%;
+  left: 50%;
+  z-index: 11020;
+  width: min(76vw, 280px);
+  min-height: 78px;
+  padding: 22px 34px;
+  display: grid;
+  place-items: center;
+  box-sizing: border-box;
+  color: #fff;
+  font-family: var(--tf-font-active);
+  font-size: clamp(1.25rem, 5vw, 1.75rem);
+  font-weight: 900;
+  text-align: center;
+  line-height: 1.15;
+  pointer-events: none;
+  transform: translateX(-50%) scale(0.9);
+  animation: tfPersonalResultIn 220ms ease-out forwards;
+  -webkit-mask-image: url('buttons/blob-wide-1.webp');
+  mask-image: url('buttons/blob-wide-1.webp');
+  -webkit-mask-size: 100% 100%;
+  mask-size: 100% 100%;
+  -webkit-mask-repeat: no-repeat;
+  mask-repeat: no-repeat;
+}
+
+.personal-result-toast.is-correct,
+.result-feed-item.is-correct {
+  background: var(--tf-feedback-success) !important;
+  color: #ffffff !important;
+}
+
+.personal-result-toast.is-wrong,
+.result-feed-item.is-wrong {
+  background: var(--tf-feedback-error) !important;
+  color: #ffffff !important;
+}
+
+.personal-result-toast.is-leaving {
+  animation: tfPersonalResultOut 280ms ease-in forwards;
+}
+
+@keyframes tfPersonalResultIn {
+  0% { opacity: 0; transform: translateX(-50%) scale(0.9) translateY(-8px); }
+  70% { opacity: 1; transform: translateX(-50%) scale(1.035) translateY(0); }
+  100% { opacity: 1; transform: translateX(-50%) scale(1) translateY(0); }
+}
+
+@keyframes tfPersonalResultOut {
+  from { opacity: 1; transform: translateX(-50%) translateY(0) scale(1); }
+  to { opacity: 0; transform: translateX(-50%) translateY(14px) scale(0.98); }
+}
+
+.result-feed {
+  position: fixed;
+  top: calc(max(12px, env(safe-area-inset-top)) + 68px);
+  right: max(10px, env(safe-area-inset-right));
+  z-index: 10010;
+  width: min(72vw, 300px);
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+  pointer-events: none;
+}
+
+.result-feed-item {
+  width: 100%;
+  min-height: 58px;
+  padding: 16px 28px;
+  display: grid;
+  place-items: center;
+  box-sizing: border-box;
+  color: #fff;
+  font-family: var(--tf-font-active);
+  font-size: clamp(0.82rem, 3.4vw, 1rem);
+  font-weight: 800;
+  line-height: 1.2;
+  text-align: center;
+  overflow-wrap: anywhere;
+  animation: tfFeedIn 220ms ease-out both;
+  -webkit-mask-image: url('buttons/blob-wide-1.webp');
+  mask-image: url('buttons/blob-wide-1.webp');
+  -webkit-mask-size: 100% 100%;
+  mask-size: 100% 100%;
+  -webkit-mask-repeat: no-repeat;
+  mask-repeat: no-repeat;
+}
+
+.result-feed-item.is-leaving {
+  animation: tfFeedOut 260ms ease-in forwards;
+}
+
+@keyframes tfFeedIn {
+  0% { opacity: 0; transform: translateX(18px) scale(0.9); }
+  70% { opacity: 1; transform: translateX(-2px) scale(1.02); }
+  100% { opacity: 1; transform: translateX(0) scale(1); }
+}
+
+@keyframes tfFeedOut {
+  from { opacity: 1; transform: translateY(0) scale(1); }
+  to { opacity: 0; transform: translateY(12px) scale(0.98); }
+}
+
+@media (max-width: 380px) {
+  .result-feed {
+    width: min(68vw, 250px);
+  }
+
+  .result-feed-item {
+    min-height: 52px;
+    padding: 14px 24px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .guess-option.selected::after,
+  .personal-result-toast,
+  .personal-result-toast.is-leaving,
+  .result-feed-item,
+  .result-feed-item.is-leaving {
+    animation-duration: 1ms !important;
+  }
+}
+
+
+/* ── STABLE SHARED LOADING SURFACE ── */
+.tf-ui-state {
+  inset: 0 !important;
+  width: 100vw !important;
+  width: 100dvw !important;
+  max-width: none !important;
+  margin: 0 !important;
+  padding:
+    max(20px, env(safe-area-inset-top))
+    max(16px, env(safe-area-inset-right))
+    max(20px, env(safe-area-inset-bottom))
+    max(16px, env(safe-area-inset-left)) !important;
+  place-items: center !important;
+  overflow: hidden;
+}
+
+.tf-ui-state-card {
+  inline-size: min(calc(100vw - 32px), 680px) !important;
+  inline-size: min(calc(100dvw - 32px), 680px) !important;
+  min-inline-size: min(calc(100vw - 32px), 680px);
+  max-inline-size: min(calc(100vw - 32px), 680px) !important;
+  min-height: clamp(210px, 30svh, 260px);
+  margin: 0 !important;
+  place-self: center;
+  flex: none;
+  contain: layout;
+}
+
+.tf-ui-state-title,
+.tf-ui-state-message {
+  width: 100%;
+  margin-inline: 0;
+  text-align: center;
+  overflow-wrap: anywhere;
+}
+
+.tf-ui-state-title {
+  min-height: 2.3em;
+  display: grid;
+  place-items: center;
+}
+
+.tf-ui-state-message {
+  min-height: 3em;
+}
+
+@supports not (width: 100dvw) {
+  .tf-ui-state {
+    width: 100vw !important;
+  }
+}
+
+
+/* ── SHARED PATH-BASED ONBOARDING DOT ORBIT ── */
+.tf-onboarding-outline {
+  position: absolute;
+  z-index: 10;
+  pointer-events: none;
+  overflow: visible;
+  background: transparent;
+}
+
+.tf-orbit-dot {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 6px;
+  height: 6px;
+  margin: -3px 0 0 -3px;
+  border-radius: 999px !important;
+  clip-path: circle(50%);
+  background: var(--game-yellow);
+  offset-anchor: center;
+  pointer-events: none;
+  will-change: offset-distance;
+}
+
+.tf-onboarding-outline[hidden] {
+  display: none !important;
+}
+
+/* Hand-drawn inward arrows: stationary, crisp, and visibility-only blinking. */
+.tf-focus-arrow {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: clamp(28px, 7vw, 42px);
+  height: auto;
+  overflow: visible;
+  color: var(--game-yellow, #F2F459);
+  opacity: 1;
+  visibility: visible;
+  filter: none;
+  pointer-events: none;
+  transform-origin: center;
+  animation: tfArrowBlink 1000ms steps(1, end) infinite;
+}
+
+.tf-focus-arrow path {
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 3.2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  vector-effect: non-scaling-stroke;
+}
+
+.tf-focus-arrow:nth-child(3n + 2) {
+  animation-delay: -35ms;
+}
+
+.tf-focus-arrow:nth-child(3n) {
+  animation-delay: -70ms;
+}
+
+@keyframes tfArrowBlink {
+  0%, 49.999% {
+    visibility: visible;
+    opacity: 1;
+    filter: none;
+  }
+  50%, 100% {
+    visibility: hidden;
+    opacity: 1;
+    filter: none;
+  }
+}
+
+
+/* Bottom-of-lobby suggestion action. */
+.lobby-suggest-footer {
+  width: 100%;
+  margin: clamp(24px, 6vh, 48px) auto 12px;
+  display: flex;
+  justify-content: center;
+}
+
+#suggestCategoryBtn {
+  width: min(88vw, 680px) !important;
+  margin: 0 auto !important;
+  padding-inline: clamp(24px, 6vw, 44px) !important;
+  font-size: clamp(1rem, 3.8vw, 1.35rem) !important;
+}
+
+/* Suggestion overlay: title and form float directly on the page background. */
+.suggestion-dialog-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 12000;
+  display: grid;
+  place-items: center;
+  padding: 24px;
+  overflow-y: auto;
+  background: var(--tf-surface-deep, #4d0c31);
+}
+
+.suggestion-dialog-screen {
+  position: relative;
+  width: min(92vw, 620px);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 18px;
+  padding: 20px 0;
+  color: #fff;
+  background: transparent !important;
+  border: 0 !important;
+  outline: 0 !important;
+  box-shadow: none !important;
+}
+
+.suggestion-floating-title {
+  width: 100%;
+  margin: 0;
+  padding: 0 48px;
+  color: var(--game-yellow) !important;
+  font-family: var(--tf-font-active) !important;
+  font-size: clamp(1.5rem, 5.5vw, 2.5rem) !important;
+  font-weight: 900;
+  line-height: 1.2;
+  text-align: center;
+  background: transparent !important;
+}
+
+.suggestion-dialog-close {
+  position: absolute !important;
+  top: -8px;
+  inset-inline-end: 0;
+  width: 44px !important;
+  height: 44px !important;
+  min-width: 44px !important;
+  min-height: 44px !important;
+  margin: 0 !important;
+  padding: 0 !important;
+}
+
+.suggestion-form {
+  width: 100%;
+  padding: 0 !important;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  background: transparent !important;
+}
+
+.suggestion-form label {
+  width: min(88vw, 520px);
+  color: #fff;
+  font-family: var(--tf-font-active);
+  font-weight: 800;
+  text-align: start;
+}
+
+.suggestion-blob-input {
+  width: min(88vw, 520px);
+  min-height: 64px;
+  padding: 16px 34px;
+  box-sizing: border-box;
+  color: #fff;
+  caret-color: #F2F459;
+  background: #701444;
+  border: 0;
+  outline: 0;
+  font-family: var(--tf-font-active);
+  font-size: 1rem;
+  -webkit-mask: url('buttons/blob-wide-1.webp') center / 100% 100% no-repeat;
+  mask: url('buttons/blob-wide-1.webp') center / 100% 100% no-repeat;
+}
+
+.suggestion-blob-input:focus {
+  background: #821952;
+}
+
+.suggestion-submit {
+  width: min(88vw, 520px) !important;
+  margin-top: 12px !important;
+}
+
+
+/* ── SHARED TWO-BUTTON LANGUAGE SELECTOR ──
+   One component and one visual treatment for Home and Lobby. */
+.language-switcher-container {
+  position: fixed;
+  top: max(14px, env(safe-area-inset-top));
+  right: max(10px, env(safe-area-inset-right));
+  width: auto;
+  z-index: 2000;
+}
+
+.language-blob-group {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 4px;
+  width: calc(33.334vw + 4px);
+  max-width: 148px;
+}
+
+.language-option.language-blob {
+  width: clamp(46px, 16.667vw, 72px) !important;
+  height: clamp(46px, 16.667vw, 72px) !important;
+  min-width: 46px !important;
+  min-height: 46px !important;
+  aspect-ratio: 1 / 1 !important;
+  padding: 5px !important;
+  margin: 0 !important;
+  font-size: clamp(0.78rem, 3.8vw, 1rem) !important;
+  line-height: 1 !important;
+  opacity: 0.64;
+  border: 0 !important;
+  border-radius: 0 !important;
+  -webkit-mask-image: url('buttons/blob-circle.webp') !important;
+  mask-image: url('buttons/blob-circle.webp') !important;
+  -webkit-mask-size: 100% 100% !important;
+  mask-size: 100% 100% !important;
+  -webkit-mask-repeat: no-repeat !important;
+  mask-repeat: no-repeat !important;
+  -webkit-mask-position: center !important;
+  mask-position: center !important;
+}
+
+.language-option.language-blob.active {
+  opacity: 1;
+  transform: scale(1.08);
+  filter: brightness(1.2) !important;
+}
+
+.language-option.language-blob[data-lang="ar"] {
+  font-family: var(--tf-font-ar) !important;
+  font-size: clamp(0.92rem, 4.2vw, 1.14rem) !important;
+  line-height: 1 !important;
+}
+
+.language-option.language-blob[data-lang="en"] {
+  font-family: var(--tf-font-en) !important;
+}
+
+
+/* One language-aware type system for every TFADHLOON screen. */
+html[lang="ar"] {
+  --tf-font-active: var(--tf-font-ar);
+}
+
+html[lang="en"] {
+  --tf-font-active: var(--tf-font-en);
+}
+
+html[lang="ar"] body,
+html[lang="ar"] body *:not(.bi):not(.fa):not(.fas):not(.far):not(.fab):not(.fa-solid):not(.fa-regular):not(.fa-brands),
+html[lang="en"] body,
+html[lang="en"] body *:not(.bi):not(.fa):not(.fas):not(.far):not(.fab):not(.fa-solid):not(.fa-regular):not(.fa-brands) {
+  font-family: var(--tf-font-active) !important;
+}
+
+
+/* ── GLOBAL VERTICAL RHYTHM ───────────────────────────────────
+   One shared spacing scale drives every page, stack, grid and dialog. */
+:root {
+  --tf-rhythm-xs: var(--tf-space-1, 4px);
+  --tf-rhythm-sm: var(--tf-space-2, 8px);
+  --tf-rhythm-md: var(--tf-space-3, 12px);
+  --tf-rhythm-lg: var(--tf-space-4, 16px);
+  --tf-rhythm-section: var(--tf-space-5, 24px);
+  --tf-rhythm-screen: var(--tf-space-6, 32px);
+}
+
+.game-container,
+.text-center.w-100,
+.tf-ui-state-card,
+.nickname-card,
+.room-code-card,
+.alert-container,
+.category-dialog-container,
+.qlimit-container,
+.suggestion-dialog-container,
+.points-dashboard {
+  row-gap: var(--tf-rhythm-md) !important;
+}
+
+#optionsContainer,
+.lobby-action-grid,
+.category-grid,
+.qlimit-grid,
+.tf-confirm-actions,
+.alert-footer,
+.language-blob-group {
+  gap: var(--tf-rhythm-md) !important;
+}
+
+.qr-join-card,
+#playersContainer,
+.points-container {
+  gap: var(--tf-rhythm-sm) !important;
+}
+
+#chooseHeader,
+#waitingHeader,
+#waitingPlayersText,
+.category-dialog-title,
+.qlimit-title,
+.suggestion-dialog-title,
+.room-code-title,
+.scores-title,
+.locations-title {
+  margin-block-start: 0 !important;
+  margin-block-end: var(--tf-rhythm-md) !important;
+}
+
+#questionSectionprime,
+.question-card,
+.question-text,
+[data-question-card] {
+  margin-block-start: 0 !important;
+  margin-block-end: var(--tf-rhythm-md) !important;
+}
+
+#optionsContainer {
+  margin-block-start: 0 !important;
+  margin-block-end: var(--tf-rhythm-section) !important;
+}
+
+#playersHeader,
+.players-heading {
+  margin-block-start: var(--tf-rhythm-section) !important;
+  margin-block-end: var(--tf-rhythm-md) !important;
+}
+
+.alert-body,
+.alert-footer,
+.category-grid,
+.qlimit-grid,
+.suggestion-dialog-container p {
+  padding-block: var(--tf-rhythm-lg) !important;
+}
+
+
+/* ── GAMEPLAY PERCEIVED-PERFORMANCE LAYER ─────────────────────
+   Keep committed answer surfaces visually stable while network-backed state
+   catches up. Transitions use compositor-friendly opacity/filter/transform. */
+.tf-ui-state.is-leaving {
+  opacity: 0;
+  pointer-events: none;
+}
+
+.tf-confirm-overlay {
+  opacity: 1;
+  transition: opacity 160ms ease-out;
+}
+
+.tf-confirm-overlay.is-leaving {
+  opacity: 0;
+  pointer-events: none;
+}
+
+#optionsContainer .guess-option {
+  will-change: transform, filter;
+  transition:
+    transform 180ms cubic-bezier(0.2, 0.8, 0.2, 1),
+    filter 180ms ease-out !important;
+}
+
+#optionsContainer .guess-option.selected,
+#optionsContainer .guess-option.selected:disabled {
+  animation: none !important;
+}
+
+#optionsContainer .guess-option.is-inert,
+#optionsContainer .guess-option.is-inert:hover,
+#optionsContainer .guess-option.is-inert:active,
+#optionsContainer .guess-option.is-inert:focus {
+  transition:
+    transform 180ms cubic-bezier(0.2, 0.8, 0.2, 1),
+    filter 180ms ease-out !important;
+}
+
+#optionsContainer.is-committing {
+  pointer-events: none;
+}
+
+#optionsContainer.is-committing .guess-option.selected {
+  transform: scale(1.025) !important;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .tf-ui-state.is-leaving,
+  .tf-confirm-overlay,
+  #optionsContainer .guess-option,
+  #optionsContainer .guess-option.is-inert {
+    transition-duration: 1ms !important;
+  }
+}
+
+
+/* ============================================================
+   EXACT TYPOGRAPHY + CONTROL SYSTEM
+   This final cascade is authoritative. It maps legacy markup onto
+   one small system while preserving behavior and organic artwork.
+   ============================================================ */
+:root {
+  /* 4 / 8 / 16 / 24 / 32 / 48 / 64 spacing scale */
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 16px;
+  --space-4: 24px;
+  --space-5: 32px;
+  --space-6: 48px;
+  --space-7: 64px;
+
+  /* Six typography roles */
+  --type-display-size: clamp(2.75rem, 10vw, 6rem);
+  --type-heading-size: clamp(1.75rem, 6vw, 3rem);
+  --type-subheading-size: clamp(1.3rem, 4.5vw, 2rem);
+  --type-body-size: clamp(1rem, 3.5vw, 1.25rem);
+  --type-button-size: clamp(1.15rem, 4vw, 1.65rem);
+  --type-caption-size: clamp(0.85rem, 3vw, 1rem);
+  --type-display-leading: 1.05;
+  --type-heading-leading: 1.12;
+  --type-body-leading: 1.45;
+
+  /* One primary-button contract */
+  --button-primary-width: min(88vw, 520px);
+  --button-primary-height: clamp(72px, 9vh, 88px);
+  --button-padding-block: var(--space-3);
+  --button-padding-inline: var(--space-4);
+  --button-radius: 0px;
+  --button-icon-gap: var(--space-2);
+
+  /* One blob-family contract: no outlines or shadows by design */
+  --blob-padding: var(--space-4);
+  --blob-outline-width: 0px;
+  --blob-border-width: 0px;
+  --blob-shadow: none;
+}
+
+/* English must use the real chunky Sniglet face. Request only the available
+   800 face, disable synthetic stretching/weights, and remove tracking hacks. */
+html[lang="en"],
+html[lang="en"] body,
+html[lang="en"] body *:not(.bi):not(.fa):not(.fas):not(.far):not(.fab):not(.fa-solid):not(.fa-regular):not(.fa-brands) {
+  font-family: "Sniglet", cursive !important;
+  font-weight: 400 !important;
+  font-style: normal;
+  font-stretch: normal;
+  font-synthesis: none;
+  font-kerning: normal;
+  font-optical-sizing: auto;
+  font-feature-settings: normal;
+  font-variation-settings: normal;
+  letter-spacing: normal !important;
+}
+
+/* Preserve icon glyph fonts. */
+.bi::before { font-family: "bootstrap-icons" !important; }
+.fa,.fas,.far,.fa-solid,.fa-regular { font-family: "Font Awesome 6 Free" !important; }
+.fa-brands,.fab { font-family: "Font Awesome 6 Brands" !important; }
+
+/* Display */
+.tf-type-display,
+#waitingPlayersText {
+  font-size: var(--type-display-size) !important;
+  line-height: var(--type-display-leading) !important;
+}
+
+/* Heading */
+.tf-type-heading,
+h1,
+h2,
+.alert-title,
+.category-dialog-title,
+.qlimit-title,
+.suggestion-floating-title,
+.room-code-title,
+#chooseHeader,
+#waitingHeader,
+.scores-title,
+.locations-title {
+  font-size: var(--type-heading-size) !important;
+  line-height: var(--type-heading-leading) !important;
+}
+
+/* Subheading */
+.tf-type-subheading,
+h3,
+h4,
+#playersHeader,
+.players-heading {
+  font-size: var(--type-subheading-size) !important;
+  line-height: var(--type-heading-leading) !important;
+}
+
+/* Body */
+.tf-type-body,
+body,
+p,
+label,
+input,
+textarea,
+select,
+.alert-message,
+.tf-ui-state-message,
+.question-text {
+  font-size: var(--type-body-size);
+  line-height: var(--type-body-leading);
+}
+
+/* Button */
+.tf-type-button,
+button,
+[role="button"],
+.menu-button,
+.small-button,
+.guess-option {
+  font-size: var(--type-button-size);
+  line-height: 1.1 !important;
+}
+
+/* Caption */
+.tf-type-caption,
+caption,
+small,
+.caption,
+#roundProgress,
+#turnProgress,
+.waiting-text {
+  font-size: var(--type-caption-size) !important;
+  line-height: 1.3 !important;
+}
+
+/* Shared blob family. Organic masks may vary, but treatment does not. */
+.menu-button,
+.small-button,
+.guess-option,
+.nickname-blob-input,
+.suggestion-blob-input,
+.alert-container,
+.category-dialog-container,
+.qlimit-container,
+.suggestion-dialog-container,
+.tf-ui-state-card {
+  box-sizing: border-box !important;
+  border: var(--blob-border-width) solid transparent !important;
+  outline: var(--blob-outline-width) solid transparent !important;
+  border-radius: 0 !important;
+  box-shadow: var(--blob-shadow) !important;
+  text-shadow: var(--tf-text-shadow) !important;
+  background-image: none !important;
+  -webkit-mask-repeat: no-repeat !important;
+  mask-repeat: no-repeat !important;
+  -webkit-mask-position: center !important;
+  mask-position: center !important;
+  -webkit-mask-size: 100% 100% !important;
+  mask-size: 100% 100% !important;
+}
+
+/* One primary button implementation mapped onto existing markup. */
+.menu-button:not(.compact):not(.language-blob),
+.nickname-start-btn,
+.alert-btn,
+.category-dialog-btn,
+.qlimit-option,
+.suggestion-submit,
+.tf-empty-action {
+  box-sizing: border-box !important;
+  width: var(--button-primary-width) !important;
+  max-width: calc(100vw - (2 * var(--space-3))) !important;
+  height: var(--button-primary-height) !important;
+  min-height: var(--button-primary-height) !important;
+  max-height: var(--button-primary-height) !important;
+  aspect-ratio: auto !important;
+  padding: var(--button-padding-block) var(--button-padding-inline) !important;
+  border-radius: var(--button-radius) !important;
+  font-family: var(--tf-font-active) !important;
+  font-size: var(--type-button-size) !important;
+  font-weight: 800 !important;
+  line-height: 1.1 !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: var(--button-icon-gap) !important;
+  text-align: center !important;
+  vertical-align: middle !important;
+  margin-inline: auto !important;
+  white-space: nowrap !important;
+}
+
+/* The 2x2 lobby keeps equal columns; all controls still share height/type. */
+.lobby-action-grid {
+  width: min(88vw, 680px) !important;
+  display: grid !important;
+  grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  gap: var(--space-3) !important;
+  margin: var(--space-4) auto 0 !important;
+}
+.lobby-action-grid .menu-button:not(.compact) {
+  width: 100% !important;
+  max-width: none !important;
+}
+.lobby-action-grid #startGameBtn {
+  grid-column: 1 / -1;
+}
+
+/* Gameplay choices are content cards, not primary controls. */
+.guess-option {
+  width: min(88vw, 680px) !important;
+  height: auto !important;
+  min-height: clamp(112px, 16vh, 170px) !important;
+  max-height: none !important;
+  padding: var(--space-4) var(--space-5) !important;
+  white-space: normal !important;
+}
+
+/* Compact/icon controls share one alignment rule without CTA dimensions. */
+.menu-button.compact,
+.small-button,
+button.icon {
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: var(--button-icon-gap) !important;
+}
+button i,
+[role="button"] i {
+  margin: 0 !important;
+}
+
+/* System spacing and mathematical centering. */
+.game-container,
+.nickname-card,
+.room-code-card,
+.tf-ui-state-card,
+.alert-container,
+.category-dialog-container,
+.qlimit-container,
+.suggestion-dialog-screen,
+.points-dashboard {
+  gap: var(--space-3) !important;
+}
+
+#optionsContainer,
+.category-grid,
+.qlimit-grid,
+.tf-confirm-actions,
+.alert-footer,
+.language-blob-group {
+  gap: var(--space-3) !important;
+}
+
+.container,
+.game-container,
+.text-center,
+#newGameSection,
+#joinGameSection,
+#optionsContainer,
+#playersContainer,
+.lobby-action-grid {
+  margin-inline: auto !important;
+}
+
+#chooseHeader,
+#waitingHeader,
+#questionSectionprime,
+.question-card,
+.question-text,
+[data-question-card] {
+  width: 100% !important;
+  margin-inline: auto !important;
+  padding-inline: var(--space-3) !important;
+  text-align: center !important;
+}
+
+/* Inputs use chunky Sniglet too; placeholders cannot fall back to 400. */
+html[lang="en"] input,
+html[lang="en"] textarea,
+html[lang="en"] input::placeholder,
+html[lang="en"] textarea::placeholder {
+  font-family: "Sniglet", cursive !important;
+  font-weight: 400 !important;
+  font-style: normal !important;
+  font-stretch: normal !important;
+  letter-spacing: normal !important;
+  opacity: 1;
+}
+
+@media (max-width: 380px) {
+  :root {
+    --button-primary-height: 68px;
+    --button-padding-inline: var(--space-3);
+    --type-button-size: clamp(1rem, 4.6vw, 1.25rem);
+  }
+}
+
+@media (max-width: 319px) {
+  .lobby-action-grid {
+    grid-template-columns: 1fr !important;
+  }
+  .lobby-action-grid #startGameBtn {
+    grid-column: auto;
+  }
+}
+
+
+/* High-specificity bridge: legacy page CSS uses ID-level !important rules.
+   Keep legacy behavior, but make the shared primary-button contract win. */
+html body #newGameBtn,
+html body #joinGameBtn,
+html body #categorySelectionBtn,
+html body #suggestCategoryBtn,
+html body #questionLimitBtn,
+html body #langToggleBtn,
+html body #startGameBtn,
+html body #roomCodeSubmitBtn {
+  width: var(--button-primary-width) !important;
+  max-width: calc(100vw - (2 * var(--space-3))) !important;
+  height: var(--button-primary-height) !important;
+  min-height: var(--button-primary-height) !important;
+  max-height: var(--button-primary-height) !important;
+  aspect-ratio: auto !important;
+  padding: var(--button-padding-block) var(--button-padding-inline) !important;
+  font-family: "Sniglet", cursive !important;
+  font-size: var(--type-button-size) !important;
+  font-weight: 400 !important;
+  font-stretch: normal !important;
+  font-synthesis: none !important;
+  letter-spacing: normal !important;
+  line-height: 1.1 !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: var(--button-icon-gap) !important;
+  margin-inline: auto !important;
+}
+
+/* Lobby controls remain equal within their established two-column grid. */
+html body .lobby-action-grid #categorySelectionBtn,
+html body .lobby-action-grid #suggestCategoryBtn,
+html body .lobby-action-grid #questionLimitBtn,
+html body .lobby-action-grid #langToggleBtn {
+  width: 100% !important;
+  max-width: none !important;
+}
+
+html body .lobby-action-grid #startGameBtn {
+  width: 100% !important;
+  max-width: none !important;
+  grid-column: 1 / -1;
+}
+
+
+/* English regular-face enforcement.
+   This deliberately outranks legacy ID-level !important declarations. */
+html[lang="en"] body:not(#tf-never) *:not(.bi):not(.fa):not(.fas):not(.far):not(.fab):not(.fa-solid):not(.fa-regular):not(.fa-brands),
+html[lang="en"] body:not(#tf-never) input::placeholder,
+html[lang="en"] body:not(#tf-never) textarea::placeholder {
+  font-family: "Sniglet", cursive !important;
+  font-weight: 400 !important;
+  font-style: normal !important;
+  font-stretch: normal !important;
+  font-synthesis: none !important;
+  font-kerning: normal !important;
+  font-optical-sizing: auto !important;
+  font-feature-settings: normal !important;
+  font-variation-settings: normal !important;
+  letter-spacing: normal !important;
+  text-shadow: var(--tf-text-shadow) !important;
+  -webkit-text-stroke: 0 !important;
+}
+
+
+/* ============================================================
+   PREMIUM UI ART DIRECTION — role-based component contracts
+   Keeps Sniglet Regular and the existing palette/organic artwork.
+   This block intentionally outranks earlier compatibility bridges.
+   ============================================================ */
+:root {
+  --ui-space-1: 4px;
+  --ui-space-2: 8px;
+  --ui-space-3: 16px;
+  --ui-space-4: 24px;
+  --ui-space-5: 32px;
+  --ui-space-6: 48px;
+  --ui-space-7: 64px;
+
+  --ui-display: clamp(2.25rem, 7vw, 4.5rem);
+  --ui-heading: clamp(1.75rem, 4.5vw, 3rem);
+  --ui-subheading: clamp(1.25rem, 3vw, 1.75rem);
+  --ui-body: clamp(1rem, 2vw, 1.2rem);
+  --ui-button: clamp(1.05rem, 2.4vw, 1.35rem);
+  --ui-caption: clamp(0.85rem, 1.6vw, 1rem);
+
+  --ui-control-height: 72px;
+  --ui-control-width: min(86vw, 420px);
+  --ui-control-padding: var(--ui-space-3) var(--ui-space-4);
+  --ui-tile-height: 76px;
+  --ui-panel-width: min(92vw, 640px);
+  --ui-grid-width: min(84vw, 560px);
+}
+
+/* Six typography roles; English remains the official Sniglet Regular face. */
+.tf-type-display,
+#waitingPlayersText {
+  font-size: var(--ui-display) !important;
+  line-height: 1.02 !important;
+  text-wrap: balance;
+}
+.tf-type-heading,
+h1,
+h2,
+.alert-title,
+.category-dialog-title,
+.qlimit-title,
+.suggestion-floating-title,
+.room-code-title,
+#chooseHeader,
+#waitingHeader,
+.scores-title,
+.locations-title {
+  font-size: var(--ui-heading) !important;
+  line-height: 1.08 !important;
+  text-wrap: balance;
+}
+.tf-type-subheading,
+h3,
+h4,
+#playersHeader,
+.players-heading {
+  font-size: var(--ui-subheading) !important;
+  line-height: 1.18 !important;
+}
+.tf-type-body,
+body,
+p,
+label,
+input,
+textarea,
+select,
+.alert-message,
+.tf-ui-state-message,
+.question-text {
+  font-size: var(--ui-body) !important;
+  line-height: 1.45 !important;
+}
+.tf-type-button,
+button,
+[role="button"],
+.menu-button,
+.small-button,
+.guess-option {
+  font-size: var(--ui-button) !important;
+  line-height: 1.12 !important;
+}
+.tf-type-caption,
+caption,
+small,
+.caption,
+#roundProgress,
+#turnProgress,
+.waiting-text {
+  font-size: var(--ui-caption) !important;
+  line-height: 1.35 !important;
+}
+
+/* Primary actions: one stable geometry, no text-dependent resizing. */
+html body .menu-button:not(.compact):not(.language-blob):not(.category-dialog-btn):not(.qlimit-option),
+html body .nickname-start-btn,
+html body .alert-btn,
+html body .suggestion-submit,
+html body .tf-empty-action,
+html body #newGameBtn,
+html body #joinGameBtn,
+html body #categorySelectionBtn,
+html body #suggestCategoryBtn,
+html body #questionLimitBtn,
+html body #langToggleBtn,
+html body #startGameBtn,
+html body #roomCodeSubmitBtn {
+  box-sizing: border-box !important;
+  width: var(--ui-control-width) !important;
+  max-width: calc(100vw - (2 * var(--ui-space-3))) !important;
+  height: var(--ui-control-height) !important;
+  min-height: var(--ui-control-height) !important;
+  max-height: var(--ui-control-height) !important;
+  aspect-ratio: auto !important;
+  padding: var(--ui-control-padding) !important;
+  margin-inline: auto !important;
+  font-size: var(--ui-button) !important;
+  font-weight: 400 !important;
+  line-height: 1.12 !important;
+  white-space: nowrap !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: var(--ui-space-2) !important;
+}
+
+/* Category/limit tiles are their own soft-square component, never CTA capsules. */
+html body .category-dialog-container,
+html body .qlimit-container {
+  width: var(--ui-panel-width) !important;
+  max-width: calc(100vw - (2 * var(--ui-space-3))) !important;
+  padding: var(--ui-space-5) var(--ui-space-4) !important;
+  gap: var(--ui-space-4) !important;
+}
+html body .category-grid,
+html body .qlimit-grid {
+  width: var(--ui-grid-width) !important;
+  max-width: 100% !important;
+  margin-inline: auto !important;
+  padding: 0 !important;
+  display: grid !important;
+  grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  gap: var(--ui-space-3) !important;
+}
+html body .category-dialog-btn,
+html body .qlimit-option {
+  box-sizing: border-box !important;
+  width: 100% !important;
+  min-width: 0 !important;
+  max-width: none !important;
+  height: var(--ui-tile-height) !important;
+  min-height: var(--ui-tile-height) !important;
+  max-height: var(--ui-tile-height) !important;
+  aspect-ratio: auto !important;
+  padding: var(--ui-space-3) !important;
+  margin: 0 !important;
+  font-size: clamp(1rem, 2.3vw, 1.2rem) !important;
+  font-weight: 400 !important;
+  line-height: 1.15 !important;
+  white-space: normal !important;
+  overflow-wrap: anywhere !important;
+  text-wrap: balance;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  -webkit-mask-image: url("buttons/blob-square.webp") !important;
+  mask-image: url("buttons/blob-square.webp") !important;
+  -webkit-mask-size: 100% 100% !important;
+  mask-size: 100% 100% !important;
+}
+
+/* Lobby actions share rhythm without inheriting a stretched single-row mask. */
+html body .lobby-action-grid {
+  width: min(90vw, 620px) !important;
+  grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  gap: var(--ui-space-3) !important;
+  margin: var(--ui-space-4) auto 0 !important;
+}
+html body .lobby-action-grid #categorySelectionBtn,
+html body .lobby-action-grid #suggestCategoryBtn,
+html body .lobby-action-grid #questionLimitBtn,
+html body .lobby-action-grid #langToggleBtn {
+  width: 100% !important;
+  max-width: none !important;
+}
+html body .lobby-action-grid #startGameBtn {
+  width: 100% !important;
+  max-width: none !important;
+  grid-column: 1 / -1 !important;
+}
+
+/* Shared panel and flow rhythm. */
+html body .game-container,
+html body .nickname-card,
+html body .room-code-card,
+html body .tf-ui-state-card,
+html body .alert-container,
+html body .category-dialog-container,
+html body .qlimit-container,
+html body .suggestion-dialog-screen,
+html body .points-dashboard {
+  gap: var(--ui-space-3) !important;
+}
+html body #optionsContainer,
+html body .tf-confirm-actions,
+html body .alert-footer,
+html body .language-blob-group {
+  gap: var(--ui-space-3) !important;
+}
+
+/* Viewport safety at zoom and on narrow phones. */
+html body .alert-container,
+html body .suggestion-dialog-container,
+html body .tf-ui-state-card {
+  width: var(--ui-panel-width) !important;
+  max-width: calc(100vw - (2 * var(--ui-space-3))) !important;
+  padding: var(--ui-space-5) var(--ui-space-4) !important;
+}
+html body .guess-option {
+  width: min(90vw, 680px) !important;
+  min-height: clamp(104px, 15vh, 156px) !important;
+  padding: var(--ui-space-4) var(--ui-space-5) !important;
+  font-weight: 400 !important;
+}
+html body button i,
+html body [role="button"] i {
+  margin: 0 !important;
+  align-self: center;
+}
+
+@media (max-width: 480px) {
+  :root {
+    --ui-control-height: 68px;
+    --ui-space-5: 24px;
+  }
+  html body .category-dialog-container,
+  html body .qlimit-container,
+  html body .alert-container,
+  html body .suggestion-dialog-container {
+    padding: var(--ui-space-4) var(--ui-space-3) !important;
+  }
+}
+@media (max-width: 350px) {
+  :root {
+    --ui-control-height: 64px;
+    --ui-tile-height: 72px;
+  }
+  html body .category-grid,
+  html body .qlimit-grid {
+    gap: var(--ui-space-2) !important;
+  }
+}
+
+/* English rendering guarantee: no fallback synthesis or artificial weight. */
+html[lang="en"] body:not(#tf-never) *:not(.bi):not(.fa):not(.fas):not(.far):not(.fab):not(.fa-solid):not(.fa-regular):not(.fa-brands) {
+  font-family: "Sniglet", cursive !important;
+  font-weight: 400 !important;
+  font-style: normal !important;
+  font-stretch: normal !important;
+  font-synthesis: none !important;
+  letter-spacing: normal !important;
+  text-shadow: var(--tf-text-shadow) !important;
+  -webkit-text-stroke: 0 !important;
+}
+
+
+/* ============================================================
+   UI CONSISTENCY — natural navigation, shared accent and Arabic face
+   ============================================================ */
+
+/* Back belongs to document flow on every screen. Page-level legacy rules
+   used fixed coordinates; this shared rule deliberately outranks them. */
+html body:not(#tf-never) .back-btn,
+html body:not(#tf-never) .back-button {
+  position: relative !important;
+  inset: auto !important;
+  top: auto !important;
+  right: auto !important;
+  bottom: auto !important;
+  left: auto !important;
+  align-self: flex-start !important;
+  margin: var(--ui-space-4) 0 0 var(--ui-space-4) !important;
+  z-index: auto !important;
+}
+
+/* Players is an accent heading, using the exact existing project yellow. */
+html body:not(#tf-never) #playersHeader,
+html body:not(#tf-never) .players-heading {
+  color: var(--game-yellow) !important;
+  -webkit-text-fill-color: var(--game-yellow) !important;
+}
+
+/* One Arabic typeface everywhere, including generated overlays, placeholders,
+   popup controls and loading states. Icon fonts remain explicitly excluded. */
+html[lang="ar"] body:not(#tf-never),
+html[lang="ar"] body:not(#tf-never) *:not(.bi):not(.fa):not(.fas):not(.far):not(.fab):not(.fa-solid):not(.fa-regular):not(.fa-brands),
+html[lang="ar"] body:not(#tf-never) input::placeholder,
+html[lang="ar"] body:not(#tf-never) textarea::placeholder {
+  font-family: var(--tf-font-ar) !important;
+  font-style: normal !important;
+  font-synthesis: none !important;
+  font-stretch: normal !important;
+}
+
+@media (max-width: 480px) {
+  html body:not(#tf-never) .back-btn,
+  html body:not(#tf-never) .back-button {
+    margin: var(--ui-space-3) 0 0 var(--ui-space-3) !important;
+  }
+}
+
+
+/* ============================================================
+   RESPONSIVE LAYOUT CONTRACT — centered, safe, zero x-overflow
+   One outer width/gutter system for Home, Join, Lobby and Gameplay.
+   ============================================================ */
+:root {
+  --tf-layout-max: 720px;
+  --tf-layout-gutter: clamp(16px, 4vw, 24px);
+  --tf-safe-top: max(var(--tf-layout-gutter), env(safe-area-inset-top));
+  --tf-safe-right: max(var(--tf-layout-gutter), env(safe-area-inset-right));
+  --tf-safe-bottom: max(var(--tf-layout-gutter), env(safe-area-inset-bottom));
+  --tf-safe-left: max(var(--tf-layout-gutter), env(safe-area-inset-left));
+}
+
+html {
+  width: 100% !important;
+  min-width: 0 !important;
+  max-width: 100% !important;
+  overflow-x: clip !important;
+}
+
+html body {
+  box-sizing: border-box !important;
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  justify-content: flex-start !important;
+  width: 100% !important;
+  min-width: 0 !important;
+  max-width: 100% !important;
+  margin: 0 !important;
+  padding-right: var(--tf-safe-right) !important;
+  padding-left: var(--tf-safe-left) !important;
+  overflow-x: clip !important;
+}
+
+/* Fixed full-viewport layers must ignore body padding. */
+html body > #wave-bg,
+html body > #wave-bg-accent,
+html body > .tf-ui-state,
+html body > .alert-overlay,
+html body > .category-dialog,
+html body > .category-dialog-overlay,
+html body > .qlimit-overlay,
+html body > .suggestion-dialog,
+html body > .suggestion-dialog-overlay,
+html body > .nickname-overlay {
+  width: 100vw !important;
+  max-width: 100vw !important;
+  margin: 0 !important;
+}
+
+/* Shared centered page frame. */
+html body > .container,
+html body > .text-center.w-100,
+html body > main,
+html body > [data-tf-layout-root] {
+  box-sizing: border-box !important;
+  width: min(100%, var(--tf-layout-max)) !important;
+  min-width: 0 !important;
+  max-width: var(--tf-layout-max) !important;
+  margin-right: auto !important;
+  margin-left: auto !important;
+  padding-right: 0 !important;
+  padding-left: 0 !important;
+  align-self: center !important;
+}
+
+/* Restore semantic hiding before any component display rule can win. */
+html body .d-none,
+html body [hidden] {
+  display: none !important;
+}
+
+/* Back stays in normal flow, occupies its own top row, and aligns to the
+   shared content edge without pushing the page sideways. */
+html body:not(#tf-never) > .back-btn,
+html body:not(#tf-never) > .back-button {
+  position: relative !important;
+  inset: auto !important;
+  order: -1;
+  flex: 0 0 auto !important;
+  align-self: flex-start !important;
+  max-width: calc(100% - var(--tf-layout-gutter)) !important;
+  margin-top: var(--tf-safe-top) !important;
+  margin-right: 0 !important;
+  margin-bottom: var(--tf-layout-gutter) !important;
+  margin-left: max(0px, calc((100% - var(--tf-layout-max)) / 2)) !important;
+  transform: none;
+}
+
+/* Every nested layout item may shrink instead of forcing the viewport wider. */
+html body .container,
+html body .game-container,
+html body .text-center,
+html body .row,
+html body [class*="grid"],
+html body [class*="panel"],
+html body [class*="card"],
+html body [class*="dialog"],
+html body [class*="overlay"],
+html body #optionsContainer,
+html body #playersContainer,
+html body #qrJoinCard,
+html body #qrCodeEl {
+  min-width: 0 !important;
+  max-width: 100% !important;
+}
+
+html body img,
+html body svg,
+html body canvas,
+html body video,
+html body iframe,
+html body #qrCodeEl img,
+html body #qrCodeEl canvas {
+  display: block;
+  max-width: 100% !important;
+  height: auto;
+}
+
+/* Center all modal compositions inside the safe viewport. */
+html body .tf-ui-state,
+html body .alert-overlay,
+html body .category-dialog,
+html body .category-dialog-overlay,
+html body .qlimit-overlay,
+html body .suggestion-dialog,
+html body .suggestion-dialog-overlay,
+html body .nickname-overlay {
+  box-sizing: border-box !important;
+  place-items: center !important;
+  align-items: center !important;
+  justify-content: center !important;
+  padding-top: var(--tf-safe-top) !important;
+  padding-right: var(--tf-safe-right) !important;
+  padding-bottom: var(--tf-safe-bottom) !important;
+  padding-left: var(--tf-safe-left) !important;
+  overflow-x: clip !important;
+}
+
+html body .tf-ui-state-card,
+html body .alert-container,
+html body .category-dialog-container,
+html body .qlimit-container,
+html body .suggestion-dialog-container,
+html body .suggestion-dialog-screen,
+html body .nickname-card,
+html body .room-code-card,
+html body .points-dashboard {
+  box-sizing: border-box !important;
+  width: min(100%, 640px) !important;
+  min-width: 0 !important;
+  max-width: 100% !important;
+  margin-right: auto !important;
+  margin-left: auto !important;
+}
+
+/* Controls never exceed their centered content frame. */
+html body button,
+html body [role="button"],
+html body input,
+html body textarea,
+html body select,
+html body .menu-button,
+html body .small-button,
+html body .guess-option {
+  min-width: 0;
+  max-width: 100% !important;
+}
+
+html body #newGameSection,
+html body #joinGameSection,
+html body .home-name-field,
+html body .lobby-action-grid,
+html body #optionsContainer,
+html body .category-grid,
+html body .qlimit-grid {
+  width: min(100%, var(--ui-control-width, 420px)) !important;
+  max-width: 100% !important;
+  margin-right: auto !important;
+  margin-left: auto !important;
+}
+
+/* Wide game content remains centered while individual controls keep their role. */
+html body #optionsContainer,
+html body .lobby-action-grid {
+  width: min(100%, 680px) !important;
+}
+
+/* Floating utility controls stay inside notches and rounded corners. */
+html body .language-switcher-container {
+  top: var(--tf-safe-top) !important;
+  right: var(--tf-safe-right) !important;
+  max-width: calc(100vw - var(--tf-safe-left) - var(--tf-safe-right)) !important;
+}
+html body .voice-controls,
+html body #micBtn,
+html body #speakerBtn {
+  right: var(--tf-safe-right) !important;
+  max-width: calc(100vw - var(--tf-safe-left) - var(--tf-safe-right)) !important;
+}
+html body .points-dashboard-container,
+html body .dashboard-toggle,
+html body .points-dashboard {
+  right: var(--tf-safe-right) !important;
+  max-width: calc(100vw - var(--tf-safe-left) - var(--tf-safe-right)) !important;
+}
+html body .tf-ui-banner,
+html body .alert-toast,
+html body .notification-container,
+html body .personal-result-toast,
+html body .result-feed {
+  max-width: calc(100vw - var(--tf-safe-left) - var(--tf-safe-right)) !important;
+}
+
+/* Prevent decorative transforms from creating a scrollable x-axis. */
+html body .tf-onboarding-outline,
+html body .tf-answer-outline,
+html body .tf-focus-arrow,
+html body .tf-orbit-dot {
+  max-width: 100% !important;
+}
+
+/* Compact landscape: retain safe edges without wasting vertical space. */
+@media (orientation: landscape) and (max-height: 520px) {
+  :root {
+    --tf-layout-gutter: 12px;
+  }
+  html body:not(#tf-never) > .back-btn,
+  html body:not(#tf-never) > .back-button {
+    margin-bottom: 8px !important;
+  }
+  html body .tf-ui-state,
+  html body .alert-overlay,
+  html body .category-dialog,
+  html body .qlimit-overlay,
+  html body .suggestion-dialog,
+  html body .nickname-overlay {
+    overflow-y: auto !important;
+  }
+}
+
+/* 320px devices: grids may shrink, labels wrap, and nothing clips. */
+@media (max-width: 359px) {
+  html body .category-grid,
+  html body .qlimit-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    gap: 8px !important;
+  }
+  html body .category-dialog-btn,
+  html body .qlimit-option {
+    padding-right: 8px !important;
+    padding-left: 8px !important;
+    white-space: normal !important;
+    overflow-wrap: anywhere !important;
+  }
+}
+
+
+/* ============================================================
+   PRODUCT COMPOSITION SYSTEM — one owner for active page geometry
+   All page shells use:
+   .tf-app-shell > .tf-topbar + .tf-app-content > .tf-screen-content
+   ============================================================ */
+:root {
+  --tf-shell-max: 720px;
+  --tf-shell-gutter: clamp(16px, 4vw, 24px);
+  --tf-topbar-control: 56px;
+  --tf-topbar-pad-top: max(10px, env(safe-area-inset-top));
+  --tf-topbar-pad-bottom: 8px;
+  --tf-content-top: clamp(6px, 1.4svh, 12px);
+  --tf-content-bottom: max(16px, env(safe-area-inset-bottom));
+  --tf-screen-gap: clamp(8px, 1.5svh, 16px);
+  --tf-answer-height: clamp(92px, 13svh, 128px);
+  --tf-player-section-gap: clamp(14px, 2svh, 20px);
+  --tf-player-list-gap: 3px;
+}
+
+html,
+html body {
+  box-sizing: border-box;
+  width: 100% !important;
+  min-width: 0 !important;
+  max-width: 100% !important;
+  min-height: 100%;
+  margin: 0 !important;
+  padding: 0 !important;
+  overflow-x: clip !important;
+}
+
+html body {
+  display: block !important;
+}
+
+.tf-app-shell {
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  min-width: 0;
+  min-height: 100svh;
+  overflow-x: clip;
+}
+
+/* One reserved navigation row. Direction never changes its physical slots. */
+.tf-topbar {
+  box-sizing: border-box;
+  position: relative;
+  z-index: 100;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+  align-items: center;
+  direction: ltr;
+  width: min(100%, var(--tf-shell-max));
+  min-width: 0;
+  min-height: calc(
+    var(--tf-topbar-control)
+    + var(--tf-topbar-pad-top)
+    + var(--tf-topbar-pad-bottom)
+  );
+  margin: 0 auto;
+  padding:
+    var(--tf-topbar-pad-top)
+    max(var(--tf-shell-gutter), env(safe-area-inset-right))
+    var(--tf-topbar-pad-bottom)
+    max(var(--tf-shell-gutter), env(safe-area-inset-left));
+}
+
+.tf-topbar-start,
+.tf-topbar-center,
+.tf-topbar-end {
+  min-width: 0;
+  min-height: var(--tf-topbar-control);
+  display: flex;
+  align-items: center;
+}
+
+.tf-topbar-start { grid-column: 1; justify-content: flex-start; }
+.tf-topbar-center { grid-column: 2; justify-content: center; }
+.tf-topbar-end { grid-column: 3; justify-content: flex-end; }
+
+html body .tf-topbar .back-btn,
+html body .tf-topbar .back-button,
+html body .tf-topbar .language-switcher-container {
+  position: static !important;
+  inset: auto !important;
+  flex: 0 0 auto !important;
+  align-self: center !important;
+  margin: 0 !important;
+  transform: none !important;
+}
+
+html body .tf-topbar .back-btn,
+html body .tf-topbar .back-button {
+  direction: var(--tf-direction, ltr);
+  min-height: var(--tf-topbar-control) !important;
+}
+
+html body .tf-topbar .language-blob-group {
+  width: auto !important;
+  max-width: 100% !important;
+  gap: 4px !important;
+}
+
+/* Every screen receives the same safe, centered frame. */
+.tf-app-content {
+  box-sizing: border-box;
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+  min-width: 0;
+  max-width: 100%;
+  margin: 0;
+  padding:
+    var(--tf-content-top)
+    max(var(--tf-shell-gutter), env(safe-area-inset-right))
+    var(--tf-content-bottom)
+    max(var(--tf-shell-gutter), env(safe-area-inset-left));
+  overflow-x: clip;
+}
+
+html body .tf-screen-content {
+  box-sizing: border-box !important;
+  position: relative !important;
+  align-self: center !important;
+  width: min(100%, var(--tf-shell-max)) !important;
+  min-width: 0 !important;
+  max-width: var(--tf-shell-max) !important;
+  margin: 0 auto !important;
+  padding: 0 !important;
+  transform: none !important;
+  translate: none !important;
+}
+
+.tf-screen-content > *,
+.tf-screen-content .game-container,
+.tf-screen-content #optionsContainer,
+.tf-screen-content #playersContainer,
+.tf-screen-content #qrJoinCard,
+.tf-screen-content .lobby-action-grid {
+  box-sizing: border-box;
+  min-width: 0;
+  max-width: 100%;
+}
+
+/* Home/nickname is composed as one unit, then the tutorial follows below. */
+.tf-home-hero {
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--tf-screen-gap);
+  width: 100%;
+  min-height: calc(
+    100svh
+    - var(--tf-topbar-control)
+    - var(--tf-topbar-pad-top)
+    - var(--tf-topbar-pad-bottom)
+    - var(--tf-content-top)
+    - var(--tf-content-bottom)
+  );
+  padding-block: clamp(4px, 1svh, 12px);
+}
+
+.tf-home-hero .header {
+  width: min(78vw, 440px) !important;
+  margin: 0 auto !important;
+  padding: 0 !important;
+}
+
+.tf-home-hero .header img {
+  display: block;
+  width: 100%;
+  max-height: clamp(92px, 18svh, 176px);
+  object-fit: contain;
+  margin: 0 auto;
+}
+
+.tf-home-hero .game-container {
+  display: flex !important;
+  flex-direction: column;
+  align-items: center;
+  width: 100% !important;
+  margin: 0 auto !important;
+  padding: 0 !important;
+  gap: clamp(8px, 1.35svh, 14px) !important;
+}
+
+.tf-home-hero .home-name-label,
+.tf-home-hero .home-name-field,
+.tf-home-hero #newGameSection,
+.tf-home-hero #joinGameSection {
+  margin-block: 0 !important;
+}
+
+.tf-home-hero .home-name-field {
+  width: min(88vw, 430px) !important;
+}
+
+/* The native input never paints over its existing blob, including autofill. */
+html body #homeNameInput,
+html body #homeNameInput:hover,
+html body #homeNameInput:focus,
+html body #homeNameInput:focus-visible,
+html body #homeNameInput:active {
+  appearance: none !important;
+  -webkit-appearance: none !important;
+  background: transparent !important;
+  background-color: transparent !important;
+  background-image: none !important;
+  border-color: transparent !important;
+  outline: none !important;
+  box-shadow: none !important;
+  filter: none !important;
+  color: #fff !important;
+  font-size: clamp(1.375rem, 5vw, 1.875rem) !important;
+}
+
+html body #homeNameInput:-webkit-autofill,
+html body #homeNameInput:-webkit-autofill:hover,
+html body #homeNameInput:-webkit-autofill:focus,
+html body #homeNameInput:-webkit-autofill:active {
+  -webkit-text-fill-color: #fff !important;
+  caret-color: #fff !important;
+  border-color: transparent !important;
+  box-shadow: 0 0 0 1000px transparent inset !important;
+  -webkit-box-shadow: 0 0 0 1000px transparent inset !important;
+  transition: background-color 999999s ease-out 0s !important;
+}
+
+.tf-home-hero #newGameSection,
+.tf-home-hero #joinGameSection {
+  width: min(88vw, 520px) !important;
+}
+
+.tf-home-hero #newGameBtn,
+.tf-home-hero #joinGameBtn {
+  margin-block: 0 !important;
+}
+
+.tutorial-section {
+  margin-top: clamp(24px, 5svh, 48px) !important;
+}
+
+/* Lobby, settings and QR use the same measured vertical rhythm. */
+html body.tf-lobby-page .tf-app-content {
+  padding-top: 0 !important;
+}
+
+html body.tf-lobby-page .ad-banner:has(.ad-text:empty) {
+  display: none !important;
+}
+
+html body .tf-lobby-content {
+  display: flex !important;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+  min-height: 0 !important;
+  margin: 0 auto !important;
+  padding: 0 !important;
+  gap: clamp(6px, 1svh, 10px) !important;
+}
+
+.tf-lobby-content > * {
+  margin-block: 0 !important;
+}
+
+html body .tf-lobby-content #waitingPlayersText {
+  width: min(100%, 520px) !important;
+  margin: 0 auto 4px !important;
+  font-size: clamp(1.15rem, 5vw, 1.65rem) !important;
+  line-height: 1.15 !important;
+}
+
+html body .tf-lobby-content #waitingPlayersText::after {
+  min-width: 32px;
+  letter-spacing: 1px;
+}
+
+html body .tf-lobby-content .lobby-action-grid {
+  margin: 8px auto 0 !important;
+  gap: clamp(8px, 1.4vw, 12px) !important;
+}
+
+html body .tf-lobby-content .players-heading {
+  margin: 12px auto 3px !important;
+}
+
+html body .tf-lobby-content #playersContainer {
+  margin: 0 auto 2px !important;
+  gap: 2px !important;
+}
+
+html body .tf-lobby-content .qr-join-card {
+  margin: 4px auto !important;
+  padding-block: 4px !important;
+}
+
+html body .tf-app-content > .ad-banner {
+  box-sizing: border-box !important;
+  position: relative !important;
+  inset: auto !important;
+  width: min(100%, var(--tf-shell-max)) !important;
+  max-width: var(--tf-shell-max) !important;
+  min-height: 0;
+  margin: 0 auto var(--tf-screen-gap) !important;
+  transform: none !important;
+}
+
+/* Gameplay prioritizes prompt and choices above the fold. */
+html body.tf-gameplay-page .tf-app-content {
+  padding-top: 0 !important;
+}
+
+html body.tf-gameplay-page #adBanner:has(.ad-text:empty) {
+  display: none !important;
+}
+
+html body .tf-gameplay-content {
+  display: flex !important;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+  min-height: 0;
+  margin: 0 auto !important;
+  gap: clamp(4px, 0.75svh, 7px) !important;
+}
+
+.tf-gameplay-content > * {
+  flex: 0 0 auto;
+}
+
+html body .tf-gameplay-content #roundProgress,
+html body .tf-gameplay-content #turnProgress,
+html body .tf-gameplay-content #chooseHeader,
+html body .tf-gameplay-content #waitingHeader,
+html body .tf-gameplay-content #questionSectionprime,
+html body .tf-gameplay-content #optionsContainer,
+html body .tf-gameplay-content #playersHeader,
+html body .tf-gameplay-content #playersContainer {
+  margin-block: 0 !important;
+}
+
+html body .tf-gameplay-content #roundProgress,
+html body .tf-gameplay-content #turnProgress {
+  min-height: 0 !important;
+  padding-block: 1px !important;
+  line-height: 1.05 !important;
+}
+
+html body .tf-gameplay-content #chooseHeader,
+html body .tf-gameplay-content #waitingHeader {
+  width: 100% !important;
+  max-width: min(100%, 620px) !important;
+  padding-inline: 0 !important;
+  font-size: clamp(1.05rem, 4.4vw, 1.6rem) !important;
+  line-height: 1.12 !important;
+}
+
+html body .tf-gameplay-content #questionSectionprime {
+  width: 100% !important;
+  max-width: min(100%, 620px) !important;
+  min-height: clamp(48px, 7svh, 72px) !important;
+  padding: clamp(4px, 0.8svh, 8px) 8px !important;
+  font-size: clamp(1.15rem, 4.7vw, 1.8rem) !important;
+  line-height: 1.18 !important;
+}
+
+html body .tf-gameplay-content #optionsContainer {
+  width: min(100%, 620px) !important;
+  max-width: 100% !important;
+  gap: clamp(8px, 1.2svh, 12px) !important;
+  padding: 0 !important;
+}
+
+html body .tf-gameplay-content #optionsContainer > .guess-option {
+  box-sizing: border-box !important;
+  width: 100% !important;
+  max-width: 100% !important;
+  min-height: var(--tf-answer-height) !important;
+  margin: 0 !important;
+  padding: clamp(14px, 2.4svh, 22px) clamp(18px, 5vw, 30px) !important;
+  font-size: clamp(1.18rem, 5vw, 1.85rem) !important;
+  line-height: 1.15 !important;
+}
+
+/* Next is a stable action slot; its decorative orbit never participates in flow. */
+html body .tf-gameplay-content .tf-next-action {
+  box-sizing: border-box;
+  position: relative;
+  width: var(--button-primary-width, min(88vw, 460px));
+  max-width: 100%;
+  min-height: 0;
+  margin: clamp(6px, 1svh, 10px) auto 0 !important;
+  padding: 0;
+}
+
+html body .tf-gameplay-content .tf-next-action:not(.is-visible) {
+  display: none !important;
+}
+
+html body .tf-gameplay-content .tf-next-action #nextRoundBtn {
+  position: relative;
+  z-index: 1;
+  width: 100% !important;
+  max-width: 100% !important;
+  margin: 0 !important;
+  opacity: 1 !important;
+  color: #fff !important;
+  background: transparent !important;
+  background-color: transparent !important;
+  background-image: none !important;
+  border-color: transparent !important;
+  box-shadow: none !important;
+  outline: none !important;
+  text-shadow: var(--tf-text-shadow) !important;
+  filter: none !important;
+  transform: none !important;
+  transition: none !important;
+  animation: none !important;
+  cursor: pointer;
+}
+
+html body .tf-gameplay-content .tf-next-action #nextRoundBtn::before,
+html body .tf-gameplay-content .tf-next-action #nextRoundBtn::after {
+  content: none !important;
+  display: none !important;
+}
+
+html body .tf-gameplay-content .tf-next-orbit {
+  position: absolute;
+  z-index: 2;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+  pointer-events: none;
+}
+
+html body .tf-gameplay-content #playersHeader {
+  margin-top: var(--tf-player-section-gap) !important;
+  margin-bottom: 2px !important;
+  color: var(--game-yellow) !important;
+  font-size: clamp(1rem, 3.8vw, 1.35rem) !important;
+  line-height: 1.15 !important;
+}
+
+html body .tf-gameplay-content #playersContainer {
+  width: 100% !important;
+  height: auto !important;
+  min-height: 0 !important;
+  margin: 0 auto !important;
+  gap: var(--tf-player-list-gap) !important;
+}
+
+html body .tf-gameplay-content #playersContainer .player-box,
+html body .tf-gameplay-content #playersContainer .player-box.is-current-player {
+  box-sizing: border-box !important;
+  width: min(100%, 420px) !important;
+  height: auto !important;
+  min-height: 30px !important;
+  aspect-ratio: auto !important;
+  margin: 0 auto !important;
+  padding: 1px 8px !important;
+  line-height: 1.25 !important;
+}
+
+/* The original loading family uses the wide-1 artwork at its natural ratio. */
+html body .tf-ui-state {
+  box-sizing: border-box !important;
+  position: fixed !important;
+  inset: 0 !important;
+  display: grid;
+  place-items: center !important;
+  width: 100% !important;
+  max-width: 100% !important;
+  margin: 0 !important;
+  padding:
+    max(16px, env(safe-area-inset-top))
+    max(16px, env(safe-area-inset-right))
+    max(16px, env(safe-area-inset-bottom))
+    max(16px, env(safe-area-inset-left)) !important;
+  overflow: hidden;
+}
+
+html body .tf-ui-state-card {
+  box-sizing: border-box !important;
+  inline-size: min(calc(100vw - 32px), 560px) !important;
+  max-inline-size: 560px !important;
+  min-inline-size: 0 !important;
+  min-height: 0 !important;
+  aspect-ratio: 1453 / 843;
+  margin: 0 !important;
+  padding: clamp(34px, 8vw, 58px) clamp(38px, 10vw, 72px) !important;
+  gap: clamp(8px, 1.5svh, 14px) !important;
+  background: var(--tf-surface);
+  -webkit-mask: url('buttons/blob-wide-1.webp') center / 100% 100% no-repeat !important;
+  mask: url('buttons/blob-wide-1.webp') center / 100% 100% no-repeat !important;
+  contain: layout;
+}
+
+.tf-ui-state-title,
+.tf-ui-state-message {
+  width: 100%;
+  min-height: 0 !important;
+  margin: 0 !important;
+  text-align: center;
+  overflow-wrap: anywhere;
+}
+
+/* Typography is selected by the active language, including transient UI. */
+html[lang="ar"] body,
+html[lang="ar"] body *:not(.bi):not(.fa):not(.fas):not(.far):not(.fab):not(.fa-solid):not(.fa-regular):not(.fa-brands),
+.tf-ui-state[lang="ar"],
+.tf-ui-state[lang="ar"] *,
+.tf-ui-banner[lang="ar"],
+.tf-ui-banner[lang="ar"] * {
+  font-family: "Playpen Sans Arabic", cursive !important;
+  font-weight: 400 !important;
+  font-style: normal !important;
+  font-synthesis: none !important;
+}
+
+html[lang="en"] body,
+html[lang="en"] body *:not(.bi):not(.fa):not(.fas):not(.far):not(.fab):not(.fa-solid):not(.fa-regular):not(.fa-brands),
+.tf-ui-state[lang="en"],
+.tf-ui-state[lang="en"] *,
+.tf-ui-banner[lang="en"],
+.tf-ui-banner[lang="en"] * {
+  font-family: "Sniglet", cursive !important;
+  font-weight: 400 !important;
+  font-style: normal !important;
+  font-stretch: normal !important;
+  font-synthesis: none !important;
+  letter-spacing: normal !important;
+  filter: none !important;
+  text-shadow: var(--tf-text-shadow) !important;
+  -webkit-text-stroke: 0 !important;
+}
+
+/* All viewport overlays share one safe centering contract. */
+html body > .alert-overlay,
+html body > .category-dialog,
+html body > .category-dialog-overlay,
+html body > .qlimit-overlay,
+html body > .suggestion-dialog,
+html body > .suggestion-dialog-overlay,
+html body > .nickname-overlay {
+  box-sizing: border-box !important;
+  position: fixed !important;
+  inset: 0 !important;
+  width: 100% !important;
+  max-width: 100% !important;
+  margin: 0 !important;
+  padding:
+    max(var(--tf-shell-gutter), env(safe-area-inset-top))
+    max(var(--tf-shell-gutter), env(safe-area-inset-right))
+    max(var(--tf-shell-gutter), env(safe-area-inset-bottom))
+    max(var(--tf-shell-gutter), env(safe-area-inset-left)) !important;
+  overflow-x: clip !important;
+}
+
+html body > .points-dashboard-container,
+html body > .notification-container,
+html body > .result-feed,
+html body > .voice-controls,
+html body > #micBtn,
+html body > #speakerBtn {
+  max-width: calc(
+    100vw
+    - max(var(--tf-shell-gutter), env(safe-area-inset-left))
+    - max(var(--tf-shell-gutter), env(safe-area-inset-right))
+  ) !important;
+}
+
+html body .d-none,
+html body [hidden] {
+  display: none !important;
+}
+
+/* Short screens are denser, while touch targets remain generous. */
+@media (max-height: 760px) {
+  :root {
+    --tf-topbar-control: 52px;
+    --tf-topbar-pad-top: max(8px, env(safe-area-inset-top));
+    --tf-topbar-pad-bottom: 4px;
+    --tf-content-top: 4px;
+    --tf-content-bottom: max(10px, env(safe-area-inset-bottom));
+    --tf-screen-gap: 7px;
+    --tf-answer-height: clamp(88px, 13svh, 108px);
+  }
+
+  .tf-home-hero {
+    padding-block: 0;
+  }
+
+  .tf-home-hero .header img {
+    max-height: clamp(78px, 15svh, 112px);
+  }
+
+  .tf-home-hero .game-container {
+    gap: 6px !important;
+  }
+
+  html body .tf-gameplay-content {
+    gap: 3px !important;
+  }
+
+  html body .tf-gameplay-content #questionSectionprime {
+    min-height: 42px !important;
+    padding-block: 3px !important;
+  }
+
+  html body .tf-gameplay-content #optionsContainer {
+    gap: 7px !important;
+  }
+
+  html body .tf-gameplay-content #playersHeader {
+    margin-top: 2px !important;
+  }
+}
+
+@media (max-width: 359px) {
+  :root {
+    --tf-shell-gutter: 12px;
+    --tf-topbar-control: 52px;
+  }
+
+  html body .tf-topbar .back-btn,
+  html body .tf-topbar .back-button {
+    min-width: 0 !important;
+    padding-inline: 10px !important;
+  }
+
+  html body .tf-topbar .language-option.language-blob {
+    width: 46px !important;
+    height: 52px !important;
+    min-width: 46px !important;
+    min-height: 52px !important;
+  }
+
+  .tf-home-hero .header {
+    width: min(74vw, 300px) !important;
+  }
+}
+
+@media (orientation: landscape) and (max-height: 520px) {
+  :root {
+    --tf-topbar-control: 48px;
+    --tf-topbar-pad-top: max(6px, env(safe-area-inset-top));
+    --tf-topbar-pad-bottom: 2px;
+    --tf-content-top: 2px;
+    --tf-content-bottom: max(6px, env(safe-area-inset-bottom));
+    --tf-answer-height: 72px;
+  }
+
+  .tf-home-hero {
+    min-height: 0;
+    padding-block: 4px;
+  }
+
+  .tf-home-hero .header img {
+    max-height: 78px;
+  }
+
+  html body .tf-gameplay-content #questionSectionprime {
+    min-height: 34px !important;
+  }
+
+  html body .tf-gameplay-content #optionsContainer {
+    flex-direction: row;
+  }
+
+  html body .tf-gameplay-content #optionsContainer > .guess-option {
+    min-height: 72px !important;
+    padding-block: 10px !important;
+  }
+}
+
+
+/* One shared organic treatment for every temporary connection/status banner. */
+.tf-ui-banner {
+  box-sizing: border-box;
+  width: min(calc(100vw - 24px), 640px);
+  min-height: 64px;
+  padding: 18px 32px;
+  border: 0 !important;
+  border-radius: 0 !important;
+  box-shadow: none !important;
+  background: #1F6455 !important;
+  -webkit-mask: url('buttons/blob-thin.webp') center / 100% 100% no-repeat;
+  mask: url('buttons/blob-thin.webp') center / 100% 100% no-repeat;
+}
+.tf-ui-banner.is-success,
+.tf-ui-banner.is-info { background: #1F6455 !important; }
+.tf-ui-banner.is-error { background: #681A43 !important; }
+.tf-ui-banner-action {
+  padding: 4px 8px;
+  color: var(--tf-logo-yellow, #F2F459);
+  background: transparent !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  box-shadow: none !important;
+  text-decoration: underline;
+  text-underline-offset: 0.18em;
+}
+
+
+/* Overflow-aware, hand-drawn scroll cue. Visibility is controlled by measured page overflow. */
+.tf-scroll-indicator {
+  position: fixed;
+  left: max(12px, env(safe-area-inset-left));
+  bottom: max(18px, env(safe-area-inset-bottom));
+  z-index: 850;
+  width: 48px;
+  height: 58px;
+  margin: 0;
+  padding: 0;
+  color: var(--game-yellow, var(--tf-logo-yellow));
+  background: transparent;
+  border: 0;
+  outline-offset: 3px;
+  box-shadow: none;
+  pointer-events: auto;
+  cursor: pointer;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+  opacity: 0.82;
+  transition: opacity 180ms ease;
+}
+
+.tf-scroll-indicator[hidden] {
+  display: none !important;
+}
+
+.tf-scroll-indicator svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+}
+
+.tf-scroll-indicator:focus-visible {
+  outline: 2px solid currentColor;
+}
+
+.tf-scroll-indicator path {
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 3.4;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  vector-effect: non-scaling-stroke;
+}
+
+.tf-scroll-indicator.is-gameplay {
+  opacity: 0.25;
+}
+
+.tf-scroll-indicator.is-gameplay.is-attending {
+  animation: tfScrollCueAttention 720ms ease-in-out 3;
+}
+
+@keyframes tfScrollCueAttention {
+  0%, 100% { opacity: 0.25; transform: translateY(0); }
+  45% { opacity: 1; transform: translateY(4px); }
+}
+
+.tf-suggestion-footer {
+  width: min(100%, var(--tf-shell-max));
+  margin: clamp(28px, 7svh, 56px) auto max(28px, env(safe-area-inset-bottom));
+  padding-inline: var(--tf-screen-gutter);
+  display: flex;
+  justify-content: center;
+  box-sizing: border-box;
+}
+
+.tf-suggest-question-btn {
+  width: min(88vw, 680px) !important;
+  margin: 0 auto !important;
+  padding-inline: clamp(24px, 6vw, 44px) !important;
+  font-size: clamp(1rem, 3.8vw, 1.35rem) !important;
+  text-align: center;
+}
+
+.tf-end-screen .tf-suggestion-footer {
+  margin-top: clamp(20px, 4svh, 36px);
+  margin-bottom: max(24px, env(safe-area-inset-bottom));
+  padding-inline: 0;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .tf-scroll-indicator.is-gameplay.is-attending {
+    animation: none;
+    opacity: 0.25;
+  }
+}
+
+
+/* Focused English-flow polish: keep existing art while fixing responsive geometry. */
+.tf-end-screen .tf-end-suggest {
+  box-sizing: border-box !important;
+  width: min(calc(100vw - 48px), 520px) !important;
+  max-width: 100% !important;
+  min-width: 0 !important;
+  min-height: clamp(88px, 18vw, 108px) !important;
+  height: auto !important;
+  margin-inline: auto !important;
+  padding: clamp(18px, 4vw, 24px) clamp(38px, 10vw, 68px) !important;
+  color: var(--tf-surface-deep, #4d0c31) !important;
+  font-size: clamp(0.95rem, 4vw, 1.25rem) !important;
+  line-height: 1.2 !important;
+  white-space: normal !important;
+  overflow: visible !important;
+  text-align: center !important;
+  text-shadow: none !important;
+  -webkit-mask: url('buttons/blob-wide-1.webp') center / 100% 100% no-repeat !important;
+  mask: url('buttons/blob-wide-1.webp') center / 100% 100% no-repeat !important;
+}
+
+:root {
+  --tf-home-entry-text-size: clamp(1.5rem, 5.5vw, 2rem);
+}
+
+html body #homeNameInput,
+html body #newGameBtn,
+html body #joinGameBtn {
+  font-size: var(--tf-home-entry-text-size) !important;
+  line-height: 1.1 !important;
+}
+
+html body #newGameBtn,
+html body #joinGameBtn {
+  white-space: nowrap !important;
+  overflow: visible !important;
+}

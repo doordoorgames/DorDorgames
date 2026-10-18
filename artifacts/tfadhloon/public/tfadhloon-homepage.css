@@ -1,0 +1,1472 @@
+/* Keep icon fonts visible even with global font overrides */
+.bi::before { font-family: "bootstrap-icons" !important; }
+.fa,.fas,.far,.fab,.fa-solid,.fa-regular { font-family: "Font Awesome 6 Free" !important; }
+.fa-brands,.fab { font-family: "Font Awesome 6 Brands" !important; }
+.fa::before,.fas::before,.far::before,.fab::before,
+.fa-solid::before,.fa-regular::before,.fa-brands::before { font-family: inherit !important; }
+
+* {
+  font-family: var(--tf-font-active) !important;
+  border-radius: 0 !important;
+}
+
+body {
+  background-size: cover;
+  background-repeat: no-repeat;
+  background-position: center center;
+  transition: background-image 1s ease-in-out;
+  padding-top: 40px;
+  isolation: isolate;
+}
+
+/* Soften background image patterns without hiding the image */
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  pointer-events: none;
+}
+
+/* ============================================================
+INTRO OVERLAY
+============================================================ */
+.intro-active { overflow: hidden; }
+
+.intro-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 6000;
+  background: rgba(0, 0, 0, 0.88);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  transition: opacity 0.35s ease, visibility 0.35s ease;
+}
+
+.intro-overlay.hidden {
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+}
+
+.intro-card {
+  position: relative;
+  width: min(90vw, 560px);
+  max-height: 82vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background: #0e0e0e;
+  border: 2px solid #ffffff;
+  box-shadow: -8px -8px 0 rgba(0, 0, 0, 0.85);
+  padding: 16px;
+  animation: introCardIn 0.45s cubic-bezier(0.175, 0.885, 0.32, 1.275) both;
+}
+
+@keyframes introCardIn {
+  from { opacity: 0; transform: scale(0.88) translateY(20px); }
+  to   { opacity: 1; transform: scale(1) translateY(0); }
+}
+
+.intro-image {
+  width: 100%;
+  max-width: 520px;
+  height: auto;
+  max-height: 72vh;
+  object-fit: contain;
+  object-position: center;
+  display: block;
+}
+
+.intro-close-btn {
+  position: absolute;
+  top: -16px;
+  right: -16px;
+  z-index: 10;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: #111;
+  color: #fff;
+  border: 2px solid #fff;
+  font-size: 1.4rem;
+  line-height: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  box-shadow: -3px -3px 0 rgba(0,0,0,0.7);
+  transition: background 0.15s ease, transform 0.15s ease;
+  padding: 0;
+}
+.intro-close-btn:hover {
+  background: #333;
+  transform: scale(1.12);
+}
+.intro-close-btn:active {
+  transform: scale(0.93);
+}
+
+/* ============================================================
+NICKNAME OVERLAY — floating "window" for entering a name before
+starting a new game. Opens independently over the page instead of
+expanding the section inline.
+============================================================ */
+.nickname-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 6500;
+  background: rgba(0, 0, 0, 0.88);
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  padding: 20px;
+  padding-top: 12vh;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  transition: opacity 0.3s ease, visibility 0.3s ease;
+}
+
+.nickname-overlay.open {
+  opacity: 1;
+  visibility: visible;
+  pointer-events: auto;
+}
+
+.nickname-card {
+  position: relative;
+  width: min(90vw, 380px);
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 0;
+  margin-bottom: auto;
+  animation: nicknameCardIn 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) both;
+}
+
+@keyframes nicknameCardIn {
+  from { opacity: 0; transform: scale(0.88) translateY(20px); }
+  to   { opacity: 1; transform: scale(1) translateY(0); }
+}
+
+.nickname-blob-input {
+  position: relative;
+  z-index: 1;
+  text-align: center;
+  outline: none;
+}
+
+.nickname-blob-input::placeholder {
+  color: rgba(255, 255, 255, 0.75);
+}
+
+.nickname-start-btn {
+  display: block;
+  position: relative;
+  z-index: 3;
+  width: 100%;
+  min-height: 64px;
+  margin-top: -32px;
+  border: none !important;
+  cursor: pointer;
+  color: #F2F459 !important;
+  font-weight: 900;
+  font-size: 1.25rem;
+  text-align: center;
+}
+
+.nickname-start-btn #nicknameStartBtnText {
+  color: #F2F459 !important;
+}
+
+.nickname-close-btn {
+  position: absolute;
+  top: -18px;
+  right: -8px;
+  z-index: 10;
+}
+
+/* ============================================================
+AD BANNER
+============================================================ */
+.ad-banner {
+  position: fixed;
+  top: 0; left: 0;
+  width: 100%;
+  height: 60px;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.ad-content {
+  color: white;
+  font-weight: bold;
+  font-size: 16px;
+  text-align: center;
+  text-shadow: var(--tf-text-shadow) !important;
+}
+.ad-text { animation: pulse 2s infinite; }
+@keyframes pulse {
+  0%,100% { opacity: 1; }
+  50%      { opacity: 0.7; }
+}
+@media (max-width: 768px) {
+  .ad-banner { height: 50px; }
+  .ad-content { font-size: 14px; }
+}
+
+/* ============================================================
+LANGUAGE SWITCHER
+============================================================ */
+.language-switcher-container {
+  position: fixed;
+  top: 70px;
+  right: 20px;
+  z-index: 2000;
+}
+
+.language-switcher { position: relative; width: auto; }
+
+/* Floating text only — no blob, no button chrome, no shadows/outlines. */
+.language-toggle {
+  background: none;
+  color: var(--game-white, #fff);
+  font-weight: 800;
+  border: none;
+  padding: 4px 6px;
+  font-size: clamp(0.95rem, 2.4vw, 1.15rem);
+  cursor: pointer;
+  box-shadow: none;
+  text-shadow: var(--tf-text-shadow) !important;
+  transition: opacity 0.15s ease, transform 0.15s ease;
+  width: auto;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+.language-toggle:hover {
+  background: none;
+  opacity: 0.75;
+  transform: translateY(-1px);
+  box-shadow: none;
+}
+.language-toggle:active {
+  transform: translateY(0);
+  box-shadow: none;
+}
+
+.language-flag { margin-right: 0; font-size: 15px; opacity: 0.9; }
+.language-name { text-align: left; }
+.dropdown-arrow { transition: transform 0.3s ease; font-size: 11px; opacity: 0.8; }
+.language-switcher.open .dropdown-arrow { transform: rotate(180deg); }
+
+.language-dropdown {
+  position: absolute;
+  top: 100%;
+  left: 0; right: 0;
+  min-width: 150px;
+  background: rgba(20, 12, 30, 0.92);
+  margin-top: 8px;
+  box-shadow: 0 10px 26px rgba(0, 0, 0, 0.3);
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(-10px) scale(0.97);
+  transition: opacity 0.25s ease, visibility 0.25s ease,
+              transform 0.25s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  z-index: 2001;
+  overflow: hidden;
+  border: none;
+}
+.language-switcher.open .language-dropdown {
+  opacity: 1;
+  visibility: visible;
+  transform: translateY(0) scale(1);
+}
+
+.language-option {
+  background: none;
+  color: var(--game-white, #fff);
+  font-weight: 700;
+  border: none;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.12);
+  padding: 12px 18px;
+  font-size: 1.05rem;
+  cursor: pointer;
+  text-shadow: var(--tf-text-shadow) !important;
+  box-shadow: none;
+  transition: background-color 0.15s ease, padding-left 0.15s ease;
+  display: flex;
+  align-items: center;
+}
+.language-option:last-child { border-bottom: none; }
+.language-option:hover {
+  background-color: rgba(255, 255, 255, 0.1);
+  padding-left: 24px;
+}
+.language-option.active {
+  background-color: rgba(255, 255, 255, 0.18);
+  color: var(--game-white, #fff);
+}
+.language-option.active .language-flag { color: inherit; }
+
+/* ============================================================
+BACK BUTTON
+============================================================ */
+.back-btn {
+  position: fixed;
+  top: 70px; left: 20px;
+  z-index: 2000;
+  background-color: #20bb58;
+  color: white;
+  border: 2px solid white;
+  padding: 12px 24px;
+  font-size: 1.2rem;
+  font-weight: bold;
+  cursor: pointer;
+  font-family: var(--tf-font-active) !important;
+  box-shadow: -4px -4px 0 rgba(0, 0, 0, 0.8);
+  text-shadow: var(--tf-text-shadow) !important;
+  transition: transform 0.18s cubic-bezier(0.175, 0.885, 0.32, 1.5),
+              box-shadow 0.18s ease,
+              background 0.18s ease;
+}
+.back-btn:hover {
+  background: linear-gradient(135deg, #5a6fd8 0%, #6a4190 100%);
+  transform: translateY(-3px);
+  box-shadow: -6px -6px 0 rgba(0, 0, 0, 0.8);
+}
+.back-btn:active {
+  transform: translateY(1px);
+  box-shadow: -2px -2px 0 rgba(0, 0, 0, 0.8);
+}
+
+/* ============================================================
+MAIN CONTAINER & HEADER — animated entrance
+============================================================ */
+.container {
+  animation: pageEntrance 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) both;
+}
+
+@keyframes pageEntrance {
+  from { opacity: 0; transform: translateY(20px) scale(0.98); }
+  to   { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+.header {
+  text-align: center;
+  margin-bottom: 0.3rem;
+  animation: headerDrop 0.55s cubic-bezier(0.175, 0.885, 0.32, 1.275) 0.05s both;
+}
+
+.header .img-fluid {
+  max-height: 120px;
+  width: auto;
+  max-width: 85%;
+}
+
+@keyframes headerDrop {
+  from { opacity: 0; transform: translateY(-28px) scale(0.95); }
+  to   { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+.img-fluid {
+  max-width: 85%;
+  height: auto;
+  transition: transform 0.25s ease;
+}
+.img-fluid:hover {
+  transform: scale(1.02);
+}
+
+/* ============================================================
+GAME CONTAINER
+============================================================ */
+.game-container {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+}
+
+/* ============================================================
+BUTTON SECTIONS — force both to same fixed width so buttons match
+============================================================ */
+#newGameSection,
+#joinGameSection {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: var(--cta-width, min(66.666vw, 900px));
+  align-self: center;
+}
+
+/* Inputs inside sections should fill the section width */
+#newGameSection .form-control-custom,
+#joinGameSection .form-control-custom {
+  width: 100%;
+}
+
+/* ============================================================
+ACTION BUTTONS — new-game & join-game
+Both fill the fixed-width section so they're always identical
+============================================================ */
+.btn-action {
+  display: block;        /* block so it fills parent width */
+  width: 100%;
+  font-family: var(--tf-font-active) !important;
+  font-weight: bold;
+  font-size: 1.3rem;
+  cursor: pointer;
+  border: 2px solid white;
+  padding: 14px 36px;
+  color: white;
+  text-align: center;
+  /* White-shadow text: hard black offset + soft white counter */
+  text-shadow: var(--tf-text-shadow) !important;
+  transition: transform 0.18s cubic-bezier(0.175, 0.885, 0.32, 1.5),
+              box-shadow 0.18s ease,
+              background-color 0.18s ease;
+  position: relative;
+  /* overflow hidden clips the shimmer — no leaking dot */
+  overflow: hidden;
+}
+
+.new-game-btn {
+  background-color: #20bb58;
+  box-shadow: -5px -5px 0 rgba(0, 0, 0, 0.8);
+  animation: btnPopIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) 0.15s both;
+}
+
+.join-game-btn {
+  background-color: #20bb58;
+  box-shadow: -5px -5px 0 rgba(0, 0, 0, 0.8);
+  animation: btnPopIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) 0.25s both;
+}
+
+@keyframes btnPopIn {
+  from { opacity: 0; transform: scale(0.72); }
+  to   { opacity: 1; transform: scale(1); }
+}
+
+.btn-action:hover {
+  background-color: #1a9c4a;
+  transform: translateY(-4px) scale(1.04);
+  box-shadow: -7px -7px 0 rgba(0, 0, 0, 0.85);
+}
+
+.btn-action:active {
+  transform: translateY(1px) scale(0.97);
+  box-shadow: -2px -2px 0 rgba(0, 0, 0, 0.8);
+}
+
+/* Shimmer sweep — starts fully outside left edge, only visible on hover */
+.btn-action::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -120%;           /* start well outside so it's invisible at rest */
+  width: 60%;
+  height: 100%;
+  background: linear-gradient(
+    120deg,
+    rgba(255,255,255,0) 0%,
+    rgba(255,255,255,0.22) 50%,
+    rgba(255,255,255,0) 100%
+  );
+  transform: skewX(-20deg);
+  transition: left 0.45s ease;
+  pointer-events: none;
+}
+.btn-action:hover::after { left: 160%; }
+
+/* ============================================================
+TEXT INPUT — custom form control
+============================================================ */
+.form-control-custom {
+  background: rgba(255,255,255,0.12);
+  border: 1px solid rgba(255,255,255,0.28) !important;
+  color: white !important;
+  font-family: var(--tf-font-active) !important;
+  font-size: 1.1rem;
+  padding: 12px 16px;
+  box-shadow: none !important;
+  outline: none;
+  transition: background 0.2s ease, border-color 0.2s ease;
+  animation: inputSlideIn 0.3s ease both;
+}
+.form-control-custom:focus {
+  background: rgba(255,255,255,0.2) !important;
+  box-shadow: none !important;
+  border-color: rgba(255,255,255,0.55) !important;
+}
+.form-control-custom::placeholder { color: rgba(255,255,255,0.55); }
+
+/* Nickname inputs are shaped as a semi-transparent Wide1 blob, same
+   width as the Start/Join CTAs above them, same translucent fill
+   rules as before (no opaque theme-engine color, no white outline). */
+#newGameInput,
+#joinGameInput {
+  width: var(--cta-width, min(66.666vw, 900px));
+  max-width: 100%;
+  aspect-ratio: 1453 / 843;
+  height: auto;
+  min-height: 0;
+  border: none !important;
+  border-radius: 0 !important;
+  -webkit-mask-image: url('buttons/blob-wide-1.webp');
+  mask-image: url('buttons/blob-wide-1.webp');
+  -webkit-mask-size: 100% 100%;
+  mask-size: 100% 100%;
+  -webkit-mask-repeat: no-repeat;
+  mask-repeat: no-repeat;
+  -webkit-mask-position: center;
+  mask-position: center;
+  text-align: center;
+  padding: 12px 40px;
+  margin-left: auto;
+  margin-right: auto;
+  display: block;
+}
+#newGameInput:focus,
+#joinGameInput:focus {
+  border: none !important;
+}
+@keyframes inputSlideIn {
+  from { opacity: 0; transform: translateY(-8px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* ============================================================
+BUTTON SETTINGS / SECTION LAYOUT
+============================================================ */
+.button-settings-p {
+  /* width/layout handled by #joinGameSection rule — do not override */
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+}
+
+.btn-top-set {
+  margin-top: 30px !important;
+  background-color: transparent;
+  color: white;
+  padding: 10px;
+  border: 1px solid white;
+  font-family: var(--tf-font-active) !important;
+  font-weight: 400;
+  transition: transform 0.18s ease, box-shadow 0.18s ease, background 0.18s ease;
+  text-shadow: var(--tf-text-shadow) !important;
+}
+.btn-top-set:hover {
+  background-color: rgba(255,255,255,0.12);
+  transform: translateY(-2px);
+  box-shadow: -3px -3px 0 rgba(0,0,0,0.6);
+}
+
+/* ============================================================
+CHARACTER (animated spy figure)
+============================================================ */
+
+
+/* ============================================================
+RESPONSIVE
+============================================================ */
+@media (max-width: 768px) {
+  .language-switcher-container { top: 60px; right: 15px; }
+  .language-switcher { width: 160px; }
+  .language-toggle { padding: 8px 12px; font-size: 13px; }
+  .back-btn { top: 60px; left: 15px; padding: 8px 12px; font-size: 13px; }
+}
+@media (max-width: 480px) {
+  .language-switcher-container { top: 55px; right: 10px; }
+  .language-switcher { width: 150px; }
+  .back-btn { top: 55px; left: 10px; }
+  .btn-action { font-size: 1.1rem; padding: 12px 28px; }
+}
+
+/* ============================================================
+ALERT SYSTEM — full match with lobby CSS improvements
+============================================================ */
+@keyframes alertFadeIn { from { opacity: 0; } to { opacity: 1; } }
+@keyframes alertSlideIn {
+  from { opacity: 0; transform: translateY(50px) scale(0.8); }
+  to   { opacity: 1; transform: translateY(0) scale(1); }
+}
+@keyframes progressBar { from { width: 100%; } to { width: 0%; } }
+@keyframes toastBounce {
+  0%   { transform: translateX(100%); opacity: 0; }
+  60%  { transform: translateX(-8px); opacity: 1; }
+  80%  { transform: translateX(4px); }
+  100% { transform: translateX(0); opacity: 1; }
+}
+@keyframes wiggle {
+  0%,100% { transform: rotate(0deg); }
+  25%      { transform: rotate(-6deg); }
+  75%      { transform: rotate(6deg); }
+}
+
+.alert-overlay {
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(0, 0, 0, 0.7);
+  backdrop-filter: blur(10px);
+  z-index: 99999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  animation: alertFadeIn 0.3s ease;
+}
+
+.alert-container {
+  background: #20bb58;
+  padding: 0;
+  max-width: 450px;
+  width: 100%;
+  box-shadow: -6px -6px 0 rgba(0, 0, 0, 0.8);
+  animation: alertSlideIn 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  border: 2px solid white;
+  overflow: hidden;
+  position: relative;
+}
+
+.alert-header {
+  background: rgba(255, 255, 255, 0.1);
+  padding: 25px 30px 15px;
+  text-align: center;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+  position: relative;
+}
+
+.alert-icon {
+  font-size: 54px;
+  margin-bottom: 15px;
+  display: block;
+  text-shadow: var(--tf-text-shadow) !important;
+  color: white;
+  animation: wiggle 0.6s 0.3s ease both;
+}
+
+.alert-title {
+  color: white;
+  font-size: 26px;
+  font-weight: 700;
+  margin: 0;
+  font-family: var(--tf-font-active) !important;
+  /* White-shadow text on dialog titles */
+  text-shadow: var(--tf-text-shadow) !important;
+  line-height: 1.2;
+}
+
+.alert-body {
+  padding: 30px;
+  text-align: center;
+  background: rgba(255,255,255,0.05);
+}
+
+.alert-message {
+  color: white;
+  font-size: 16px;
+  line-height: 1.6;
+  margin: 0;
+  font-weight: 500;
+  text-shadow: var(--tf-text-shadow) !important;
+  font-family: var(--tf-font-active) !important;
+}
+
+.alert-footer {
+  padding: 25px 30px;
+  display: flex;
+  justify-content: center;
+  gap: 15px;
+  background: rgba(0, 0, 0, 0.1);
+  flex-wrap: wrap;
+}
+
+.alert-btn {
+  padding: 14px 32px;
+  border: 2px solid white;
+  font-weight: 700;
+  font-family: var(--tf-font-active) !important;
+  cursor: pointer;
+  /* White-shadow text on alert buttons */
+  text-shadow: var(--tf-text-shadow) !important;
+  transition: transform 0.18s cubic-bezier(0.175, 0.885, 0.32, 1.5),
+              box-shadow 0.18s ease;
+  min-width: 120px;
+  font-size: 15px;
+  letter-spacing: 0.5px;
+  position: relative;
+  overflow: hidden;
+  box-shadow: -4px -4px 0 rgba(0, 0, 0, 0.8);
+}
+.alert-btn:hover {
+  transform: translateY(-3px) scale(1.03);
+  box-shadow: -6px -6px 0 rgba(0,0,0,0.8);
+}
+.alert-btn:active {
+  transform: translateY(1px) scale(0.97);
+  box-shadow: -2px -2px 0 rgba(0,0,0,0.8);
+}
+
+.alert-btn-primary {
+  background: #20bb58;
+  color: white;
+}
+.alert-btn-primary:hover { background: #1a9c4a; }
+
+.alert-btn-secondary {
+  background: rgba(255,255,255,0.15);
+  color: white;
+  backdrop-filter: blur(10px);
+}
+.alert-btn-secondary:hover { background: rgba(255,255,255,0.25); }
+
+.alert-success  .alert-container { background: #20bb58; }
+.alert-error    .alert-container { background: #ff6b6b; }
+.alert-warning  .alert-container { background: #F2F459; }
+.alert-info     .alert-container { background: #4fc3f7; }
+.alert-question .alert-container { background: #a78bfa; }
+
+.alert-warning .alert-title,
+.alert-warning .alert-message {
+  color: #333;
+  text-shadow: var(--tf-text-shadow) !important;
+}
+.alert-warning .alert-btn-secondary {
+  background: rgba(0,0,0,0.1);
+  color: #333;
+  border: 2px solid rgba(0,0,0,0.2);
+  text-shadow: var(--tf-text-shadow) !important;
+}
+
+.alert-progress {
+  position: absolute;
+  bottom: 0; left: 0;
+  height: 4px;
+  background: rgba(255,255,255,0.8);
+  width: 100%;
+  animation: progressBar linear forwards;
+}
+
+.alert-close {
+  position: absolute;
+  top: 15px; right: 15px;
+  background: rgba(255,255,255,0.2);
+  border: 2px solid white;
+  width: 35px; height: 35px;
+  color: white;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+  transition: transform 0.25s ease, background 0.2s ease;
+  backdrop-filter: blur(10px);
+  box-shadow: -2px -2px 0 rgba(0,0,0,0.5);
+}
+.alert-close:hover {
+  background: rgba(255,255,255,0.35);
+  transform: rotate(90deg) scale(1.1);
+}
+
+.alert-input {
+  width: 100%;
+  padding: 12px 16px;
+  margin: 15px 0;
+  border: 2px solid white;
+  background: rgba(255,255,255,0.1);
+  color: white;
+  font-size: 16px;
+  font-family: var(--tf-font-active) !important;
+  outline: none;
+  transition: background 0.25s ease, box-shadow 0.25s ease;
+  box-sizing: border-box;
+  box-shadow: -2px -2px 0 rgba(0,0,0,0.3);
+}
+.alert-input:focus {
+  background: rgba(255,255,255,0.18);
+  box-shadow: -4px -4px 0 rgba(0,0,0,0.5);
+  border-color: #fff;
+}
+.alert-input::placeholder { color: rgba(255,255,255,0.6); }
+
+/* ---- Toast — bouncy entrance ---- */
+.alert-toast {
+  position: fixed;
+  top: 20px; right: 20px;
+  background: #20bb58;
+  color: white;
+  padding: 15px 20px;
+  border: 2px solid white;
+  box-shadow: -4px -4px 0 rgba(0,0,0,0.8);
+  z-index: 99998;
+  max-width: 350px;
+  animation: toastBounce 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  font-family: var(--tf-font-active) !important;
+  text-shadow: var(--tf-text-shadow) !important;
+}
+.alert-toast.success { background: #20bb58; }
+.alert-toast.error   { background: #ff6b6b; }
+.alert-toast.warning { background: #F2F459; color: #333; text-shadow: var(--tf-text-shadow) !important; }
+.alert-toast.info    { background: #4fc3f7; }
+
+@media (max-width: 480px) {
+  .alert-overlay { padding: 15px; }
+  .alert-container { max-width: 100%; }
+  .alert-header { padding: 20px 25px 10px; }
+  .alert-icon { font-size: 42px; }
+  .alert-title { font-size: 22px; }
+  .alert-body { padding: 25px 20px; }
+  .alert-message { font-size: 15px; }
+  .alert-footer { padding: 20px; gap: 10px; }
+  .alert-btn { padding: 12px 24px; min-width: 100px; font-size: 14px; }
+  .alert-close { top: 10px; right: 10px; width: 30px; height: 30px; font-size: 16px; }
+  .alert-input { padding: 10px 14px; font-size: 15px; }
+}
+
+/* Scoped homepage sizing and inline Join flow. */
+#newGameSection,
+#joinGameSection {
+  width: clamp(150px, 33.333vw, 450px);
+}
+
+#newGameBtn,
+#joinGameBtn {
+  width: 100% !important;
+}
+
+.game-container.join-mode {
+  min-height: min(470px, calc(100dvh - env(safe-area-inset-top) - env(safe-area-inset-bottom) - 100px));
+  justify-content: center;
+}
+
+.game-container.join-mode #joinGameSection {
+  width: min(94vw, 520px);
+  gap: clamp(14px, 2.5vh, 24px);
+}
+
+.join-fields {
+  width: 100%;
+  display: grid;
+  gap: clamp(12px, 2vh, 20px);
+  justify-items: center;
+}
+
+.join-fields.d-none {
+  display: none !important;
+}
+
+#joinGameSection .join-flow-input {
+  width: min(100%, 500px);
+  min-height: clamp(82px, 12vh, 108px);
+  height: clamp(82px, 12vh, 108px);
+  aspect-ratio: auto;
+  padding: 18px clamp(42px, 10vw, 72px);
+  margin: 0 auto;
+  border: none !important;
+  border-radius: 0 !important;
+  background: rgba(112, 20, 68, 0.92) !important;
+  color: #fff !important;
+  font-size: clamp(1.15rem, 4.4vw, 1.55rem);
+  font-weight: 800;
+  text-align: center;
+  box-sizing: border-box;
+  -webkit-mask-size: 100% 100%;
+  mask-size: 100% 100%;
+  -webkit-mask-repeat: no-repeat;
+  mask-repeat: no-repeat;
+  -webkit-mask-position: center;
+  mask-position: center;
+}
+
+#joinGameInput {
+  -webkit-mask-image: url('buttons/blob-wide-1.webp');
+  mask-image: url('buttons/blob-wide-1.webp');
+  transform: rotate(-0.7deg);
+}
+
+#joinNicknameInput {
+  -webkit-mask-image: url('buttons/blob-wide-2.webp');
+  mask-image: url('buttons/blob-wide-2.webp');
+  transform: rotate(0.7deg);
+}
+
+#joinGameSection .join-flow-input:focus {
+  background: rgba(77, 12, 49, 0.96) !important;
+  transform: scale(1.02);
+}
+
+#joinGameSection #joinGameBtn {
+  width: min(76%, 350px) !important;
+  height: clamp(84px, 12vh, 108px) !important;
+  min-height: 84px !important;
+  aspect-ratio: auto !important;
+  margin-inline: auto !important;
+}
+
+.tutorial-section {
+  width: 100%;
+  max-width: 100%;
+  margin: clamp(36px, 8vh, 72px) auto max(24px, env(safe-area-inset-bottom));
+}
+
+.tutorial-inline-image {
+  display: block;
+  width: 100%;
+  max-width: 100%;
+  height: auto;
+  object-fit: contain;
+}
+
+.tutorial-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 6000;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  padding: 18px;
+  background: rgba(31, 7, 28, 0.84);
+  backdrop-filter: blur(8px);
+}
+
+.tutorial-overlay.open { display: flex; }
+
+.tutorial-dialog {
+  position: relative;
+  width: min(94vw, 760px);
+  max-height: 90dvh;
+  overflow: auto;
+  padding: 20px;
+  background: #fff8ec;
+  color: #591132;
+  border: 3px solid #9e315f;
+  box-shadow: 10px 10px 0 rgba(39, 5, 29, 0.5);
+  text-align: center;
+}
+
+.tutorial-dialog h2 { margin: 0 52px 16px; font-weight: 900; }
+
+.tutorial-close {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  width: 44px;
+  height: 44px;
+  border: 2px solid #9e315f;
+  background: #fff;
+  color: #591132;
+  font-size: 28px;
+  line-height: 1;
+  cursor: pointer;
+}
+
+#howToPlaySection { width: var(--cta-width, min(66.666vw, 900px)); }
+
+#howToPlayBtn {
+  width: min(76%, 350px) !important;
+  min-height: 64px !important;
+  height: auto !important;
+  margin-inline: auto !important;
+  background: rgba(255, 248, 236, 0.94) !important;
+  color: #761d49 !important;
+  border: 3px solid #9e315f !important;
+}
+
+html body #backBtn {
+  position: fixed !important;
+  top: max(12px, env(safe-area-inset-top)) !important;
+  left: 12px !important;
+  right: auto !important;
+  min-height: 42px !important;
+  padding: 8px 12px !important;
+  font-size: 0.92rem !important;
+  z-index: 3000 !important;
+}
+
+.voice-disabled {
+  opacity: 0.68;
+}
+
+@media (max-width: 480px) {
+  #newGameSection,
+  #joinGameSection {
+    width: clamp(150px, 46vw, 210px);
+  }
+
+  .game-container.join-mode #joinGameSection {
+    width: min(94vw, 440px);
+  }
+
+  #joinGameSection .join-flow-input {
+    min-height: 82px;
+    height: 82px;
+    padding-inline: 44px;
+  }
+
+  #joinGameSection #joinGameBtn {
+    height: 86px !important;
+  }
+}
+
+/* Two direct language blobs; no dropdown or generic controls. */
+.language-switcher-container {
+  width: auto;
+  top: max(14px, env(safe-area-inset-top));
+  right: max(10px, env(safe-area-inset-right));
+}
+
+.language-blob-group {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 4px;
+  width: calc(33.334vw + 4px);
+  max-width: 148px;
+}
+
+.language-blob {
+  width: clamp(46px, 16.667vw, 72px) !important;
+  height: clamp(46px, 16.667vw, 72px) !important;
+  min-width: 46px !important;
+  min-height: 46px !important;
+  aspect-ratio: 1 / 1 !important;
+  padding: 5px !important;
+  margin: 0 !important;
+  font-size: clamp(0.78rem, 3.8vw, 1rem) !important;
+  line-height: 1 !important;
+  opacity: 0.64;
+  border: 0 !important;
+  border-radius: 0 !important;
+  -webkit-mask-image: url('buttons/blob-circle.webp') !important;
+  mask-image: url('buttons/blob-circle.webp') !important;
+  -webkit-mask-size: 100% 100% !important;
+  mask-size: 100% 100% !important;
+  -webkit-mask-repeat: no-repeat !important;
+  mask-repeat: no-repeat !important;
+  -webkit-mask-position: center !important;
+  mask-position: center !important;
+}
+
+.language-blob.active {
+  opacity: 1;
+  transform: scale(1.08);
+  filter: brightness(1.2) !important;
+}
+
+.join-room-heading {
+  width: min(92vw, 500px);
+  margin: 0 auto 4px;
+  color: #F2F459;
+  font-size: clamp(1.2rem, 4.8vw, 1.8rem);
+  text-align: center;
+  overflow-wrap: anywhere;
+}
+
+.smart-room-code {
+  display: none !important;
+}
+
+/* Homepage CTA typography stays elegant inside the large tap targets. */
+#newGameBtn,
+#joinGameBtn {
+  font-size: clamp(0.95rem, 3.6vw, 1.65rem) !important;
+  line-height: 1 !important;
+  white-space: nowrap !important;
+  overflow-wrap: normal !important;
+  word-break: keep-all !important;
+  text-align: center !important;
+  padding-inline: clamp(10px, 4vw, 28px) !important;
+}
+
+
+/* ── SIMPLIFIED HOME ONBOARDING ── */
+.game-container {
+  gap: clamp(10px, 2vh, 16px);
+}
+
+.home-name-label {
+  margin: 0;
+  color: var(--game-yellow, #F2F459);
+  font-size: clamp(1.15rem, 4.5vw, 1.65rem);
+  font-weight: 900;
+  line-height: 1.2;
+  text-align: center;
+}
+
+.home-name-field {
+  position: relative;
+  width: var(--cta-width, min(66.666vw, 900px));
+  max-width: 100%;
+  margin: 0 auto;
+  overflow: visible;
+  background: transparent !important;
+  border: 0 !important;
+  box-shadow: none !important;
+}
+
+.home-name-field::before,
+.home-name-field::after {
+  content: none !important;
+  display: none !important;
+}
+
+#homeNameInput {
+  width: 100%;
+  max-width: 100%;
+  aspect-ratio: 1453 / 843;
+  height: auto;
+  min-height: 0;
+  margin: 0 auto;
+  padding: 12px 40px;
+  display: block;
+  border: none !important;
+  color: #fff !important;
+  background: rgba(255, 255, 255, 0.16) !important;
+  text-align: center;
+  font-size: clamp(1.1rem, 4vw, 1.5rem);
+  -webkit-mask-image: url("buttons/blob-wide-1.webp");
+  mask-image: url("buttons/blob-wide-1.webp");
+  -webkit-mask-size: 100% 100%;
+  mask-size: 100% 100%;
+  -webkit-mask-repeat: no-repeat;
+  mask-repeat: no-repeat;
+  -webkit-mask-position: center;
+  mask-position: center;
+}
+
+#homeNameInput::placeholder {
+  color: rgba(255, 255, 255, 0.72);
+}
+
+#homeNameInput:focus {
+  border: none !important;
+  outline: none !important;
+  background: rgba(255, 255, 255, 0.22) !important;
+}
+
+.home-name-field > .tf-onboarding-outline {
+  --tf-outline-mask: url("buttons/blob-wide-1.webp");
+  inset: -5px;
+  width: calc(100% + 10px);
+  height: calc(100% + 10px);
+}
+
+#newGameSection,
+#joinGameSection {
+  margin: 0 !important;
+}
+
+.character {
+  display: none !important;
+}
+
+.room-code-card {
+  gap: 10px;
+}
+
+.room-code-title {
+  margin: 0 28px 4px;
+  color: var(--game-yellow, #F2F459) !important;
+  font-size: clamp(1.35rem, 5vw, 1.9rem) !important;
+  text-align: center;
+}
+
+#roomCodeOverlay {
+  background: rgba(0, 0, 0, 0.68);
+}
+
+#roomCodeOverlay #joinGameInput {
+  width: 100%;
+  max-width: 100%;
+}
+
+#roomCodeSubmitBtn,
+#roomCodeSubmitBtnText {
+  color: var(--game-yellow, #F2F459) !important;
+}
+
+@media (max-width: 480px) {
+  .home-name-field {
+    width: min(82vw, 340px);
+  }
+}
+
+
+/* One shared guide moves from the name field to Start. */
+.game-container {
+  position: relative;
+  overflow: visible;
+}
+
+#homeNameInput {
+  caret-color: var(--game-yellow, #F2F459);
+}
+
+#homeGuidanceOutline {
+  position: absolute;
+}
+
+
+/* ── MINIMAL HOME START CONTROL ──
+   Preserve the real button as a stable tap target, but render only its label. */
+html body #newGameSection {
+  width: clamp(180px, 52vw, 250px) !important;
+  max-width: 250px !important;
+  margin-inline: auto !important;
+}
+
+html body #newGameBtn {
+  width: 100% !important;
+  max-width: 250px !important;
+  aspect-ratio: 1453 / 843 !important;
+  height: auto !important;
+  min-height: 72px !important;
+  box-sizing: border-box !important;
+  margin: 0 auto !important;
+  padding: 18px 28px !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  color: #ffffff !important;
+  background: transparent !important;
+  box-shadow: none !important;
+  text-shadow: var(--tf-text-shadow) !important;
+  -webkit-mask: none !important;
+  mask: none !important;
+  animation: none !important;
+  transition: none !important;
+  transform: none !important;
+  overflow: visible !important;
+  white-space: nowrap !important;
+  line-height: 1 !important;
+}
+
+html body #newGameBtn:hover,
+html body #newGameBtn:active,
+html body #newGameBtn:focus,
+html body #newGameBtn:disabled {
+  color: #ffffff !important;
+  background: transparent !important;
+  box-shadow: none !important;
+  transform: none !important;
+  opacity: 1 !important;
+}
+
+html body #newGameBtn::before,
+html body #newGameBtn::after {
+  content: none !important;
+  display: none !important;
+}
+
+
+/* QR room links: the code is prefilled in state, so players only see nickname + Join. */
+.game-container.room-link-mode #newGameSection {
+  display: none !important;
+}
+
+.game-container.room-link-mode #joinGameSection {
+  display: block !important;
+  margin-inline: auto !important;
+}
+
+.game-container.room-link-mode #joinGameBtn {
+  color: #ffffff !important;
+}
+
+
+/* Transparent nickname blob: retain its blob-sized hit area and guidance orbit. */
+html body #homeNameInput,
+html body #homeNameInput:hover,
+html body #homeNameInput:active,
+html body #homeNameInput:focus {
+  -webkit-appearance: none !important;
+  appearance: none !important;
+  background: transparent !important;
+  background-color: transparent !important;
+  background-image: none !important;
+  border: 0 !important;
+  box-shadow: none !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+  filter: none !important;
+  opacity: 1 !important;
+}
+
+
+/* ============================================================
+   PREMIUM HOME COMPOSITION — one centered rhythm, no hand offsets
+   ============================================================ */
+html body {
+  padding-top: var(--ui-space-4) !important;
+}
+html body > .container {
+  width: min(100%, 960px) !important;
+  max-width: 960px !important;
+  min-height: 0 !important;
+  padding-inline: var(--ui-space-3) !important;
+  margin-inline: auto !important;
+}
+html body .header {
+  margin: 0 auto var(--ui-space-3) !important;
+  text-align: center !important;
+}
+html body .header .img-fluid {
+  display: block !important;
+  width: clamp(210px, 34vw, 330px) !important;
+  max-width: 76vw !important;
+  max-height: 132px !important;
+  margin-inline: auto !important;
+  object-fit: contain;
+}
+html body .game-container {
+  width: 100% !important;
+  max-width: 720px !important;
+  margin-inline: auto !important;
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  gap: var(--ui-space-3) !important;
+  overflow: visible !important;
+}
+html body .home-name-label {
+  margin: 0 !important;
+  font-size: var(--ui-body) !important;
+  line-height: 1.3 !important;
+  text-align: center !important;
+}
+html body .home-name-field {
+  width: var(--ui-control-width) !important;
+  max-width: calc(100vw - (2 * var(--ui-space-3))) !important;
+  height: var(--ui-control-height) !important;
+  margin: 0 !important;
+}
+html body #homeNameInput {
+  box-sizing: border-box !important;
+  width: 100% !important;
+  height: 100% !important;
+  min-height: var(--ui-control-height) !important;
+  padding: var(--ui-control-padding) !important;
+  margin: 0 !important;
+  font-size: var(--ui-body) !important;
+  line-height: 1.2 !important;
+  text-align: center !important;
+}
+html body #newGameSection,
+html body #joinGameSection {
+  box-sizing: border-box !important;
+  width: var(--ui-control-width) !important;
+  max-width: calc(100vw - (2 * var(--ui-space-3))) !important;
+  margin: 0 !important;
+  align-self: center !important;
+}
+html body #newGameBtn,
+html body #joinGameBtn {
+  box-sizing: border-box !important;
+  width: 100% !important;
+  max-width: none !important;
+  height: var(--ui-control-height) !important;
+  min-height: var(--ui-control-height) !important;
+  max-height: var(--ui-control-height) !important;
+  aspect-ratio: auto !important;
+  padding: var(--ui-control-padding) !important;
+  margin: 0 !important;
+  font-size: var(--ui-button) !important;
+  font-weight: 400 !important;
+  line-height: 1.12 !important;
+  white-space: nowrap !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+}
+html body #newGameBtn {
+  background: transparent !important;
+  -webkit-mask: none !important;
+  mask: none !important;
+}
+html body #homeGuidanceOutline {
+  position: absolute !important;
+  z-index: 10 !important;
+  pointer-events: none !important;
+  margin: 0 !important;
+}
+html body .tutorial-section {
+  margin-top: var(--ui-space-6) !important;
+}
+html body .room-code-card {
+  width: min(90vw, 420px) !important;
+  gap: var(--ui-space-3) !important;
+}
+html body #roomCodeOverlay:not(.open) {
+  visibility: hidden !important;
+  pointer-events: none !important;
+}
+html body #micBtn,
+html body #speakerBtn {
+  width: 56px !important;
+  height: 56px !important;
+  min-width: 56px !important;
+  min-height: 56px !important;
+  padding: 0 !important;
+}
+@media (max-width: 480px) {
+  html body {
+    padding-top: var(--ui-space-3) !important;
+  }
+  html body .header {
+    margin-bottom: var(--ui-space-2) !important;
+  }
+  html body .header .img-fluid {
+    width: clamp(190px, 62vw, 270px) !important;
+    max-height: 108px !important;
+  }
+  html body .game-container {
+    gap: var(--ui-space-2) !important;
+  }
+  html body .tutorial-section {
+    margin-top: var(--ui-space-5) !important;
+  }
+}
+@media (max-height: 700px) and (min-width: 481px) {
+  html body {
+    padding-top: var(--ui-space-3) !important;
+  }
+  html body .header .img-fluid {
+    max-height: 96px !important;
+  }
+  html body .game-container {
+    gap: var(--ui-space-2) !important;
+  }
+}
+
+
+/* VISUAL QA: outrank legacy ID dimensions so both home actions are exact peers. */
+html body:not(#tf-never) #newGameSection,
+html body:not(#tf-never) #joinGameSection {
+  width: var(--ui-control-width) !important;
+  max-width: calc(100vw - (2 * var(--ui-space-3))) !important;
+}
+html body:not(#tf-never) #newGameBtn,
+html body:not(#tf-never) #joinGameBtn {
+  box-sizing: border-box !important;
+  width: 100% !important;
+  max-width: none !important;
+  height: var(--ui-control-height) !important;
+  min-height: var(--ui-control-height) !important;
+  max-height: var(--ui-control-height) !important;
+  aspect-ratio: auto !important;
+  padding: var(--ui-control-padding) !important;
+  margin: 0 !important;
+}
