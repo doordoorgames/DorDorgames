@@ -1,10 +1,13 @@
 import { test, expect } from "@playwright/test";
 import { nanoid } from "nanoid";
 
-const ADMIN_USERNAME = "admin";
-const ADMIN_PASSWORD = "admin999";
-const ADMIN_TOKEN = "doordoor-admin-token-2024";
+const ADMIN_USERNAME = process.env.ADMIN_USERNAME ?? "admin";
+const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD;
 const BASE_URL = process.env.BASE_URL || "http://localhost:80";
+
+if (!ADMIN_PASSWORD) {
+  throw new Error("ADMIN_PASSWORD is required for admin end-to-end tests");
+}
 
 test.describe("Admin panel — game management", () => {
   test("admin can log in and reach the dashboard", async ({ page }) => {

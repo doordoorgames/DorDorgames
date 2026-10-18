@@ -1,6 +1,12 @@
 import app from "./app";
+import { createServer } from "node:http";
+import { ensureDatabaseSchema, pool } from "@workspace/db";
 import { logger } from "./lib/logger";
 import { store } from "./lib/store";
+import {
+  setupWebSocketServer,
+  shutdownForeheadGameServer,
+} from "./games/forehead/ws/gameServer";
 
 const rawPort = process.env["PORT"];
 
@@ -26,30 +32,48 @@ function sweepExpiredRooms() {
   }
 }
 
-sweepExpiredRooms();
-const sweepTimer = setInterval(sweepExpiredRooms, SWEEP_INTERVAL_MS);
+const server = createServer(app);
+const wss = setupWebSocketServer(server);
+let sweepTimer: ReturnType<typeof setInterval> | undefined;
+let shuttingDown = false;
 
-const server = app.listen(port, host, (err) => {
-  if (err) {
-    logger.error({ err }, "Error listening on port");
+async function start() {
+  await ensureDatabaseSchema();
+  sweepExpiredRooms();
+  sweepTimer = setInterval(sweepExpiredRooms, SWEEP_INTERVAL_MS);
+
+  server.listen(port, host, () => {
+    logger.info({ host, port }, "Server listening");
+  });
+}
+
+async function shutdown(signal: NodeJS.Signals) {
+  if (shuttingDown) return;
+  shuttingDown = true;
+  logger.info({ signal }, "Shutting down server");
+  if (sweepTimer) clearInterval(sweepTimer);
+
+  try {
+    await shutdownForeheadGameServer(wss);
+    await new Promise<void>((resolve, reject) => {
+      if (!server.listening) return resolve();
+      server.close((error) => (error ? reject(error) : resolve()));
+    });
+    await pool.end();
+    process.exit(0);
+  } catch (error) {
+    logger.error({ error }, "Error closing server resources");
     process.exit(1);
   }
-
-  logger.info({ host, port }, "Server listening");
-});
-
-function shutdown(signal: NodeJS.Signals) {
-  logger.info({ signal }, "Shutting down server");
-  clearInterval(sweepTimer);
-  server.close((err) => {
-    if (err) {
-      logger.error({ err }, "Error closing server");
-      process.exit(1);
-    }
-
-    process.exit(0);
-  });
 }
 
 process.on("SIGTERM", shutdown);
 process.on("SIGINT", shutdown);
+
+start().catch(async (error) => {
+  logger.error({ error }, "Server startup failed");
+  await pool.end().catch((poolError) => {
+    logger.error({ poolError }, "Error closing database pool after startup failure");
+  });
+  process.exit(1);
+});

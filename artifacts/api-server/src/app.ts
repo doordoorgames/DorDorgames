@@ -3,6 +3,8 @@ import cors from "cors";
 import pinoHttp from "pino-http";
 import router from "./routes";
 import { logger } from "./lib/logger";
+import foreheadRouter from "./games/forehead/routes";
+import tfadhloonRouter from "./games/tfadhloon/routes/index.js";
 
 const app: Express = express();
 const allowedOrigins = (process.env["CLIENT_ORIGIN"] ?? "")
@@ -49,5 +51,7 @@ app.get("/", (_req, res) => {
 });
 
 app.use("/api", router);
+app.use("/forehead/api", foreheadRouter);
+app.use("/tfadhloon/api", tfadhloonRouter);
 
 export default app;

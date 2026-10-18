@@ -5,16 +5,24 @@ import {
   DeletePromoCodeParams,
 } from "@workspace/api-zod";
 import { store } from "../lib/store";
+import { timingSafeEqual } from "node:crypto";
 
 const router: IRouter = Router();
 
-const ADMIN_USERNAME = "admin";
-const ADMIN_PASSWORD = "admin999";
-const ADMIN_TOKEN = "doordoor-admin-token-2024";
+const ADMIN_USERNAME = process.env.ADMIN_USERNAME ?? "admin";
+const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD;
+const ADMIN_TOKEN = process.env.ADMIN_TOKEN;
+
+function credentialsMatch(actual: string | undefined, expected: string | undefined): boolean {
+  if (!actual || !expected) return false;
+  const actualBuffer = Buffer.from(actual);
+  const expectedBuffer = Buffer.from(expected);
+  return actualBuffer.length === expectedBuffer.length && timingSafeEqual(actualBuffer, expectedBuffer);
+}
 
 function requireAdminAuth(req: Request, res: Response, next: NextFunction): void {
   const auth = req.headers.authorization;
-  if (!auth || auth !== `Bearer ${ADMIN_TOKEN}`) {
+  if (!ADMIN_TOKEN || !auth || !credentialsMatch(auth, `Bearer ${ADMIN_TOKEN}`)) {
     res.status(401).json({ error: "Unauthorized" });
     return;
   }
@@ -24,8 +32,9 @@ function requireAdminAuth(req: Request, res: Response, next: NextFunction): void
 router.post("/admin/login", (req, res) => {
   const body = AdminLoginBody.parse(req.body);
   if (
-    body.username === ADMIN_USERNAME &&
-    body.password === ADMIN_PASSWORD
+    ADMIN_TOKEN &&
+    credentialsMatch(body.username, ADMIN_USERNAME) &&
+    credentialsMatch(body.password, ADMIN_PASSWORD)
   ) {
     req.log.info("Admin logged in");
     res.json({ token: ADMIN_TOKEN, success: true });
