@@ -1,0 +1,38 @@
+/* Keep icon fonts visible even with global font overrides */
+.bi::before {
+  font-family: "bootstrap-icons" !important;
+}
+
+.fa,
+.fas,
+.far,
+.fab,
+.fa-solid,
+.fa-regular {
+  font-family: "Font Awesome 6 Free" !important;
+}
+
+.fa-brands,
+.fab {
+  font-family: "Font Awesome 6 Brands" !important;
+}
+
+.fa::before,
+.fas::before,
+.far::before,
+.fab::before,
+.fa-solid::before,
+.fa-regular::before,
+.fa-brands::before {
+  font-family: inherit !important;
+}
+
+@font-face {
+    font-family: 'AbdoMaster';
+    src: url('AbdoMaster-Black.woff2') format('woff2'),
+        url('AbdoMaster-Black.woff') format('woff');
+    font-weight: 900;
+    font-style: normal;
+    font-display: swap;
+}
+
