@@ -97,7 +97,7 @@ document.addEventListener("DOMContentLoaded", function () {
     tutorialOverlay.setAttribute("aria-hidden", "true");
     howToPlayBtn.focus();
   };
-  backBtn?.addEventListener("click", () => { window.location.href = "https://dordor.games/"; });
+  backBtn?.addEventListener("click", () => { window.location.href = "https://www.dordor.games/"; });
   howToPlayBtn.addEventListener("click", () => {
     tutorialOverlay.classList.add("open");
     tutorialOverlay.setAttribute("aria-hidden", "false");
@@ -343,7 +343,7 @@ function updateLocalizedUI() {
   const roomCodeSubmitText = document.getElementById("roomCodeSubmitBtnText");
   if (roomCodeSubmitText) roomCodeSubmitText.textContent = lang === "ar" ? "دخول" : "Join";
   if (backBtnText) backBtnText.textContent = "Back to Home";
-  if (howToPlayBtn) howToPlayBtn.textContent = lang === "ar" ? "طريقة اللعب" : "How to Play";
+  if (howToPlayBtn) howToPlayBtn.textContent = lang === "ar" ? "▶ طريقة اللعب" : "▶ How to Play";
   const tutorialTitle = document.getElementById("tutorialTitle");
   if (tutorialTitle) tutorialTitle.textContent = lang === "ar" ? "طريقة اللعب" : "How to Play";
 

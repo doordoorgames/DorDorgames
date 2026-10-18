@@ -13,11 +13,11 @@ document.addEventListener("DOMContentLoaded", () => {
     catch(e){ const text=C.message(e); if(statusEl){statusEl.textContent=text;statusEl.style.color="#ffb3b3";}else alert(text); }
   }
 
-  $("backBtn").onclick=()=>location.href="https://dordor.games/";
+  $("backBtn").onclick=()=>location.href="https://www.dordor.games/";
   $("langToggleBtn").onclick=()=>{const next=lang()==="ar"?"en":"ar";localStorage.setItem("lang",next);location.reload();};
   document.documentElement.lang=lang(); document.documentElement.dir=lang()==="ar"?"rtl":"ltr";
   $("langToggleText").textContent=lang()==="ar"?"English":"العربية";
-  const t=copy[lang()];$("gameSubtitle").textContent=t.subtitle;$("newGameBtn").textContent=t.create;$("joinGameBtn").textContent=t.join;$("newGameInput").placeholder=t.name;$("joinGameInput").placeholder=t.code;$("inviteRoomText").childNodes[0].textContent=t.joining+" ";$("inviteNicknameInput").placeholder=t.name;$("inviteJoinBtn").textContent=t.joinRoom;$("howToPlayBtn").textContent=t.how;$("howToPlayTitle").textContent=t.how+":";
+  const t=copy[lang()];$("gameSubtitle").textContent=t.subtitle;$("newGameBtn").textContent=t.create;$("joinGameBtn").textContent=t.join;$("newGameInput").placeholder=t.name;$("joinGameInput").placeholder=t.code;$("inviteRoomText").childNodes[0].textContent=t.joining+" ";$("inviteNicknameInput").placeholder=t.name;$("inviteJoinBtn").textContent=t.joinRoom;$("howToPlayBtn").textContent="▶ "+t.how;$("howToPlayTitle").textContent=t.how+":";
 
   const instructionsOverlay=$("instructionsOverlay");
   const closeInstructions=()=>{instructionsOverlay.classList.remove("open");instructionsOverlay.setAttribute("aria-hidden","true");$("howToPlayBtn").focus();};

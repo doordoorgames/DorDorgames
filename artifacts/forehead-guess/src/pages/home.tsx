@@ -137,7 +137,7 @@ export default function Home({ mode }: { mode: 'forehead' | 'character' | 'chara
       : (tutorial === 'ar' ? foreheadHowToAr : foreheadHowToEn);
   const backToGamesLink = (
     <a
-      href="https://dordor.games/"
+      href="https://www.dordor.games/"
       aria-label="Back to Home"
       style={{
         position: 'fixed', top: 'max(14px, env(safe-area-inset-top))', left: 16, zIndex: 60,
@@ -237,11 +237,12 @@ export default function Home({ mode }: { mode: 'forehead' | 'character' | 'chara
           ))}
           <button type="button" onClick={() => setTutorial(lang)} style={{
             width: '100%', minHeight: 52, padding: '10px 18px',
-            background: 'rgba(255,255,255,0.12)', color: '#fff',
-            border: '2px solid rgba(255,255,255,0.72)', borderRadius: 12,
+            background: '#fff4d6', color: '#28143f',
+            border: '2px solid #fff', borderRadius: 12,
             fontSize: 17, fontWeight: 800, cursor: 'pointer',
             fontFamily: isAr ? "'Marhey', sans-serif" : "'Patrick Hand', cursive",
-          }}>{howToLabel}</button>
+            boxShadow: '0 5px 0 rgba(0,0,0,0.35)',
+          }}>▶ {howToLabel}</button>
         </div>
         {tutorialOverlay}
       </div>
@@ -705,11 +706,12 @@ export default function Home({ mode }: { mode: 'forehead' | 'character' | 'chara
                   onClick={() => setTutorial(lang)}
                   className="w-full h-12 font-bold tracking-wide transition-transform active:scale-95"
                   style={{
-                    background: 'rgba(255,255,255,0.08)', border: '2px solid rgba(255,255,255,0.65)',
-                    color: '#fff', fontFamily: isAr ? "'Changa', sans-serif" : undefined,
+                    background: '#f8e8ff', border: '2px solid #c219a6',
+                    color: '#4f0750', fontFamily: isAr ? "'Changa', sans-serif" : undefined,
+                    boxShadow: '0 4px 0 #7b126d',
                   }}
                 >
-                  {howToLabel}
+                  ▶ {howToLabel}
                 </button>
               </>
             ) : mode === 'forehead' ? (
@@ -751,11 +753,12 @@ export default function Home({ mode }: { mode: 'forehead' | 'character' | 'chara
                   onClick={() => setTutorial(lang)}
                   className="w-full h-12 font-bold tracking-wide transition-transform active:scale-95"
                   style={{
-                    background: 'rgba(255,255,255,0.08)', border: '2px solid rgba(255,255,255,0.65)',
-                    color: '#fff', fontFamily: isAr ? "'Changa', sans-serif" : "Arial, 'Helvetica Neue', sans-serif",
+                    background: '#fff', border: '2px solid #ff4fa3',
+                    color: '#8b0048', fontFamily: isAr ? "'Changa', sans-serif" : "Arial, 'Helvetica Neue', sans-serif",
+                    boxShadow: '0 4px 0 #a8005a',
                   }}
                 >
-                  {howToLabel}
+                  ▶ {howToLabel}
                 </button>
               </>
             ) : (
