@@ -1,0 +1,861 @@
+/* Keep icon fonts visible even with global font overrides */
+.bi::before {
+  font-family: "bootstrap-icons" !important;
+}
+
+.fa,
+.fas,
+.far,
+.fab,
+.fa-solid,
+.fa-regular {
+  font-family: "Font Awesome 6 Free" !important;
+}
+
+.fa-brands,
+.fab {
+  font-family: "Font Awesome 6 Brands" !important;
+}
+
+.fa::before,
+.fas::before,
+.far::before,
+.fab::before,
+.fa-solid::before,
+.fa-regular::before,
+.fa-brands::before {
+  font-family: inherit !important;
+}
+
+* {
+        font-family: "AbdoMaster", sans-serif !important;
+        border-radius: 0 !important;
+      }
+
+      body {
+        background: #f8f9fa;
+        font-family: "AbdoMaster", sans-serif;
+      }
+
+      .sidebar {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        min-height: 100vh;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 250px;
+        z-index: 1000;
+        transition: all 0.3s ease;
+      }
+
+      .sidebar-header {
+        padding: 20px;
+        text-align: center;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+      }
+
+      .sidebar-header h3 {
+        color: white;
+        margin: 0;
+        font-weight: 700;
+      }
+
+      .sidebar-menu {
+        list-style: none;
+        padding: 0;
+        margin: 20px 0;
+      }
+
+      .sidebar-menu li {
+        margin: 5px 0;
+      }
+
+      .sidebar-menu a {
+        display: block;
+        padding: 15px 20px;
+        color: rgba(255, 255, 255, 0.8);
+        text-decoration: none;
+        transition: all 0.3s ease;
+        border-radius: 0 25px 25px 0;
+        margin-right: 20px;
+      }
+
+      .sidebar-menu a:hover,
+      .sidebar-menu a.active {
+        background: rgba(255, 255, 255, 0.1);
+        color: white;
+        transform: translateX(5px);
+      }
+
+      .main-content {
+        margin-left: 250px;
+        padding: 20px;
+        min-height: 100vh;
+      }
+
+      .top-bar {
+        background: white;
+        padding: 15px 30px;
+        border-radius: 15px;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        margin-bottom: 30px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+      }
+
+      .page-title {
+        font-size: 1.8rem;
+        font-weight: 700;
+        color: #333;
+        margin: 0;
+      }
+
+      .logout-btn {
+        background: #dc3545;
+        color: white;
+        border: none;
+        padding: 10px 20px;
+        border-radius: 10px;
+        font-weight: 500;
+        transition: all 0.3s ease;
+      }
+
+      .logout-btn:hover {
+        background: #c82333;
+        transform: translateY(-2px);
+      }
+
+      .dashboard-card {
+        background: white;
+        border-radius: 15px;
+        padding: 30px;
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        margin-bottom: 30px;
+      }
+
+      .stats-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 20px;
+        margin-bottom: 30px;
+      }
+
+      .stat-card {
+        background: white;
+        border-radius: 15px;
+        padding: 25px;
+        text-align: center;
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        transition: transform 0.3s ease;
+      }
+
+      .stat-card:hover {
+        transform: translateY(-5px);
+      }
+
+      .stat-icon {
+        font-size: 3rem;
+        margin-bottom: 15px;
+      }
+
+      .stat-number {
+        font-size: 2.5rem;
+        font-weight: 700;
+        margin-bottom: 10px;
+      }
+
+      .stat-label {
+        color: #666;
+        font-weight: 500;
+      }
+
+      .content-section {
+        display: none;
+      }
+
+      .content-section.active {
+        display: block;
+      }
+
+      .btn-primary-custom {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        border: none;
+        border-radius: 10px;
+        padding: 12px 25px;
+        font-weight: 600;
+        transition: all 0.3s ease;
+      }
+
+      .btn-primary-custom:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(102, 126, 234, 0.3);
+      }
+
+      .table-container {
+        background: white;
+        border-radius: 15px;
+        overflow: hidden;
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+      }
+
+      .table th {
+        background: #f8f9fa;
+        border: none;
+        font-weight: 600;
+        color: #333;
+      }
+
+      .table td {
+        border: none;
+        vertical-align: middle;
+      }
+
+      .action-btn {
+        padding: 5px 10px;
+        border-radius: 5px;
+        border: none;
+        margin: 0 2px;
+        font-size: 0.9rem;
+      }
+
+      .btn-edit {
+        background: #ffc107;
+        color: #333;
+      }
+
+      .btn-delete {
+        background: #dc3545;
+        color: white;
+      }
+
+      /* Spy Words Section - Complete Responsive CSS */
+      #spy_words .dashboard-card {
+        padding: 25px;
+        background: white;
+        border-radius: 20px;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+      }
+
+      #spy_words .spy-words-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 25px;
+        flex-wrap: wrap;
+        gap: 15px;
+      }
+
+      #spy_words .spy-words-header h3 {
+        margin: 0;
+        font-size: 1.8rem;
+        font-weight: 600;
+        color: #333;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+      }
+
+      #spy_words .spy-words-header h3 i {
+        color: #667eea;
+        font-size: 2rem;
+      }
+
+      #spy_words .spy-words-header .btn-primary-custom {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        border: none;
+        border-radius: 12px;
+        padding: 12px 25px;
+        font-weight: 600;
+        font-size: 1rem;
+        transition: all 0.3s ease;
+        white-space: nowrap;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+
+      #spy_words .spy-words-header .btn-primary-custom:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 10px 20px rgba(102, 126, 234, 0.3);
+      }
+
+      #spy_words .spy-words-controls {
+        margin-bottom: 25px;
+        display: flex;
+        gap: 20px;
+        flex-wrap: wrap;
+      }
+
+      #spy_words .spy-words-controls .col-md-6 {
+        flex: 1 1 300px;
+        min-width: 250px;
+      }
+
+      #spy_words .spy-words-controls label {
+        font-weight: 600;
+        color: #555;
+        margin-bottom: 8px;
+        display: block;
+        font-size: 0.95rem;
+      }
+
+      #spy_words .spy-words-controls select.form-control {
+        width: 100%;
+        padding: 12px 15px;
+        border: 2px solid #e0e0e0;
+        border-radius: 12px;
+        font-size: 1rem;
+        transition: all 0.3s ease;
+        background: white;
+        cursor: pointer;
+      }
+
+      #spy_words .spy-words-controls select.form-control:focus {
+        border-color: #667eea;
+        outline: none;
+        box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+      }
+
+      #spy_words .spy-words-controls .btn-outline-success {
+        background: white;
+        border: 2px solid #28a745;
+        color: #28a745;
+        padding: 12px 20px;
+        border-radius: 12px;
+        font-weight: 600;
+        font-size: 1rem;
+        transition: all 0.3s ease;
+        width: 100%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+      }
+
+      #spy_words .spy-words-controls .btn-outline-success:hover {
+        background: #28a745;
+        color: white;
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(40, 167, 69, 0.3);
+      }
+
+      #spy_words .spy-words-controls .btn-outline-success i {
+        font-size: 1.2rem;
+      }
+
+      #spy_words #spyWordExcelStatus {
+        margin-top: 10px;
+        font-size: 0.9rem;
+        color: #666;
+        padding: 5px 10px;
+        background: #f8f9fa;
+        border-radius: 8px;
+      }
+
+      #spy_words .table-container {
+        background: white;
+        border-radius: 16px;
+        overflow: hidden;
+        box-shadow: 0 5px 20px rgba(0, 0, 0, 0.05);
+        border: 1px solid #eee;
+        width: 100%;
+        overflow-x: auto;
+      }
+
+      #spy_words .table {
+        width: 100%;
+        margin-bottom: 0;
+        min-width: 600px;
+      }
+
+      #spy_words .table thead th {
+        background: #f8f9fa;
+        padding: 18px 15px;
+        font-weight: 600;
+        color: #444;
+        border-bottom: 2px solid #667eea;
+        font-size: 0.95rem;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        white-space: nowrap;
+      }
+
+      #spy_words .table tbody td {
+        padding: 15px;
+        vertical-align: middle;
+        border-bottom: 1px solid #eee;
+        color: #555;
+        font-size: 0.95rem;
+        word-break: break-word;
+      }
+
+      #spy_words .table tbody tr:hover {
+        background: #f5f7ff;
+      }
+
+      #spy_words .table tbody tr:last-child td {
+        border-bottom: none;
+      }
+
+      #spy_words .action-btn {
+        padding: 8px 12px;
+        border-radius: 8px;
+        border: none;
+        margin: 0 3px;
+        font-size: 0.9rem;
+        transition: all 0.2s ease;
+        cursor: pointer;
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
+      }
+
+      #spy_words .btn-edit {
+        background: #ffc107;
+        color: #333;
+      }
+
+      #spy_words .btn-edit:hover {
+        background: #e0a800;
+        transform: translateY(-2px);
+      }
+
+      #spy_words .btn-delete {
+        background: #dc3545;
+        color: white;
+      }
+
+      #spy_words .btn-delete:hover {
+        background: #c82333;
+        transform: translateY(-2px);
+      }
+
+      /* Modal styling */
+      #addSpyWordModal .modal-content,
+      #editSpyWordModal .modal-content {
+        border-radius: 20px;
+        border: none;
+        box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
+      }
+
+      #addSpyWordModal .modal-header,
+      #editSpyWordModal .modal-header {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        border-radius: 20px 20px 0 0;
+        padding: 20px 25px;
+        border: none;
+      }
+
+      #addSpyWordModal .modal-header .btn-close,
+      #editSpyWordModal .modal-header .btn-close {
+        background: white;
+        opacity: 0.8;
+      }
+
+      #addSpyWordModal .modal-body,
+      #editSpyWordModal .modal-body {
+        padding: 25px;
+      }
+
+      #addSpyWordModal .modal-footer,
+      #editSpyWordModal .modal-footer {
+        padding: 20px 25px;
+        border-top: 1px solid #eee;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 10px;
+      }
+
+      #addSpyWordModal .form-label,
+      #editSpyWordModal .form-label {
+        font-weight: 600;
+        color: #555;
+        margin-bottom: 8px;
+        font-size: 0.95rem;
+      }
+
+      #addSpyWordModal .form-control,
+      #editSpyWordModal .form-control {
+        padding: 12px 15px;
+        border: 2px solid #e0e0e0;
+        border-radius: 12px;
+        font-size: 1rem;
+        transition: all 0.3s ease;
+        width: 100%;
+      }
+
+      #addSpyWordModal .form-control:focus,
+      #editSpyWordModal .form-control:focus {
+        border-color: #667eea;
+        outline: none;
+        box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+      }
+
+      #addSpyWordModal select.form-control,
+      #editSpyWordModal select.form-control {
+        cursor: pointer;
+        background: white;
+      }
+
+      #addSpyWordModal .btn-outline-success {
+        background: white;
+        border: 2px solid #28a745;
+        color: #28a745;
+        padding: 10px 20px;
+        border-radius: 10px;
+        font-weight: 600;
+        font-size: 0.95rem;
+        transition: all 0.3s ease;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+      }
+
+      #addSpyWordModal .btn-outline-success:hover {
+        background: #28a745;
+        color: white;
+      }
+
+      #addSpyWordModal .btn-secondary,
+      #editSpyWordModal .btn-secondary {
+        background: #6c757d;
+        border: none;
+        padding: 10px 25px;
+        border-radius: 10px;
+        font-weight: 500;
+      }
+
+      #addSpyWordModal .btn-primary-custom,
+      #editSpyWordModal .btn-primary-custom {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        border: none;
+        padding: 10px 25px;
+        border-radius: 10px;
+        font-weight: 600;
+        color: white;
+      }
+
+      #addSpyWordModal #spyWordModalExcelStatus {
+        margin-top: 15px;
+        padding: 10px;
+        background: #f8f9fa;
+        border-radius: 8px;
+        font-size: 0.9rem;
+      }
+
+      /* Responsive Breakpoints */
+      @media (max-width: 992px) {
+        #spy_words .spy-words-header h3 {
+          font-size: 1.6rem;
+        }
+
+        #spy_words .spy-words-header .btn-primary-custom {
+          padding: 10px 20px;
+          font-size: 0.95rem;
+        }
+      }
+
+      @media (max-width: 768px) {
+        .sidebar {
+          transform: translateX(-100%);
+        }
+
+        .main-content {
+          margin-left: 0;
+        }
+
+        .stats-grid {
+          grid-template-columns: 1fr;
+        }
+
+        .main-content {
+          padding: 12px;
+        }
+
+        .dashboard-card {
+          padding: 18px;
+        }
+
+        .table th,
+        .table td {
+          padding: 10px;
+          font-size: 0.9rem;
+        }
+
+        .table-container {
+          overflow-x: auto;
+        }
+
+        #spy_words .dashboard-card {
+          padding: 20px;
+        }
+
+        #spy_words .spy-words-header {
+          flex-direction: column;
+          align-items: flex-start;
+        }
+
+        #spy_words .spy-words-header h3 {
+          font-size: 1.4rem;
+          width: 100%;
+        }
+
+        #spy_words .spy-words-header .btn-primary-custom {
+          width: 100%;
+          justify-content: center;
+        }
+
+        #spy_words .spy-words-controls {
+          flex-direction: column;
+          gap: 15px;
+        }
+
+        #spy_words .spy-words-controls .col-md-6 {
+          width: 100%;
+        }
+
+        #spy_words .table thead th {
+          padding: 12px 10px;
+          font-size: 0.85rem;
+        }
+
+        #spy_words .table tbody td {
+          padding: 10px;
+          font-size: 0.9rem;
+        }
+
+        #spy_words .action-btn {
+          padding: 6px 10px;
+          font-size: 0.8rem;
+        }
+
+        #addSpyWordModal .modal-footer,
+        #editSpyWordModal .modal-footer {
+          flex-direction: column;
+          align-items: stretch;
+        }
+
+        #addSpyWordModal .modal-footer > div,
+        #editSpyWordModal .modal-footer > div {
+          width: 100%;
+        }
+
+        #addSpyWordModal .btn-outline-success,
+        #editSpyWordModal .btn-outline-success {
+          width: 100%;
+          justify-content: center;
+          margin-bottom: 10px;
+        }
+
+        #addSpyWordModal .btn-secondary,
+        #addSpyWordModal .btn-primary-custom,
+        #editSpyWordModal .btn-secondary,
+        #editSpyWordModal .btn-primary-custom {
+          width: 100%;
+          margin: 5px 0;
+        }
+      }
+
+      @media (max-width: 576px) {
+        .top-bar {
+          flex-direction: column;
+          align-items: flex-start;
+          gap: 10px;
+        }
+
+        .page-title {
+          font-size: 1.4rem;
+        }
+
+        #spy_words .dashboard-card {
+          padding: 15px;
+        }
+
+        #spy_words .spy-words-header h3 {
+          font-size: 1.3rem;
+        }
+
+        #spy_words .spy-words-header h3 i {
+          font-size: 1.6rem;
+        }
+
+        #spy_words .spy-words-controls label {
+          font-size: 0.9rem;
+        }
+
+        #spy_words .spy-words-controls select.form-control,
+        #spy_words .spy-words-controls .btn-outline-success {
+          padding: 10px;
+          font-size: 0.9rem;
+        }
+
+        #spy_words .table-container {
+          border-radius: 12px;
+        }
+
+        #addSpyWordModal .modal-header,
+        #editSpyWordModal .modal-header {
+          padding: 15px;
+        }
+
+        #addSpyWordModal .modal-header h5,
+        #editSpyWordModal .modal-header h5 {
+          font-size: 1.1rem;
+        }
+
+        #addSpyWordModal .modal-body,
+        #editSpyWordModal .modal-body {
+          padding: 15px;
+        }
+
+        #addSpyWordModal .form-label,
+        #editSpyWordModal .form-label {
+          font-size: 0.9rem;
+        }
+
+        #addSpyWordModal .form-control,
+        #editSpyWordModal .form-control {
+          padding: 10px;
+          font-size: 0.9rem;
+        }
+
+        #addSpyWordModal .modal-footer,
+        #editSpyWordModal .modal-footer {
+          padding: 15px;
+        }
+      }
+
+      @media (max-width: 400px) {
+        #spy_words .spy-words-header h3 {
+          font-size: 1.2rem;
+        }
+
+        #spy_words .spy-words-header .btn-primary-custom {
+          font-size: 0.9rem;
+          padding: 8px 15px;
+        }
+
+        #spy_words .table thead th {
+          padding: 10px 8px;
+          font-size: 0.8rem;
+        }
+
+        #spy_words .table tbody td {
+          padding: 8px;
+          font-size: 0.85rem;
+        }
+
+        #spy_words .action-btn {
+          padding: 5px 8px;
+          font-size: 0.75rem;
+        }
+
+        #spy_words .action-btn i {
+          font-size: 0.8rem;
+        }
+      }
+
+      /* Dark mode support */
+      @media (prefers-color-scheme: dark) {
+        body {
+          background: #1a1a1a;
+        }
+
+        .dashboard-card,
+        .stat-card,
+        .table-container,
+        .top-bar {
+          background: #2d2d2d;
+          color: #fff;
+        }
+
+        .page-title,
+        .stat-number,
+        h3,
+        h4,
+        h5 {
+          color: #fff;
+        }
+
+        .stat-label {
+          color: #ccc;
+        }
+
+        .table th {
+          background: #3d3d3d;
+          color: #fff;
+        }
+
+        .table td {
+          color: #ddd;
+          border-bottom-color: #444;
+        }
+
+        .table tbody tr:hover {
+          background: #3d3d3d;
+        }
+
+        #spy_words .dashboard-card {
+          background: #2d2d2d;
+          color: #fff;
+        }
+
+        #spy_words .spy-words-header h3 {
+          color: #fff;
+        }
+
+        #spy_words .spy-words-controls label {
+          color: #ccc;
+        }
+
+        #spy_words .spy-words-controls select.form-control {
+          background: #3d3d3d;
+          border-color: #555;
+          color: #fff;
+        }
+
+        #spy_words .spy-words-controls .btn-outline-success {
+          background: #3d3d3d;
+          border-color: #28a745;
+          color: #28a745;
+        }
+
+        #spy_words .table-container {
+          background: #2d2d2d;
+          border-color: #444;
+        }
+
+        #spy_words .table thead th {
+          background: #3d3d3d;
+          color: #fff;
+          border-bottom-color: #667eea;
+        }
+
+        #spy_words .table tbody td {
+          border-bottom-color: #444;
+          color: #ddd;
+        }
+
+        #spy_words .table tbody tr:hover {
+          background: #3d3d3d;
+        }
+
+        .form-control {
+          background: #3d3d3d;
+          border-color: #555;
+          color: #fff;
+        }
+
+        .form-control:focus {
+          background: #3d3d3d;
+          color: #fff;
+        }
+
+        .form-label {
+          color: #ccc;
+        }
+      }

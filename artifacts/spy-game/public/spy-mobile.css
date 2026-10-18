@@ -1,0 +1,246 @@
+/* Shared mobile layout safeguards for the live Spy screens. */
+:root {
+  --spy-safe-top: env(safe-area-inset-top, 0px);
+  --spy-safe-right: env(safe-area-inset-right, 0px);
+  --spy-safe-bottom: env(safe-area-inset-bottom, 0px);
+  --spy-safe-left: env(safe-area-inset-left, 0px);
+}
+
+html {
+  width: 100%;
+  max-width: 100%;
+  min-height: 100%;
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+}
+
+body {
+  width: 100%;
+  max-width: 100%;
+  min-height: 100svh;
+  margin: 0;
+  overflow-x: hidden;
+  overflow-wrap: anywhere;
+}
+
+*, *::before, *::after { box-sizing: border-box; }
+
+img, svg, video, canvas { max-width: 100%; }
+
+button, input, select, textarea { max-width: 100%; }
+
+.container,
+.game-container,
+.lobby-container,
+.results-container,
+.role-card,
+.secret-word-card,
+.spy-word-card,
+.waiting-message,
+.discussion-section,
+.voting-container,
+.result-card,
+.spy-reveal,
+.voting-results,
+.details-box,
+.player-list {
+  min-width: 0;
+}
+
+.container {
+  width: min(100%, var(--bs-container-width, 100%)) !important;
+  max-width: 100%;
+  padding-inline: clamp(8px, 3vw, 18px);
+}
+
+.back-btn {
+  top: max(8px, var(--spy-safe-top)) !important;
+  left: max(8px, var(--spy-safe-left)) !important;
+  right: auto !important;
+  max-width: calc(100% - max(16px, var(--spy-safe-left)) - max(16px, var(--spy-safe-right)));
+  min-height: 44px;
+  white-space: normal;
+}
+
+.lang-toggle-btn {
+  top: max(8px, var(--spy-safe-top)) !important;
+  right: max(8px, var(--spy-safe-right)) !important;
+  left: auto !important;
+  min-height: 44px;
+}
+
+.alert-overlay,
+.word-guess-modal {
+  padding: calc(12px + var(--spy-safe-top)) calc(12px + var(--spy-safe-right))
+    calc(12px + var(--spy-safe-bottom)) calc(12px + var(--spy-safe-left));
+}
+
+.alert-container,
+.word-guess-content {
+  width: min(100%, 440px);
+  max-height: calc(100svh - 24px - var(--spy-safe-top) - var(--spy-safe-bottom));
+  overflow: auto;
+  overscroll-behavior: contain;
+}
+
+.alert-message,
+.role-description,
+.winner-message,
+.detail-item,
+.vote-result-item,
+.player-item-name,
+.player-name { overflow-wrap: anywhere; }
+
+/* Lobby invitation controls must reflow instead of establishing a desktop width. */
+.lobby-container { width: min(100%, 480px); }
+
+.game-code-box {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  align-items: stretch;
+  gap: 8px;
+  min-width: 0;
+}
+
+.game-code-box > div {
+  grid-column: 1 / -1;
+  min-width: 0;
+  text-align: center;
+  line-height: 1.35;
+  overflow-wrap: normal;
+}
+
+#gameCodeDisplay,
+#inviteCodeDisplay {
+  direction: ltr;
+  unicode-bidi: isolate;
+  white-space: nowrap;
+  display: inline-block;
+}
+
+.game-code-box .copy-btn {
+  width: 100%;
+  min-width: 0;
+  min-height: 44px;
+  margin: 0;
+  padding-inline: 8px;
+  white-space: normal;
+  line-height: 1.2;
+}
+
+.player-item { min-width: 0; gap: 8px; }
+.player-item > :first-child { min-width: 0; overflow-wrap: anywhere; }
+.host-badge, .player-role, .player-points { flex: 0 0 auto; }
+
+/* The score drawer remains an overlay and never contributes to page width. */
+.points-dashboard-container {
+  right: var(--spy-safe-right);
+  max-width: calc(100% - var(--spy-safe-left) - var(--spy-safe-right));
+}
+
+.points-dashboard {
+  max-width: min(82vw, 230px);
+  max-height: calc(100svh - max(60px, var(--spy-safe-top)) - var(--spy-safe-bottom));
+  overflow-y: auto;
+}
+
+.dashboard-toggle { right: 0; }
+.secret-word { overflow-wrap: anywhere; word-break: normal; }
+.players-list-container, .submit-vote-container, .action-buttons { min-width: 0; }
+
+@media (max-width: 540px) {
+  body {
+    padding-top: calc(60px + var(--spy-safe-top));
+    padding-right: calc(8px + var(--spy-safe-right));
+    padding-bottom: calc(18px + var(--spy-safe-bottom));
+    padding-left: calc(8px + var(--spy-safe-left));
+  }
+
+  .container { padding-inline: 0 !important; }
+
+  .back-btn,
+  .lang-toggle-btn {
+    padding: 8px 10px;
+    font-size: clamp(0.72rem, 3.5vw, 0.85rem);
+  }
+
+  .game-title { font-size: clamp(1.55rem, 8vw, 2.2rem); }
+  .game-subtitle { font-size: clamp(0.9rem, 4.5vw, 1.15rem); }
+  .game-logo { height: auto; }
+
+  .game-container,
+  .lobby-container {
+    width: 100%;
+    padding-inline: clamp(12px, 4.5vw, 20px) !important;
+  }
+
+  .lobby-container { margin-top: 12px !important; }
+
+  .game-code-box {
+    padding: 12px;
+    font-size: clamp(1.1rem, 6vw, 1.55rem);
+    letter-spacing: clamp(1px, 1vw, 3px);
+  }
+
+  .game-code-box .copy-btn { font-size: clamp(0.7rem, 3.1vw, 0.84rem); }
+
+  .game-instructions { padding: 14px; margin-inline: 0; }
+  .game-instructions h4 { font-size: clamp(1.15rem, 6vw, 1.55rem); }
+  .instructions-list li { font-size: clamp(0.9rem, 4.3vw, 1.08rem); }
+
+  input, select, textarea { font-size: 16px !important; }
+
+  .player-box {
+    min-width: 0 !important;
+    overflow-wrap: anywhere;
+  }
+
+  .detail-item,
+  .vote-result-item,
+  .player-item {
+    gap: 8px;
+  }
+
+  .detail-item > :first-child,
+  .vote-result-item > :first-child,
+  .player-item-name { min-width: 0; }
+}
+
+@media (max-width: 359px) {
+  .game-code-box { grid-template-columns: 1fr; }
+  .game-code-box > div { grid-column: 1; }
+  .game-code-box .copy-btn { min-height: 42px; }
+
+  .back-btn span { max-width: 105px; }
+  .lang-toggle-btn { max-width: 104px; }
+
+  .detail-item,
+  .vote-result-item { align-items: flex-start; flex-direction: column; }
+
+  .vote-count-badge, .detail-item strong { align-self: flex-end; }
+}
+
+@media (max-height: 500px) and (orientation: landscape) {
+  body {
+    padding-top: calc(50px + var(--spy-safe-top));
+    background-attachment: scroll;
+  }
+
+  .back-btn, .lang-toggle-btn { min-height: 40px; padding-block: 6px; }
+  .lobby-container { margin-top: 4px !important; padding-top: 18px !important; }
+  .game-title { margin-top: 4px !important; }
+  .game-logo { max-height: 150px; margin-block: -35px -45px; }
+
+  .points-dashboard,
+  .points-dashboard.open {
+    margin-top: max(48px, var(--spy-safe-top));
+    max-height: calc(100svh - max(48px, var(--spy-safe-top)) - var(--spy-safe-bottom));
+  }
+
+  .word-guess-content, .alert-container { max-height: calc(100svh - 16px); }
+}
+
+@supports (overflow: clip) {
+  /* Final safeguard after all width-producing layouts are constrained above. */
+  html, body { overflow-x: clip; }
+}

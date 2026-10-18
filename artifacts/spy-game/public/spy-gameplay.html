@@ -1,0 +1,198 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    <title>Who is the Spy? - Playing</title>
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.6/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+    />
+    <link href="custom/custom.css" rel="stylesheet" type="text/css" />
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css"
+    />
+
+    
+  
+    <link rel="stylesheet" href="spy-gameplay.css" />
+    <link rel="stylesheet" href="spy-mobile.css" />
+  </head>
+
+  <body>
+    <!-- Back Button -->
+    <button id="backButton" class="back-btn">
+      <i class="bi bi-box-arrow-left"></i> <span id="backBtnText">Exit Game</span>
+    </button>
+
+    <!-- Updated Points Dashboard - Sidebar -->
+    <div class="points-dashboard-container">
+      <div class="points-dashboard" id="pointsDashboard">
+        <div class="dashboard-header">
+          <div class="dashboard-title-content">
+            <span><i class="bi bi-clipboard-data"></i> Spy Game</span>
+          </div>
+          <div class="dashboard-subtitle-container">
+            <div class="round-info" id="roundInfo">Round 1</div>
+            <div class="action-info" id="actionInfo">Phase: Setup</div>
+          </div>
+          <div class="close-dashboard" id="closeDashboard">
+            <i class="bi bi-x"></i>
+          </div>
+        </div>
+        <div id="pointsContainer" class="points-container"></div>
+      </div>
+
+      <!-- Hamburger Toggle Button -->
+      <div class="dashboard-toggle" id="dashboardToggle">
+        <i class="bi bi-list"></i>
+      </div>
+    </div>
+
+    <div class="container text-center">
+      <h1 class="game-title">
+        <i class="bi bi-incognito"></i> Who is the Spy?
+      </h1>
+
+      <!-- Loading State -->
+      <div id="loadingState" class="waiting-message">
+        <div class="loading-spinner"></div>
+        <h3>Loading game data...</h3>
+        <p>Please wait while we set up the game.</p>
+      </div>
+
+      <!-- Role Display -->
+      <div class="role-card" id="roleCard" style="display: none">
+        <div class="role-icon" id="roleIcon">
+          <i class="bi bi-incognito"></i>
+        </div>
+        <h2 class="role-title" id="roleTitle">Your Role</h2>
+        <p class="role-description" id="roleDescription">
+          Waiting for role assignment...
+        </p>
+      </div>
+
+      <!-- Secret Word Card (for non-spies) - Shows admin panel word -->
+      <div class="secret-word-card" id="secretWordCard" style="display: none">
+        <h3>Your Secret Word</h3>
+        <div class="secret-word" id="secretWord">••••••</div>
+        <!-- <div class="admin-word-badge">
+          <i class="bi bi-shield-check"></i> Word from Admin Panel
+        </div> -->
+        <p id="secretWordHint">
+          The spy has a different word. Discuss and vote to find the spy!
+        </p>
+      </div>
+
+      <!-- Spy Word Card (for spy) -->
+      <div class="spy-word-card" id="spyWordCard" style="display: none">
+        <h3>You are the spy</h3>
+        <div class="secret-word" id="spyWord" style="display: none"></div>
+      </div>
+
+      <!-- Game Phase Indicator -->
+      <div class="game-phase" id="gamePhase">Setup: Assigning roles...</div>
+
+      <div class="timer" id="timer" aria-live="polite">01:00</div>
+
+      <!-- Discussion Section - Replaces Clue Section -->
+      <div id="discussionSection" style="display: none">
+        <div class="discussion-section">
+          <h3><i class="bi bi-chat-dots"></i> Discussion Time</h3>
+          <p>
+            Discuss with other players. Give hints about your word without
+            revealing it directly.
+          </p>
+          <div class="discussion-timer" id="discussionTimer">01:00</div>
+          <p class="text-muted">After discussion, voting will begin.</p>
+        </div>
+      </div>
+
+      <!-- Voting Section -->
+      <div id="votingSection" style="display: none">
+        <div class="voting-container">
+          <h3>Vote for the Spy</h3>
+          <p>Click on a player's name to vote for them as the spy</p>
+
+          <!-- Current Voter Display -->
+          <div class="current-voter-display" id="currentVoterDisplay">
+            Waiting for voting to start...
+          </div>
+
+          <!-- Players List -->
+          <h5 id="playersHeader">Players</h5>
+          <div class="players-list-container" id="playersListContainer">
+            <!-- Player boxes will be dynamically added here -->
+          </div>
+
+          <!-- Submit Vote Button -->
+          <div class="submit-vote-container">
+            <button class="action-btn" id="submitVoteBtn" disabled>
+              Submit Vote
+            </button>
+            <button class="action-btn spy" id="guessWordBtn">
+              <i class="bi bi-key-fill"></i> Spy: Guess Secret Word
+            </button>
+          </div>
+
+          <!-- Vote Count Display -->
+          <div
+            class="vote-count-display"
+            id="voteCountDisplay"
+            style="display: none"
+          >
+            <!-- Vote counts will be displayed here -->
+          </div>
+        </div>
+      </div>
+
+      <!-- Results Section -->
+      <div id="resultsSection" style="display: none">
+        <div class="results-container">
+          <h2 class="results-title">Voting Results</h2>
+          <div id="resultsContent">
+            <!-- Results will be shown here -->
+          </div>
+        </div>
+      </div>
+
+      <!-- Word Guess Modal -->
+      <div id="wordGuessModal" class="word-guess-modal" style="display: none">
+        <div class="word-guess-content">
+          <h3><i class="bi bi-key"></i> Guess the Secret Word</h3>
+          <p class="text-white-50">
+            You are the spy. What word do the non-spies have?
+          </p>
+          <input
+            type="text"
+            class="clue-input"
+            id="wordGuessInput"
+            placeholder="Enter the secret word..."
+            style="
+              background: white;
+              color: #333;
+              width: 100%;
+              padding: 10px;
+              border: 2px solid white;
+              border-radius: 5px;
+            "
+          />
+          <div class="text-center mt-3">
+            <button class="action-btn spy" id="submitGuessBtn">
+              Submit Guess
+            </button>
+            <button class="action-btn" id="cancelGuessBtn">Cancel</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-database-compat.js"></script>
+    <script src="spy-core.js"></script>
+    
+  
+    <script src="spy-gameplay.js"></script>
+  </body>
+</html>
