@@ -1,0 +1,1179 @@
+import { WebSocketServer, WebSocket } from "ws";
+import { IncomingMessage } from "http";
+import { db } from "@workspace/db";
+import {
+  roomsTable,
+  playersTable,
+  categoryItemsTable,
+  categoriesTable,
+} from "@workspace/db";
+import { eq, and } from "drizzle-orm";
+import { logger } from "../../../lib/logger";
+import { fetchForeheadWordsByFlatCategory, fetchCharactersFromSupabase, fetchCharadesFromSupabase, SupabaseCharacterEntry } from "../lib/supabase-forehead";
+type CharacterEntry = SupabaseCharacterEntry;
+
+// ── CLIENT REGISTRY ──────────────────────────────────────────────────────────
+
+interface WsClient {
+  ws: WebSocket;
+  roomCode: string | null;
+  playerId: number | null;
+  playerName: string | null;
+}
+
+// ── HOST GRACE PERIOD & HEARTBEAT ────────────────────────────────────────────
+const GRACE_PERIOD_MS  = 90_000;  // 90 s before host is transferred after disconnect
+const PING_INTERVAL_MS = 25_000;  // server→client ping every 25 s
+
+/** roomCode → { timer, playerId } — set when host disconnects, cleared on reconnect */
+const hostGraceTimers = new Map<string, { timer: ReturnType<typeof setTimeout>; playerId: number }>();
+/** ws → interval handle for outgoing pings */
+const clientPingIntervals = new Map<WebSocket, ReturnType<typeof setInterval>>();
+
+// ── FOREHEAD GAME STATE ───────────────────────────────────────────────────────
+
+interface RoundState {
+  roundNumber: number;
+  imposterId: number;
+  imposterName: string;
+  normalWord: string;
+  imposterWord: string;
+  categoryName: string;
+  readyPlayerIds: number[];
+  playerWords: Record<number, string>;
+}
+
+// ── CHARACTER GAME STATE ──────────────────────────────────────────────────────
+
+interface PlayerGuess {
+  playerId: number;
+  playerName: string;
+  guess: string;
+  guessNumber: number;
+}
+
+interface CharacterRoundState {
+  adminId: number;
+  answer: string;
+  hints: string[];
+  currentHintIndex: number; // -1 = no hint shown yet
+  answerRevealed: boolean;
+  usedPoolIndices: number[]; // stores character IDs (DB ids)
+  lang: string;
+  playerGuesses: PlayerGuess[];
+  guessCountByPlayer: Record<number, number>;
+  lastGuessByPlayer: Record<number, number>; // playerId → hintIndex when they last guessed
+}
+
+// ── CHARADES GAME STATE ───────────────────────────────────────────────────────
+
+interface CharadesRoundState {
+  hostId: number;
+  words: Array<{ id: number; answer: string }>;
+  usedWordIds: number[];
+  currentWord: string | null;
+  currentWordId: number | null;
+  currentPerformerIdx: number;
+  playerQueue: number[];
+  wordNumber: number;
+  lang: string;
+}
+
+const clients = new Map<WebSocket, WsClient>();
+const roomTimers = new Map<string, ReturnType<typeof setInterval>>();
+const roomRoundState = new Map<string, RoundState>();
+const roomCharacterState = new Map<string, CharacterRoundState>();
+const roomCharadesState = new Map<string, CharadesRoundState>();
+// roomCode → kk_categories info for forehead mode
+const roomSupabaseCategory = new Map<string, { kkCategoryId: number; categoryName: string }>();
+
+// ── HELPERS ───────────────────────────────────────────────────────────────────
+
+function broadcast(roomCode: string, message: object, excludeWs?: WebSocket) {
+  const payload = JSON.stringify(message);
+  for (const [ws, client] of clients.entries()) {
+    if (client.roomCode === roomCode && ws !== excludeWs && ws.readyState === WebSocket.OPEN) {
+      ws.send(payload);
+    }
+  }
+}
+
+function sendTo(ws: WebSocket, message: object) {
+  if (ws.readyState === WebSocket.OPEN) {
+    ws.send(JSON.stringify(message));
+  }
+}
+
+function clearRoomTimer(code: string) {
+  const t = roomTimers.get(code);
+  if (t) {
+    clearInterval(t);
+    roomTimers.delete(code);
+  }
+}
+
+async function getRoomState(code: string) {
+  const room = await db.query.roomsTable.findFirst({ where: eq(roomsTable.code, code) });
+  if (!room) return null;
+  const players = await db.select().from(playersTable).where(eq(playersTable.roomId, room.id));
+  let categoryName: string | null = null;
+  const supabaseCat = roomSupabaseCategory.get(code);
+  if (supabaseCat) {
+    categoryName = supabaseCat.categoryName;
+  } else if (room.categoryId) {
+    const cat = await db.query.categoriesTable.findFirst({ where: eq(categoriesTable.id, room.categoryId) });
+    categoryName = cat?.name ?? null;
+  }
+  return {
+    code: room.code,
+    status: room.status,
+    mode: room.mode,
+    lang: room.lang ?? "en",
+    categoryId: supabaseCat ? null : (room.categoryId ?? null),
+    categoryName,
+    hostReconnecting: hostGraceTimers.has(code),
+    players: players.map((p) => ({
+      id: p.id,
+      name: p.name,
+      isHost: p.isHost,
+      score: p.score,
+      connected: p.connected,
+    })),
+  };
+}
+
+// ── CHARACTER GAME HELPERS ────────────────────────────────────────────────────
+
+async function pickNextCharacter(lang: string, existing: CharacterRoundState | undefined): Promise<{ entry: CharacterEntry; error?: string } | null> {
+  const { characters, error } = await fetchCharactersFromSupabase(lang);
+  if (characters.length === 0) {
+    logger.warn({ lang, error }, '[CharacterGame] No characters returned from Supabase');
+    return null;
+  }
+
+  const usedSoFar = existing?.usedPoolIndices ?? [];
+  let available = characters.filter(e => !usedSoFar.includes(e.id));
+
+  if (available.length === 0) {
+    // All used — reset and start over
+    available = characters;
+  }
+
+  const entry = available[Math.floor(Math.random() * available.length)];
+  return { entry };
+}
+
+async function broadcastCharacterState(roomCode: string) {
+  const cs = roomCharacterState.get(roomCode);
+  if (!cs) return;
+
+  for (const [ws2, c] of clients.entries()) {
+    if (c.roomCode !== roomCode || ws2.readyState !== WebSocket.OPEN || !c.playerId) continue;
+
+    const isAdmin = c.playerId === cs.adminId;
+
+    if (isAdmin) {
+      sendTo(ws2, {
+        type: "gtcState",
+        payload: {
+          isAdmin: true,
+          answer: cs.answer,
+          hints: cs.hints,
+          currentHintIndex: cs.currentHintIndex,
+          answerRevealed: cs.answerRevealed,
+          adminId: cs.adminId,
+          totalHints: cs.hints.length,
+          playerGuesses: cs.playerGuesses,
+        },
+      });
+    } else {
+      const currentHint = cs.currentHintIndex >= 0 ? cs.hints[cs.currentHintIndex] : null;
+      const myGuessCount = cs.guessCountByPlayer[c.playerId] ?? 0;
+      const myGuesses = cs.playerGuesses
+        .filter((g) => g.playerId === c.playerId)
+        .map((g) => g.guess);
+      const isPenalized =
+        cs.currentHintIndex >= 0 &&
+        (cs.lastGuessByPlayer[c.playerId] ?? -99) === cs.currentHintIndex;
+      sendTo(ws2, {
+        type: "gtcState",
+        payload: {
+          isAdmin: false,
+          currentHint,
+          currentHintIndex: cs.currentHintIndex,
+          answerRevealed: cs.answerRevealed,
+          revealedAnswer: cs.answerRevealed ? cs.answer : undefined,
+          adminId: cs.adminId,
+          myGuessCount,
+          myGuesses,
+          isPenalized,
+        },
+      });
+    }
+  }
+}
+
+// ── CHARADES GAME HELPERS ─────────────────────────────────────────────────────
+
+async function broadcastCharadesState(roomCode: string) {
+  const cs = roomCharadesState.get(roomCode);
+  if (!cs) return;
+  const room = await db.query.roomsTable.findFirst({ where: eq(roomsTable.code, roomCode) });
+  if (!room) return;
+  const players = await db.select().from(playersTable).where(eq(playersTable.roomId, room.id));
+
+  const performerId = cs.playerQueue[cs.currentPerformerIdx] ?? null;
+  const performer = players.find((p) => p.id === performerId);
+  const nextPerformerIdx = (cs.currentPerformerIdx + 1) % cs.playerQueue.length;
+  const nextPerformerId = cs.playerQueue[nextPerformerIdx];
+  const nextPerformer = players.find((p) => p.id === nextPerformerId);
+
+  for (const [ws2, c] of clients.entries()) {
+    if (c.roomCode !== roomCode || ws2.readyState !== WebSocket.OPEN || !c.playerId) continue;
+
+    const isHost = c.playerId === cs.hostId;
+    const isPerformer = c.playerId === performerId;
+
+    sendTo(ws2, {
+      type: "charadesState",
+      payload: {
+        isHost,
+        isPerformer,
+        hostId: cs.hostId,
+        performerName: performer?.name ?? "",
+        performerId,
+        nextPerformerName: nextPerformer?.name ?? "",
+        wordNumber: cs.wordNumber,
+        totalWords: cs.words.length,
+        word: isPerformer ? cs.currentWord : undefined,
+      },
+    });
+  }
+}
+
+// ── FOREHEAD GAME LOGIC ───────────────────────────────────────────────────────
+
+async function startCountdown(roomCode: string) {
+  await db.update(roomsTable).set({ status: "countdown" }).where(eq(roomsTable.code, roomCode));
+  broadcast(roomCode, { type: "roomUpdate", payload: await getRoomState(roomCode) });
+
+  let secondsLeft = 3;
+  broadcast(roomCode, { type: "countdownTick", payload: { secondsLeft } });
+
+  clearRoomTimer(roomCode);
+  const interval = setInterval(async () => {
+    secondsLeft--;
+    broadcast(roomCode, { type: "countdownTick", payload: { secondsLeft } });
+
+    if (secondsLeft <= 0) {
+      clearRoomTimer(roomCode);
+      await beginWordDisplay(roomCode);
+    }
+  }, 1000);
+  roomTimers.set(roomCode, interval);
+}
+
+async function beginWordDisplay(roomCode: string) {
+  const room = await db.query.roomsTable.findFirst({ where: eq(roomsTable.code, roomCode) });
+  const supabaseCat = roomSupabaseCategory.get(roomCode);
+  if (!room || (!room.categoryId && !supabaseCat)) return;
+
+  const players = await db.select().from(playersTable).where(eq(playersTable.roomId, room.id));
+  const connected = players.filter((p) => p.connected);
+  if (connected.length < 2) return;
+
+  // Assign words to ALL players in the room (not just currently-connected ones).
+  // This prevents players with a brief WebSocket blip during the countdown from
+  // showing as ??? to everyone else.
+  const wordPlayers = players;
+
+  let wordPool: string[];
+  let categoryName: string;
+
+  if (supabaseCat) {
+    const roomLang = room.lang ?? 'en';
+    const result = await fetchForeheadWordsByFlatCategory(supabaseCat.categoryName, roomLang);
+    if (result.error || result.words.length === 0) {
+      const noWordsMsg = roomLang === 'ar'
+        ? 'لا توجد كلمات في هذا التصنيف'
+        : `No words in "${supabaseCat.categoryName}"`;
+      broadcast(roomCode, { type: "error", payload: { message: result.error ?? noWordsMsg } });
+      return;
+    }
+    wordPool = result.words;
+    categoryName = supabaseCat.categoryName;
+  } else {
+    const items = await db.select().from(categoryItemsTable).where(eq(categoryItemsTable.categoryId, room.categoryId!));
+    wordPool = items.map((i) => i.itemText);
+    const cat = await db.query.categoriesTable.findFirst({ where: eq(categoriesTable.id, room.categoryId!) });
+    categoryName = cat?.name ?? "Unknown";
+  }
+
+  if (wordPool.length < wordPlayers.length) {
+    broadcast(roomCode, {
+      type: "error",
+      payload: { message: `Need at least ${wordPlayers.length} words in this category for ${wordPlayers.length} players. Add more words or switch category.` },
+    });
+    return;
+  }
+
+  const shuffledWords = [...wordPool].sort(() => Math.random() - 0.5).slice(0, wordPlayers.length);
+  const shuffledPlayers = [...wordPlayers].sort(() => Math.random() - 0.5);
+  const imposterPlayer = shuffledPlayers[0];
+  const normalPlayers = shuffledPlayers.slice(1);
+
+  const playerWords: Record<number, string> = {};
+  playerWords[imposterPlayer.id] = shuffledWords[0];
+  normalPlayers.forEach((p, i) => {
+    playerWords[p.id] = shuffledWords[i + 1];
+  });
+
+  const normalWord = normalPlayers.length > 0 ? playerWords[normalPlayers[0].id] : shuffledWords[1] ?? "";
+  const imposterWord = playerWords[imposterPlayer.id];
+
+  const existingRound = roomRoundState.get(roomCode);
+  const roundNumber = (existingRound?.roundNumber ?? 0) + 1;
+
+  const roundState: RoundState = {
+    roundNumber,
+    imposterId: imposterPlayer.id,
+    imposterName: imposterPlayer.name,
+    normalWord,
+    imposterWord,
+    categoryName,
+    readyPlayerIds: [],
+    playerWords,
+  };
+  roomRoundState.set(roomCode, roundState);
+
+  await db.update(roomsTable).set({ status: "word_display" }).where(eq(roomsTable.code, roomCode));
+
+  for (const [ws, client] of clients.entries()) {
+    if (client.roomCode === roomCode && ws.readyState === WebSocket.OPEN && client.playerId) {
+      const isImposter = client.playerId === imposterPlayer.id;
+      const myWord = playerWords[client.playerId] ?? "???";
+      const allPlayerWords = wordPlayers.map((p) => ({
+        playerId: p.id,
+        playerName: p.name,
+        word: p.id === client.playerId ? "???" : (playerWords[p.id] ?? "???"),
+      }));
+      sendTo(ws, {
+        type: "roundStart",
+        payload: {
+          roundNumber,
+          myWord,
+          isImposter,
+          categoryName,
+          allPlayerWords,
+        },
+      });
+    }
+  }
+
+  broadcast(roomCode, { type: "roomUpdate", payload: await getRoomState(roomCode) });
+}
+
+// ── MESSAGE HANDLER ───────────────────────────────────────────────────────────
+
+async function handleMessage(ws: WebSocket, client: WsClient, raw: string) {
+  let msg: { type: string; payload: Record<string, unknown> };
+  try {
+    msg = JSON.parse(raw);
+  } catch {
+    return;
+  }
+
+  const { type, payload } = msg;
+
+  // ── PONG (heartbeat reply from client) ───────────────────────────────────
+  if (type === "pong") return;
+
+  // ── JOIN ──────────────────────────────────────────────────────────────────
+  if (type === "join") {
+    const { roomCode, playerId, playerName } = payload as { roomCode: string; playerId: number; playerName: string };
+    client.roomCode = roomCode;
+    client.playerId = Number(playerId);
+    client.playerName = playerName;
+
+    await db.update(playersTable).set({ connected: true }).where(eq(playersTable.id, Number(playerId)));
+
+    // If this player had a host grace timer running, cancel it — they reconnected in time
+    const grace = hostGraceTimers.get(roomCode);
+    if (grace && grace.playerId === Number(playerId)) {
+      clearTimeout(grace.timer);
+      hostGraceTimers.delete(roomCode);
+      logger.info({ roomCode, playerId }, '[Host] Reconnected within grace period — host status retained');
+    }
+
+    const state = await getRoomState(roomCode);
+    if (state) sendTo(ws, { type: "roomUpdate", payload: state });
+
+    // Resend forehead game state if in progress
+    const rs = roomRoundState.get(roomCode);
+    if (rs && state?.status === "word_display" && client.playerId) {
+      const isImposter = client.playerId === rs.imposterId;
+      const myWord = rs.playerWords?.[client.playerId] ?? (isImposter ? rs.imposterWord : rs.normalWord);
+      const allPlayerWords = state.players.map((p) => ({
+        playerId: p.id,
+        playerName: p.name,
+        word: p.id === client.playerId ? "???" : (rs.playerWords?.[p.id] ?? "???"),
+      }));
+      sendTo(ws, {
+        type: "roundStart",
+        payload: { roundNumber: rs.roundNumber, myWord, isImposter, categoryName: rs.categoryName, allPlayerWords },
+      });
+    }
+    if (rs && state?.status === "reveal" && client.playerId) {
+      const isImposter = client.playerId === rs.imposterId;
+      const myWord = rs.playerWords?.[client.playerId] ?? (isImposter ? rs.imposterWord : rs.normalWord);
+      sendTo(ws, {
+        type: "revealInfo",
+        payload: {
+          myWord, isImposter, imposterName: rs.imposterName,
+          normalWord: rs.normalWord, imposterWord: rs.imposterWord,
+          categoryName: rs.categoryName, roundNumber: rs.roundNumber,
+          readyPlayerIds: rs.readyPlayerIds,
+        },
+      });
+    }
+
+    // Resend character game state if in progress
+    if (state?.status === "character_playing" && client.playerId) {
+      const cs = roomCharacterState.get(roomCode);
+      if (cs) {
+        const isAdmin = client.playerId === cs.adminId;
+        if (isAdmin) {
+          sendTo(ws, {
+            type: "gtcState",
+            payload: {
+              isAdmin: true, answer: cs.answer, hints: cs.hints,
+              currentHintIndex: cs.currentHintIndex, answerRevealed: cs.answerRevealed,
+              adminId: cs.adminId, totalHints: cs.hints.length,
+            },
+          });
+        } else {
+          const currentHint = cs.currentHintIndex >= 0 ? cs.hints[cs.currentHintIndex] : null;
+          sendTo(ws, {
+            type: "gtcState",
+            payload: {
+              isAdmin: false, currentHint, currentHintIndex: cs.currentHintIndex,
+              answerRevealed: cs.answerRevealed,
+              revealedAnswer: cs.answerRevealed ? cs.answer : undefined,
+              adminId: cs.adminId,
+            },
+          });
+        }
+      }
+    }
+
+    // Resend charades state if in progress
+    if (state?.status === "charades_playing" && client.playerId) {
+      const cs = roomCharadesState.get(roomCode);
+      if (cs) {
+        const isHost = client.playerId === cs.hostId;
+        const performerId = cs.playerQueue[cs.currentPerformerIdx] ?? null;
+        const isPerformer = client.playerId === performerId;
+        const nextPerformerIdx = (cs.currentPerformerIdx + 1) % cs.playerQueue.length;
+        const nextPerformerId = cs.playerQueue[nextPerformerIdx];
+        // Get names from the just-fetched state
+        const pList = state.players;
+        const performer = pList.find((p) => p.id === performerId);
+        const nextPerformer = pList.find((p) => p.id === nextPerformerId);
+        sendTo(ws, {
+          type: "charadesState",
+          payload: {
+            isHost,
+            isPerformer,
+            hostId: cs.hostId,
+            performerName: performer?.name ?? "",
+            performerId,
+            nextPerformerName: nextPerformer?.name ?? "",
+            wordNumber: cs.wordNumber,
+            totalWords: cs.words.length,
+            word: isPerformer ? cs.currentWord : undefined,
+          },
+        });
+      }
+    }
+
+    broadcast(roomCode, { type: "roomUpdate", payload: state });
+    return;
+  }
+
+  if (!client.roomCode) return;
+
+  // ── FOREHEAD: SET CATEGORY ────────────────────────────────────────────────
+  if (type === "setCategory") {
+    const { roomCode, kkCategoryId, supabaseCategory } = payload as {
+      roomCode: string; kkCategoryId?: number; supabaseCategory?: string;
+    };
+    const room = await db.query.roomsTable.findFirst({ where: eq(roomsTable.code, roomCode) });
+    if (!room) return;
+    const host = await db.query.playersTable.findFirst({
+      where: and(eq(playersTable.roomId, room.id), eq(playersTable.isHost, true)),
+    });
+    if (host?.id !== client.playerId) return;
+    if (kkCategoryId != null && supabaseCategory) {
+      roomSupabaseCategory.set(roomCode, { kkCategoryId, categoryName: supabaseCategory });
+      await db.update(roomsTable).set({ categoryId: null }).where(eq(roomsTable.code, roomCode));
+    } else {
+      roomSupabaseCategory.delete(roomCode);
+    }
+    broadcast(roomCode, { type: "roomUpdate", payload: await getRoomState(roomCode) });
+    return;
+  }
+
+  // ── FOREHEAD: START GAME ─────────────────────────────────────────────────
+  if (type === "startGame") {
+    const { roomCode } = payload as { roomCode: string };
+    const room = await db.query.roomsTable.findFirst({ where: eq(roomsTable.code, roomCode) });
+    if (!room || room.status !== "waiting") return;
+    const host = await db.query.playersTable.findFirst({
+      where: and(eq(playersTable.roomId, room.id), eq(playersTable.isHost, true)),
+    });
+    if (host?.id !== client.playerId) return;
+    if (!room.categoryId && !roomSupabaseCategory.has(roomCode)) {
+      sendTo(ws, { type: "error", payload: { message: "Please select a category first" } });
+      return;
+    }
+    const players = await db.select().from(playersTable).where(eq(playersTable.roomId, room.id));
+    const connected = players.filter((p) => p.connected);
+    if (connected.length < 2) {
+      sendTo(ws, { type: "error", payload: { message: "Need at least 2 players to start" } });
+      return;
+    }
+    roomRoundState.delete(roomCode);
+    await startCountdown(roomCode);
+    return;
+  }
+
+  // ── FOREHEAD: END ROUND ───────────────────────────────────────────────────
+  if (type === "endRound") {
+    const { roomCode } = payload as { roomCode: string };
+    const room = await db.query.roomsTable.findFirst({ where: eq(roomsTable.code, roomCode) });
+    if (!room || room.status !== "word_display") return;
+    const host = await db.query.playersTable.findFirst({
+      where: and(eq(playersTable.roomId, room.id), eq(playersTable.isHost, true)),
+    });
+    if (host?.id !== client.playerId) return;
+
+    await db.update(roomsTable).set({ status: "reveal" }).where(eq(roomsTable.code, roomCode));
+
+    const rs = roomRoundState.get(roomCode);
+    if (!rs) return;
+
+    for (const [ws2, c] of clients.entries()) {
+      if (c.roomCode === roomCode && ws2.readyState === WebSocket.OPEN && c.playerId) {
+        const isImposter = c.playerId === rs.imposterId;
+        const myWord = rs.playerWords?.[c.playerId] ?? (isImposter ? rs.imposterWord : rs.normalWord);
+        sendTo(ws2, {
+          type: "revealInfo",
+          payload: {
+            myWord, isImposter, imposterName: rs.imposterName,
+            normalWord: rs.normalWord, imposterWord: rs.imposterWord,
+            categoryName: rs.categoryName, roundNumber: rs.roundNumber,
+            readyPlayerIds: rs.readyPlayerIds,
+          },
+        });
+      }
+    }
+
+    broadcast(roomCode, { type: "roomUpdate", payload: await getRoomState(roomCode) });
+    return;
+  }
+
+  // ── FOREHEAD: REGEN ONE PLAYER'S WORD ────────────────────────────────────
+  if (type === "regenPlayerWord") {
+    const { roomCode, targetPlayerId } = payload as { roomCode: string; targetPlayerId: number };
+    const room = await db.query.roomsTable.findFirst({ where: eq(roomsTable.code, roomCode) });
+    const supabaseCat = roomSupabaseCategory.get(roomCode);
+    if (!room || room.status !== "word_display" || (!room.categoryId && !supabaseCat)) return;
+    const host = await db.query.playersTable.findFirst({
+      where: and(eq(playersTable.roomId, room.id), eq(playersTable.isHost, true)),
+    });
+    if (host?.id !== client.playerId) return;
+
+    const rs = roomRoundState.get(roomCode);
+    if (!rs) return;
+
+    const usedWords = new Set(
+      Object.entries(rs.playerWords)
+        .filter(([id]) => Number(id) !== targetPlayerId)
+        .map(([, word]) => word)
+    );
+    let available: string[];
+    if (supabaseCat) {
+      const result = await fetchForeheadWordsByFlatCategory(supabaseCat.categoryName, room.lang ?? 'en');
+      if (result.error || result.words.length === 0) return;
+      available = result.words.filter((w) => !usedWords.has(w));
+    } else {
+      const items = await db.select().from(categoryItemsTable).where(eq(categoryItemsTable.categoryId, room.categoryId!));
+      available = items.filter((item) => !usedWords.has(item.itemText)).map((i) => i.itemText);
+    }
+    if (available.length === 0) return;
+
+    const newWord = available[Math.floor(Math.random() * available.length)];
+    rs.playerWords[targetPlayerId] = newWord;
+
+    // Keep normalWord / imposterWord in sync
+    if (targetPlayerId === rs.imposterId) {
+      rs.imposterWord = newWord;
+    } else {
+      const normalWords = Object.entries(rs.playerWords)
+        .filter(([id]) => Number(id) !== rs.imposterId)
+        .map(([, w]) => w);
+      if (normalWords.length > 0) rs.normalWord = normalWords[0];
+    }
+
+    const regenCatName = supabaseCat?.categoryName ?? rs.categoryName;
+    const players = await db.select().from(playersTable).where(eq(playersTable.roomId, room.id));
+    const connected = players.filter((p) => p.connected);
+
+    for (const [ws2, c] of clients.entries()) {
+      if (c.roomCode !== roomCode || ws2.readyState !== WebSocket.OPEN || !c.playerId) continue;
+      const allPlayerWords = connected.map((p) => ({
+        playerId: p.id,
+        playerName: p.name,
+        word: p.id === c.playerId ? "???" : (rs.playerWords[p.id] ?? "???"),
+      }));
+      sendTo(ws2, {
+        type: "roundStart",
+        payload: {
+          roundNumber: rs.roundNumber,
+          myWord: rs.playerWords[c.playerId] ?? "???",
+          isImposter: c.playerId === rs.imposterId,
+          categoryName: regenCatName,
+          allPlayerWords,
+        },
+      });
+    }
+    return;
+  }
+
+  // ── FOREHEAD: NEW WORD (re-deal immediately, no countdown) ───────────────
+  if (type === "newWord") {
+    const { roomCode } = payload as { roomCode: string };
+    const room = await db.query.roomsTable.findFirst({ where: eq(roomsTable.code, roomCode) });
+    if (!room || room.status !== "word_display") return;
+    const host = await db.query.playersTable.findFirst({
+      where: and(eq(playersTable.roomId, room.id), eq(playersTable.isHost, true)),
+    });
+    if (host?.id !== client.playerId) return;
+    await beginWordDisplay(roomCode);
+    return;
+  }
+
+  // ── FOREHEAD: PLAYER READY ────────────────────────────────────────────────
+  if (type === "playerReady") {
+    const { roomCode } = payload as { roomCode: string };
+    const rs = roomRoundState.get(roomCode);
+    if (!rs || !client.playerId) return;
+    if (!rs.readyPlayerIds.includes(client.playerId)) rs.readyPlayerIds.push(client.playerId);
+    broadcast(roomCode, { type: "readyUpdate", payload: { readyPlayerIds: rs.readyPlayerIds } });
+    return;
+  }
+
+  // ── FOREHEAD: NEXT ROUND ──────────────────────────────────────────────────
+  if (type === "nextRound") {
+    const { roomCode } = payload as { roomCode: string };
+    const room = await db.query.roomsTable.findFirst({ where: eq(roomsTable.code, roomCode) });
+    if (!room || room.status !== "reveal") return;
+    const host = await db.query.playersTable.findFirst({
+      where: and(eq(playersTable.roomId, room.id), eq(playersTable.isHost, true)),
+    });
+    if (host?.id !== client.playerId) return;
+
+    const players = await db.select().from(playersTable).where(eq(playersTable.roomId, room.id));
+    const connected = players.filter((p) => p.connected);
+    const rs = roomRoundState.get(roomCode);
+    const readyIds = rs?.readyPlayerIds ?? [];
+    const allReady = connected.every((p) => readyIds.includes(p.id));
+    if (!allReady) {
+      sendTo(ws, { type: "error", payload: { message: "Not all players are ready yet" } });
+      return;
+    }
+
+    await startCountdown(roomCode);
+    return;
+  }
+
+  // ── FOREHEAD: END GAME ────────────────────────────────────────────────────
+  if (type === "endGame") {
+    const { roomCode } = payload as { roomCode: string };
+    const room = await db.query.roomsTable.findFirst({ where: eq(roomsTable.code, roomCode) });
+    if (!room) return;
+    const host = await db.query.playersTable.findFirst({
+      where: and(eq(playersTable.roomId, room.id), eq(playersTable.isHost, true)),
+    });
+    if (host?.id !== client.playerId) return;
+
+    clearRoomTimer(roomCode);
+    roomRoundState.delete(roomCode);
+    await db.update(roomsTable).set({ status: "finished" }).where(eq(roomsTable.code, roomCode));
+    broadcast(roomCode, { type: "gameEnd", payload: {} });
+    broadcast(roomCode, { type: "roomUpdate", payload: await getRoomState(roomCode) });
+    return;
+  }
+
+  // ── FOREHEAD: PLAY AGAIN ──────────────────────────────────────────────────
+  if (type === "playAgain") {
+    const { roomCode } = payload as { roomCode: string };
+    const room = await db.query.roomsTable.findFirst({ where: eq(roomsTable.code, roomCode) });
+    if (!room) return;
+    const host = await db.query.playersTable.findFirst({
+      where: and(eq(playersTable.roomId, room.id), eq(playersTable.isHost, true)),
+    });
+    if (host?.id !== client.playerId) return;
+
+    clearRoomTimer(roomCode);
+    roomRoundState.delete(roomCode);
+    await db.update(roomsTable).set({ status: "waiting" }).where(eq(roomsTable.code, roomCode));
+    broadcast(roomCode, { type: "roomUpdate", payload: await getRoomState(roomCode) });
+    return;
+  }
+
+  // ── CHARACTER: START GAME ─────────────────────────────────────────────────
+  if (type === "gtcStart") {
+    const { roomCode } = payload as { roomCode: string };
+    const room = await db.query.roomsTable.findFirst({ where: eq(roomsTable.code, roomCode) });
+    if (!room || room.status !== "waiting" || room.mode !== "character") return;
+
+    const host = await db.query.playersTable.findFirst({
+      where: and(eq(playersTable.roomId, room.id), eq(playersTable.isHost, true)),
+    });
+    if (host?.id !== client.playerId) return;
+
+    const lang = room.lang ?? "en";
+    const picked = await pickNextCharacter(lang, undefined);
+    if (!picked) {
+      sendTo(ws, { type: "error", payload: { message: "No characters found for this language." } });
+      return;
+    }
+
+    const cs: CharacterRoundState = {
+      adminId: client.playerId!,
+      answer: picked.entry.answer,
+      hints: picked.entry.hints,
+      currentHintIndex: -1,
+      answerRevealed: false,
+      usedPoolIndices: [picked.entry.id],
+      lang,
+      playerGuesses: [],
+      guessCountByPlayer: {},
+      lastGuessByPlayer: {},
+    };
+    roomCharacterState.set(roomCode, cs);
+
+    await db.update(roomsTable).set({ status: "character_playing" }).where(eq(roomsTable.code, roomCode));
+    broadcast(roomCode, { type: "roomUpdate", payload: await getRoomState(roomCode) });
+    await broadcastCharacterState(roomCode);
+    return;
+  }
+
+  // ── CHARACTER: NEXT HINT ──────────────────────────────────────────────────
+  if (type === "gtcNextHint") {
+    const { roomCode } = payload as { roomCode: string };
+    const cs = roomCharacterState.get(roomCode);
+    if (!cs || cs.adminId !== client.playerId) return;
+    if (cs.currentHintIndex >= cs.hints.length - 1) return; // all hints shown
+
+    cs.currentHintIndex++;
+    await broadcastCharacterState(roomCode);
+    return;
+  }
+
+  // ── CHARACTER: REVEAL ANSWER ──────────────────────────────────────────────
+  if (type === "gtcRevealAnswer") {
+    const { roomCode } = payload as { roomCode: string };
+    const cs = roomCharacterState.get(roomCode);
+    if (!cs || cs.adminId !== client.playerId) return;
+
+    cs.answerRevealed = true;
+    await broadcastCharacterState(roomCode);
+    return;
+  }
+
+  // ── CHARACTER: NEXT CHARACTER ─────────────────────────────────────────────
+  if (type === "gtcNextCharacter") {
+    const { roomCode } = payload as { roomCode: string };
+    const cs = roomCharacterState.get(roomCode);
+    if (!cs || cs.adminId !== client.playerId) return;
+
+    const picked = await pickNextCharacter(cs.lang, cs);
+    if (!picked) {
+      sendTo(ws, { type: "error", payload: { message: "No characters found for this language." } });
+      return;
+    }
+
+    const updatedUsed = cs.usedPoolIndices.includes(picked.entry.id)
+      ? [picked.entry.id] // reset happened — start fresh
+      : [...cs.usedPoolIndices, picked.entry.id];
+
+    const newCs: CharacterRoundState = {
+      adminId: cs.adminId,
+      answer: picked.entry.answer,
+      hints: picked.entry.hints,
+      currentHintIndex: -1,
+      answerRevealed: false,
+      usedPoolIndices: updatedUsed,
+      lang: cs.lang,
+      playerGuesses: [],
+      guessCountByPlayer: {},
+      lastGuessByPlayer: {},
+    };
+    roomCharacterState.set(roomCode, newCs);
+    await broadcastCharacterState(roomCode);
+    return;
+  }
+
+  // ── CHARACTER: SUBMIT GUESS ───────────────────────────────────────────────
+  if (type === "gtcSubmitGuess") {
+    const { roomCode, guess } = payload as { roomCode: string; guess: string };
+    const cs = roomCharacterState.get(roomCode);
+    if (!cs || !client.playerId) return;
+    if (cs.adminId === client.playerId) return; // admin cannot guess
+
+    const currentCount = cs.guessCountByPlayer[client.playerId] ?? 0;
+    if (currentCount >= 3) return; // max 3 guesses
+
+    // Penalty: player already guessed on this hint — must wait for next
+    const lastHint = cs.lastGuessByPlayer[client.playerId] ?? -99;
+    if (lastHint === cs.currentHintIndex) return;
+
+    const trimmedGuess = String(guess).trim().slice(0, 100);
+    if (!trimmedGuess) return;
+
+    const guessNumber = currentCount + 1;
+    cs.guessCountByPlayer[client.playerId] = guessNumber;
+    cs.lastGuessByPlayer[client.playerId] = cs.currentHintIndex;
+    cs.playerGuesses.push({
+      playerId: client.playerId,
+      playerName: client.playerName ?? "Unknown",
+      guess: trimmedGuess,
+      guessNumber,
+    });
+
+    await broadcastCharacterState(roomCode);
+    return;
+  }
+
+  // ── CHARACTER: CROWN WINNER ───────────────────────────────────────────────
+  if (type === "gtcCrownWinner") {
+    const { roomCode, playerId: winnerId } = payload as { roomCode: string; playerId: number };
+    const cs = roomCharacterState.get(roomCode);
+    if (!cs || cs.adminId !== client.playerId) return;
+
+    const room = await db.query.roomsTable.findFirst({ where: eq(roomsTable.code, roomCode) });
+    if (!room) return;
+    const winner = await db.query.playersTable.findFirst({
+      where: and(eq(playersTable.roomId, room.id), eq(playersTable.id, Number(winnerId))),
+    });
+    if (!winner) return;
+
+    await db.update(playersTable).set({ score: winner.score + 1 }).where(eq(playersTable.id, winner.id));
+    broadcast(roomCode, { type: "gtcWinner", payload: { winnerId: winner.id, winnerName: winner.name } });
+    broadcast(roomCode, { type: "roomUpdate", payload: await getRoomState(roomCode) });
+    return;
+  }
+
+  // ── CHARACTER: TRANSFER ADMIN ─────────────────────────────────────────────
+  if (type === "gtcTransferAdmin") {
+    const { roomCode, targetPlayerId } = payload as { roomCode: string; targetPlayerId: number };
+    const cs = roomCharacterState.get(roomCode);
+    if (!cs || cs.adminId !== client.playerId) return;
+
+    const room = await db.query.roomsTable.findFirst({ where: eq(roomsTable.code, roomCode) });
+    if (!room) return;
+
+    const target = await db.query.playersTable.findFirst({
+      where: and(eq(playersTable.roomId, room.id), eq(playersTable.id, Number(targetPlayerId))),
+    });
+    if (!target || !target.connected) {
+      sendTo(ws, { type: "error", payload: { message: "Player not found or not connected." } });
+      return;
+    }
+
+    cs.adminId = Number(targetPlayerId);
+    await broadcastCharacterState(roomCode);
+    broadcast(roomCode, { type: "roomUpdate", payload: await getRoomState(roomCode) });
+    return;
+  }
+
+  // ── CHARACTER: END GAME ───────────────────────────────────────────────────
+  if (type === "gtcEndGame") {
+    const { roomCode } = payload as { roomCode: string };
+    const room = await db.query.roomsTable.findFirst({ where: eq(roomsTable.code, roomCode) });
+    if (!room) return;
+    const cs = roomCharacterState.get(roomCode);
+    if (!cs || cs.adminId !== client.playerId) return;
+
+    roomCharacterState.delete(roomCode);
+    await db.update(roomsTable).set({ status: "finished" }).where(eq(roomsTable.code, roomCode));
+    broadcast(roomCode, { type: "gameEnd", payload: {} });
+    broadcast(roomCode, { type: "roomUpdate", payload: await getRoomState(roomCode) });
+    return;
+  }
+
+  // ── CHARACTER: BACK TO LOBBY ──────────────────────────────────────────────
+  if (type === "gtcBackToLobby") {
+    const { roomCode } = payload as { roomCode: string };
+    const room = await db.query.roomsTable.findFirst({ where: eq(roomsTable.code, roomCode) });
+    if (!room) return;
+    const cs = roomCharacterState.get(roomCode);
+    // Allow host OR game admin to go back to lobby
+    const host = await db.query.playersTable.findFirst({
+      where: and(eq(playersTable.roomId, room.id), eq(playersTable.isHost, true)),
+    });
+    if (cs?.adminId !== client.playerId && host?.id !== client.playerId) return;
+
+    roomCharacterState.delete(roomCode);
+    await db.update(roomsTable).set({ status: "waiting" }).where(eq(roomsTable.code, roomCode));
+    broadcast(roomCode, { type: "roomUpdate", payload: await getRoomState(roomCode) });
+    return;
+  }
+
+  // ── CHARADES: START GAME ──────────────────────────────────────────────────
+  if (type === "charadesStart") {
+    const { roomCode } = payload as { roomCode: string };
+    const room = await db.query.roomsTable.findFirst({ where: eq(roomsTable.code, roomCode) });
+    if (!room || room.status !== "waiting" || room.mode !== "charades") return;
+
+    const host = await db.query.playersTable.findFirst({
+      where: and(eq(playersTable.roomId, room.id), eq(playersTable.isHost, true)),
+    });
+    if (host?.id !== client.playerId) return;
+
+    const lang = room.lang ?? "en";
+    const { words: pool, error: poolError } = await fetchCharadesFromSupabase(lang);
+    if (pool.length === 0) {
+      sendTo(ws, { type: "error", payload: { message: poolError ?? "No charades entries found for this language." } });
+      return;
+    }
+
+    const players = await db.select().from(playersTable).where(eq(playersTable.roomId, room.id));
+    const connected = players.filter((p) => p.connected);
+    if (connected.length < 2) {
+      sendTo(ws, { type: "error", payload: { message: "Need at least 2 players to start." } });
+      return;
+    }
+
+    const playerQueue = [...connected].sort(() => Math.random() - 0.5).map((p) => p.id);
+    const wordEntry = pool[Math.floor(Math.random() * pool.length)];
+
+    const cs: CharadesRoundState = {
+      hostId: host.id,
+      words: pool,
+      usedWordIds: [wordEntry.id],
+      currentWord: wordEntry.answer,
+      currentWordId: wordEntry.id,
+      currentPerformerIdx: 0,
+      playerQueue,
+      wordNumber: 1,
+      lang,
+    };
+    roomCharadesState.set(roomCode, cs);
+
+    await db.update(roomsTable).set({ status: "charades_playing" }).where(eq(roomsTable.code, roomCode));
+    broadcast(roomCode, { type: "roomUpdate", payload: await getRoomState(roomCode) });
+    await broadcastCharadesState(roomCode);
+    return;
+  }
+
+  // ── CHARADES: NEXT PLAYER ─────────────────────────────────────────────────
+  if (type === "charadesNext") {
+    const { roomCode } = payload as { roomCode: string };
+    const cs = roomCharadesState.get(roomCode);
+    if (!cs || cs.hostId !== client.playerId) return;
+
+    cs.currentPerformerIdx = (cs.currentPerformerIdx + 1) % cs.playerQueue.length;
+
+    let available = cs.words.filter((w) => !cs.usedWordIds.includes(w.id));
+    if (available.length === 0) {
+      cs.usedWordIds = [];
+      available = cs.words;
+    }
+    const nextWord = available[Math.floor(Math.random() * available.length)];
+    cs.currentWord = nextWord.answer;
+    cs.currentWordId = nextWord.id;
+    cs.usedWordIds.push(nextWord.id);
+    cs.wordNumber++;
+
+    await broadcastCharadesState(roomCode);
+    return;
+  }
+
+  // ── CHARADES: END GAME ────────────────────────────────────────────────────
+  if (type === "charadesEndGame") {
+    const { roomCode } = payload as { roomCode: string };
+    const room = await db.query.roomsTable.findFirst({ where: eq(roomsTable.code, roomCode) });
+    if (!room) return;
+    const cs = roomCharadesState.get(roomCode);
+    if (!cs || cs.hostId !== client.playerId) return;
+
+    roomCharadesState.delete(roomCode);
+    await db.update(roomsTable).set({ status: "finished" }).where(eq(roomsTable.code, roomCode));
+    broadcast(roomCode, { type: "gameEnd", payload: {} });
+    broadcast(roomCode, { type: "roomUpdate", payload: await getRoomState(roomCode) });
+    return;
+  }
+
+  // ── CHARADES: BACK TO LOBBY ───────────────────────────────────────────────
+  if (type === "charadesBackToLobby") {
+    const { roomCode } = payload as { roomCode: string };
+    const room = await db.query.roomsTable.findFirst({ where: eq(roomsTable.code, roomCode) });
+    if (!room) return;
+    const cs = roomCharadesState.get(roomCode);
+    const host = await db.query.playersTable.findFirst({
+      where: and(eq(playersTable.roomId, room.id), eq(playersTable.isHost, true)),
+    });
+    if (cs?.hostId !== client.playerId && host?.id !== client.playerId) return;
+
+    roomCharadesState.delete(roomCode);
+    await db.update(roomsTable).set({ status: "waiting" }).where(eq(roomsTable.code, roomCode));
+    broadcast(roomCode, { type: "roomUpdate", payload: await getRoomState(roomCode) });
+    return;
+  }
+
+}
+
+// ── WS SERVER SETUP ───────────────────────────────────────────────────────────
+
+export function setupWebSocketServer(server: import("http").Server) {
+  const wss = new WebSocketServer({ server, path: "/forehead/ws" });
+
+  wss.on("connection", (ws: WebSocket, _req: IncomingMessage) => {
+    const client: WsClient = { ws, roomCode: null, playerId: null, playerName: null };
+    clients.set(ws, client);
+
+    ws.on("message", (data) => {
+      handleMessage(ws, client, data.toString()).catch((err) => {
+        logger.error({ err }, "WS message handler error");
+      });
+    });
+
+    ws.on("close", async () => {
+      // Clear outgoing ping interval for this connection
+      const pingInterval = clientPingIntervals.get(ws);
+      if (pingInterval) { clearInterval(pingInterval); clientPingIntervals.delete(ws); }
+
+      if (client.playerId && client.roomCode) {
+        const disconnectedId = client.playerId;
+        const roomCode = client.roomCode;
+        try {
+          await db.update(playersTable).set({ connected: false }).where(eq(playersTable.id, disconnectedId));
+          const player = await db.query.playersTable.findFirst({ where: eq(playersTable.id, disconnectedId) });
+
+          if (player?.isHost) {
+            // ── HOST DISCONNECTED: start grace period instead of transferring immediately ──
+            logger.info({ roomCode, playerId: disconnectedId }, '[Host] Disconnected — starting 90 s grace period');
+
+            const timer = setTimeout(async () => {
+              hostGraceTimers.delete(roomCode);
+              logger.info({ roomCode, playerId: disconnectedId }, '[Host] Grace period expired — transferring host');
+              try {
+                const room = await db.query.roomsTable.findFirst({ where: eq(roomsTable.code, roomCode) });
+                if (!room) return;
+                const others = await db.select().from(playersTable).where(
+                  and(eq(playersTable.roomId, room.id), eq(playersTable.connected, true))
+                );
+                if (others.length > 0) {
+                  await db.update(playersTable).set({ isHost: false }).where(eq(playersTable.roomId, room.id));
+                  await db.update(playersTable).set({ isHost: true }).where(eq(playersTable.id, others[0].id));
+                }
+                // Transfer character/charades admin too
+                const cs = roomCharacterState.get(roomCode);
+                if (cs && cs.adminId === disconnectedId && others.length > 0) {
+                  cs.adminId = others[0].id;
+                  await broadcastCharacterState(roomCode);
+                }
+                const crs = roomCharadesState.get(roomCode);
+                if (crs && crs.hostId === disconnectedId && others.length > 0) {
+                  crs.hostId = others[0].id;
+                  await broadcastCharadesState(roomCode);
+                }
+                const state = await getRoomState(roomCode);
+                if (state) broadcast(roomCode, { type: "roomUpdate", payload: state });
+              } catch (err) {
+                logger.error({ err }, '[Host] Error during grace period host transfer');
+              }
+            }, GRACE_PERIOD_MS);
+
+            hostGraceTimers.set(roomCode, { timer, playerId: disconnectedId });
+
+            // Broadcast immediately so players see "Host reconnecting…"
+            const state = await getRoomState(roomCode);
+            if (state) broadcast(roomCode, { type: "roomUpdate", payload: state });
+
+          } else {
+            // ── NON-HOST DISCONNECTED: transfer in-game roles immediately ──
+            const cs = roomCharacterState.get(roomCode);
+            if (cs && cs.adminId === disconnectedId) {
+              const room = await db.query.roomsTable.findFirst({ where: eq(roomsTable.code, roomCode) });
+              if (room) {
+                const others = await db.select().from(playersTable).where(
+                  and(eq(playersTable.roomId, room.id), eq(playersTable.connected, true))
+                );
+                if (others.length > 0) { cs.adminId = others[0].id; await broadcastCharacterState(roomCode); }
+              }
+            }
+            const crs = roomCharadesState.get(roomCode);
+            if (crs && crs.hostId === disconnectedId) {
+              const room = await db.query.roomsTable.findFirst({ where: eq(roomsTable.code, roomCode) });
+              if (room) {
+                const others = await db.select().from(playersTable).where(
+                  and(eq(playersTable.roomId, room.id), eq(playersTable.connected, true))
+                );
+                if (others.length > 0) { crs.hostId = others[0].id; await broadcastCharadesState(roomCode); }
+              }
+            }
+            const state = await getRoomState(roomCode);
+            if (state) broadcast(roomCode, { type: "roomUpdate", payload: state });
+          }
+        } catch (err) {
+          logger.error({ err }, "Error handling WS close");
+        }
+      }
+      clients.delete(ws);
+    });
+
+    ws.on("error", (err) => {
+      logger.error({ err }, "WS error");
+    });
+
+    // ── HEARTBEAT: ping client every 25 s ────────────────────────────────────
+    const pingInterval = setInterval(() => {
+      if (ws.readyState === WebSocket.OPEN) {
+        sendTo(ws, { type: "ping" });
+      } else {
+        clearInterval(pingInterval);
+        clientPingIntervals.delete(ws);
+      }
+    }, PING_INTERVAL_MS);
+    clientPingIntervals.set(ws, pingInterval);
+  });
+
+  logger.info("WebSocket server ready at /forehead/ws");
+  return wss;
+}
+
+export async function shutdownForeheadGameServer(wss: WebSocketServer): Promise<void> {
+  for (const timer of roomTimers.values()) clearInterval(timer);
+  roomTimers.clear();
+
+  for (const { timer } of hostGraceTimers.values()) clearTimeout(timer);
+  hostGraceTimers.clear();
+
+  for (const timer of clientPingIntervals.values()) clearInterval(timer);
+  clientPingIntervals.clear();
+
+  for (const ws of wss.clients) ws.terminate();
+  clients.clear();
+  roomRoundState.clear();
+  roomCharacterState.clear();
+  roomCharadesState.clear();
+  roomSupabaseCategory.clear();
+
+  await new Promise<void>((resolve, reject) => {
+    wss.close((error) => (error ? reject(error) : resolve()));
+  });
+}

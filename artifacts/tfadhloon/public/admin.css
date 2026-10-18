@@ -1,0 +1,138 @@
+/* Keep icon fonts visible even with global font overrides */
+.bi::before {
+  font-family: "bootstrap-icons" !important;
+}
+
+.fa,
+.fas,
+.far,
+.fab,
+.fa-solid,
+.fa-regular {
+  font-family: "Font Awesome 6 Free" !important;
+}
+
+.fa-brands,
+.fab {
+  font-family: "Font Awesome 6 Brands" !important;
+}
+
+.fa::before,
+.fas::before,
+.far::before,
+.fab::before,
+.fa-solid::before,
+.fa-regular::before,
+.fa-brands::before {
+  font-family: inherit !important;
+}
+
+* {
+        font-family: "Playpen Sans Arabic", "AbdoMaster", sans-serif !important;
+        border-radius: 0 !important;
+      }
+
+      body {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        min-height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-family: "Playpen Sans Arabic", "AbdoMaster", sans-serif;
+      }
+
+      .login-container {
+        background: rgba(255, 255, 255, 0.95);
+        border-radius: 20px;
+        padding: 40px;
+        box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+        backdrop-filter: blur(10px);
+        max-width: 400px;
+        width: 100%;
+        text-align: center;
+      }
+
+      .admin-icon {
+        font-size: 4rem;
+        color: #667eea;
+        margin-bottom: 20px;
+      }
+
+      .login-title {
+        color: #333;
+        font-weight: 700;
+        margin-bottom: 30px;
+        font-size: 2rem;
+      }
+
+      .form-control {
+        border-radius: 15px;
+        border: 2px solid #e0e0e0;
+        padding: 15px 20px;
+        font-size: 16px;
+        transition: all 0.3s ease;
+      }
+
+      .form-control:focus {
+        border-color: #667eea;
+        box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.25);
+      }
+
+      .btn-admin {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        border: none;
+        border-radius: 15px;
+        padding: 15px 30px;
+        font-size: 16px;
+        font-weight: 600;
+        color: white;
+        width: 100%;
+        transition: all 0.3s ease;
+      }
+
+      .btn-admin:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 10px 20px rgba(102, 126, 234, 0.3);
+        color: white;
+      }
+
+      .error-message {
+        color: #dc3545;
+        margin-top: 15px;
+        font-weight: 500;
+      }
+
+      .back-link {
+        margin-top: 20px;
+      }
+
+      .back-link a {
+        color: #667eea;
+        text-decoration: none;
+        font-weight: 500;
+      }
+
+      .back-link a:hover {
+        text-decoration: underline;
+      }
+
+      .password-input-container {
+        position: relative;
+      }
+
+      .password-toggle {
+        position: absolute;
+        right: 15px;
+        top: 50%;
+        transform: translateY(-50%);
+        cursor: pointer;
+        color: #666;
+      }
+
+      .loading {
+        display: none;
+      }
+
+      .loading.show {
+        display: inline-block;
+      }

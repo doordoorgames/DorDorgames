@@ -32,11 +32,12 @@ A dystopian 90s anime underground arcade gaming platform — mobile-first, portr
 
 ## Architecture decisions
 
-- No database — lightweight JSON file storage as specified (future-ready for DB swap via the store abstraction)
+- One Express backend serves accounts, payments, the landing API, Tfadhloon APIs, and Forehead multiplayer APIs/WebSockets
+- PostgreSQL stores Forehead multiplayer state; Supabase stores accounts and Tfadhloon content; disposable landing rooms remain behind the store abstraction
 - OTP uses Twilio Verify (real SMS, 6-digit codes) — requires TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN, TWILIO_VERIFY_SERVICE_SID secrets
 - Payment is simulated — ready for MyFatoorah/Tap integration
 - Promo code `DOORDOOR` is always valid and grants a free 3-hour pass
-- Admin credentials: username `admin`, password `admin999`
+- Admin credentials and tokens are supplied only through environment variables
 - Rooms are 3-hour disposable sessions; switching games inside a lobby preserves all guests
 
 ## Product
@@ -53,13 +54,12 @@ A dystopian 90s anime underground arcade gaming platform — mobile-first, portr
 - Mobile-first, portrait-optimized — primary target is phone screens
 - Bilingual: Arabic (RTL) + English
 - Aesthetic: 90s anime + cyber arcade + dystopian — neon magenta, purple, acid green, teal, black
-- No database for now — JSON file storage is intentional
-- No Firebase, no Supabase, no complex auth
+- Keep all account and payment logic in the primary backend
 
 ## Gotchas
 
 - After any OpenAPI spec change, always run codegen before using updated types
-- The admin token is a static string (`doordoor-admin-token-2024`) — not secure for production
+- Configure `ADMIN_PASSWORD`, `ADMIN_TOKEN`, `SESSION_SECRET`, database, Supabase, and Twilio values before deployment
 - Host sessions are stored in memory (Map) — they reset on server restart
 - The `data/` directory is created automatically on first run
 

@@ -1,0 +1,439 @@
+/* Keep icon fonts visible even with global font overrides */
+.bi::before { font-family: "bootstrap-icons" !important; }
+.fa,.fas,.far,.fab,.fa-solid,.fa-regular { font-family: "Font Awesome 6 Free" !important; }
+.fa-brands,.fab { font-family: "Font Awesome 6 Brands" !important; }
+.fa::before,.fas::before,.far::before,.fab::before,
+.fa-solid::before,.fa-regular::before,.fa-brands::before { font-family: inherit !important; }
+
+* {
+font-family: "AbdoMaster", sans-serif !important;
+border-radius: 0 !important;
+}
+
+/* =====================================================
+BLOCK ALL RTL LAYOUT SHIFTING ON THE WHOLE PAGE
+Everything stays centered / in place regardless of
+whether the page is Arabic or English.
+===================================================== */
+html, body, .container, .header, .game-container,
+.game-title, .game-subtitle, .spy-icon-large, .game-logo,
+.button-settings-p, .btn-action, .new-game-btn, .join-game-btn,
+#newGameSection, #joinGameSection,
+#newGameBtn, #joinGameBtn,
+#newGameInput, #joinGameInput,
+.form-control, .form-control-custom {
+
+}
+
+body {
+background-size: cover;
+background-repeat: no-repeat;
+background-position: center center;
+transition: background-image 1s ease-in-out;
+position: relative;
+}
+
+body::before {
+content: "";
+position: fixed;
+inset: 0;
+background: linear-gradient(
+180deg,
+rgba(15, 5, 30, 0.75) 0%,
+rgba(25, 8, 50, 0.68) 100%
+);
+pointer-events: none;
+z-index: 0;
+}
+
+.container,
+.back-btn {
+position: relative;
+z-index: 1;
+}
+
+.button-settings-p {
+display: flex;
+flex-direction: column;
+width: 100%;
+min-width: 160px;
+align-items: center;
+justify-content: center;
+text-align: center;
+align-self: center;
+}
+
+.btn-top-set {
+margin-top: 30px !important;
+background-color: transparent;
+color: white;
+padding: 10px;
+border: 1px solid white;
+font-family: "AbdoMaster";
+font-weight: 400;
+}
+
+.header {
+text-align: center;
+margin-bottom: 0;
+}
+
+.game-title {
+font-family: "AbdoMaster";
+font-size: 3.2rem;
+color: #f5e6c8;
+margin-top: 80px !important;
+margin-bottom: 4px;
+text-shadow: 0 3px 10px rgba(0, 0, 0, 0.55);
+}
+
+.game-subtitle {
+font-family: "AbdoMaster";
+font-size: 1.5rem;
+color: #d4aa70;
+opacity: 1;
+margin-bottom: 0;
+text-shadow: 0 2px 6px rgba(0, 0, 0, 0.4);
+}
+
+@keyframes pulse {
+0%, 100% { transform: scale(1); }
+50% { transform: scale(1.1); }
+}
+
+/* =====================================================
+INSTRUCTIONS BOX — only this box changes with language
+===================================================== */
+.game-instructions {
+background: rgba(15, 5, 30, 0.88);
+border-radius: 0;
+padding: 16px 24px;
+margin: 0;
+width: min(92vw, 680px);
+max-height: min(82dvh, 720px);
+overflow: auto;
+position: relative;
+color: #f5e6c8;
+font-family: "AbdoMaster";
+border: 2px solid #d4aa70;
+box-shadow: -8px -8px 0 rgba(0, 0, 0, 0.6);
+direction: ltr;
+text-align: left;
+}
+
+.instructions-overlay {
+position: fixed;
+inset: 0;
+z-index: 5000;
+display: none;
+align-items: center;
+justify-content: center;
+padding: 20px;
+background: rgba(6, 2, 14, 0.82);
+backdrop-filter: blur(8px);
+}
+
+.instructions-overlay.open { display: flex; }
+
+.instructions-close {
+position: absolute;
+top: 10px;
+right: 12px;
+width: 44px;
+height: 44px;
+border: 2px solid #d4aa70;
+background: #25103f;
+color: #fff;
+font-size: 28px;
+line-height: 1;
+cursor: pointer;
+}
+
+.how-to-play-btn {
+background: rgba(20, 8, 42, 0.82);
+color: #f5e6c8;
+border: 2px solid #d4aa70;
+}
+
+[dir="rtl"] .game-instructions {
+direction: rtl;
+text-align: right;
+box-shadow: 8px -8px 0 rgba(0, 0, 0, 0.6);
+}
+
+.game-instructions h4 {
+font-size: 2rem;
+margin-bottom: 14px;
+color: #d4aa70;
+}
+
+.instructions-list {
+margin: 0;
+padding-inline-start: 22px;
+list-style: none;
+}
+
+.instructions-list li {
+font-size: 1.35rem;
+line-height: 1.6;
+margin-bottom: 10px;
+display: flex;
+align-items: flex-start;
+gap: 10px;
+}
+
+.instructions-list li i {
+color: #e6c96a;
+font-size: 1.05em;
+margin-top: 4px;
+}
+
+[dir="rtl"] .instructions-list li {
+flex-direction: row-reverse;
+}
+
+/* =====================================================
+BACK BUTTON — always fixed to LEFT, never moves
+===================================================== */
+.back-btn {
+position: fixed;
+top: max(14px, env(safe-area-inset-top));
+left: 14px !important;
+right: auto !important;
+z-index: 2000;
+background-color: #5c2d91;
+color: #f5e6c8;
+border: 2px solid rgba(212,170,112,0.6);
+padding: 9px 13px;
+font-size: 0.95rem;
+font-weight: bold;
+cursor: pointer;
+transition: all 0.3s ease;
+font-family: "AbdoMaster";
+box-shadow: -4px -4px 0 rgba(0, 0, 0, 0.8);
+
+}
+
+.back-btn:hover {
+background: linear-gradient(135deg, #3d1a66 0%, #6a3aa0 100%);
+transform: translateY(-2px);
+box-shadow: -6px -6px 0 rgba(0, 0, 0, 0.8);
+}
+
+.lang-toggle-btn {
+position: fixed;
+top: 70px;
+right: 20px !important;
+left: auto !important;
+z-index: 2000;
+background-color: #5c2d91;
+color: #f5e6c8;
+border: 2px solid rgba(212,170,112,0.6);
+padding: 12px 20px;
+font-size: 1.1rem;
+font-weight: bold;
+cursor: pointer;
+transition: all 0.3s ease;
+font-family: "AbdoMaster";
+box-shadow: 4px -4px 0 rgba(0, 0, 0, 0.8);
+display: flex;
+align-items: center;
+gap: 8px;
+}
+
+.lang-toggle-btn:hover {
+background: linear-gradient(135deg, #3d1a66 0%, #6a3aa0 100%);
+transform: translateY(-2px);
+box-shadow: 6px -6px 0 rgba(0, 0, 0, 0.8);
+}
+
+/* ===== ALERT SYSTEM ===== */
+.alert-overlay {
+position: fixed;
+top: 0; left: 0; right: 0; bottom: 0;
+background: rgba(0, 0, 0, 0.7);
+backdrop-filter: blur(10px);
+z-index: 99999;
+display: flex;
+align-items: center;
+justify-content: center;
+padding: 20px;
+animation: alertFadeIn 0.3s ease;
+}
+
+@keyframes alertFadeIn {
+from { opacity: 0; }
+to { opacity: 1; }
+}
+
+.alert-container {
+background: #3d1a66;
+padding: 0;
+max-width: 450px;
+width: 100%;
+box-shadow: -6px -6px 0 rgba(0, 0, 0, 0.8);
+animation: alertSlideIn 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+border: 2px solid white;
+overflow: hidden;
+position: relative;
+}
+
+@keyframes alertSlideIn {
+from { opacity: 0; transform: translateY(50px) scale(0.8); }
+to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+.alert-header {
+background: rgba(255, 255, 255, 0.1);
+padding: 25px 30px 15px;
+text-align: center;
+border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+position: relative;
+}
+
+.alert-icon {
+font-size: 54px;
+margin-bottom: 15px;
+display: block;
+text-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+color: white;
+}
+
+.alert-title {
+color: white;
+font-size: 26px;
+font-weight: 700;
+margin: 0;
+font-family: "AbdoMaster", sans-serif;
+text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+line-height: 1.2;
+}
+
+.alert-body {
+padding: 30px;
+text-align: center;
+background: rgba(255, 255, 255, 0.05);
+}
+
+.alert-message {
+color: white;
+font-size: 16px;
+line-height: 1.6;
+margin: 0;
+font-weight: 500;
+text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+font-family: "AbdoMaster", sans-serif;
+}
+
+.alert-footer {
+padding: 25px 30px;
+display: flex;
+justify-content: center;
+gap: 15px;
+background: rgba(0, 0, 0, 0.1);
+flex-wrap: wrap;
+}
+
+.alert-btn {
+padding: 14px 32px;
+border: 2px solid white;
+border-radius: 0 !important;
+font-weight: 700;
+font-family: "AbdoMaster", sans-serif;
+cursor: pointer;
+transition: all 0.2s ease;
+min-width: 120px;
+font-size: 15px;
+letter-spacing: 0.5px;
+position: relative;
+overflow: hidden;
+box-shadow: -4px -4px 0 rgba(0, 0, 0, 0.8);
+}
+
+.alert-btn:hover { transform: translateY(-2px); box-shadow: -6px -6px 0 rgba(0, 0, 0, 0.8); }
+.alert-btn:active { transform: translateY(0); box-shadow: -4px -4px 0 rgba(0, 0, 0, 0.8); }
+
+.alert-btn-primary { background: #5c2d91; color: #f5e6c8; }
+.alert-btn-primary:hover { background: #3d1a66; }
+.alert-btn-secondary { background: rgba(255,255,255,0.15); color: #f5e6c8; backdrop-filter: blur(10px); }
+.alert-btn-secondary:hover { background: rgba(255,255,255,0.25); }
+
+.alert-success .alert-container { background: #3d1a66; }
+.alert-error .alert-container { background: #7a1a2e; }
+.alert-warning .alert-container { background: #4a2a00; }
+.alert-info .alert-container { background: #1a2a5c; }
+.alert-question .alert-container { background: #3d1a66; }
+
+.alert-warning .alert-title,
+.alert-warning .alert-message { color: #333; text-shadow: none; }
+.alert-warning .alert-btn-secondary { background: rgba(0,0,0,0.1); color: #333; border: 2px solid rgba(0,0,0,0.2); }
+
+.alert-progress {
+position: absolute;
+bottom: 0; left: 0;
+height: 4px;
+background: rgba(255, 255, 255, 0.8);
+width: 100%;
+animation: progressBar linear forwards;
+}
+
+@keyframes progressBar {
+from { width: 100%; }
+to { width: 0%; }
+}
+
+.alert-close {
+position: absolute;
+top: 15px; right: 15px;
+background: rgba(255, 255, 255, 0.2);
+border: 2px solid white;
+border-radius: 50% !important;
+width: 35px; height: 35px;
+color: white;
+cursor: pointer;
+display: flex; align-items: center; justify-content: center;
+font-size: 18px;
+transition: all 0.3s ease;
+backdrop-filter: blur(10px);
+box-shadow: -2px -2px 0 rgba(0, 0, 0, 0.5);
+}
+.alert-close:hover { background: rgba(255,255,255,0.3); transform: rotate(90deg); }
+
+[dir="rtl"] .alert-close { right: auto; left: 15px; }
+
+.alert-input {
+width: 100%;
+padding: 12px 16px;
+margin: 15px 0;
+border: 2px solid white;
+border-radius: 0 !important;
+background: rgba(255, 255, 255, 0.1);
+color: white;
+font-size: 16px;
+font-family: "AbdoMaster", sans-serif;
+outline: none;
+transition: all 0.3s ease;
+box-sizing: border-box;
+box-shadow: -2px -2px 0 rgba(0, 0, 0, 0.3);
+text-align: start;
+}
+
+.alert-input:focus { border-color: #fff; background: rgba(255,255,255,0.15); box-shadow: -4px -4px 0 rgba(0,0,0,0.5); }
+.alert-input::placeholder { color: rgba(255,255,255,0.6); }
+
+.game-logo {
+width: 100%;
+max-width: 500px;
+max-height: 320px;
+object-fit: contain;
+display: block;
+margin: -70px auto -80px;
+}
+
+.game-container {
+padding: 0 25px !important;
+}
+
+#newGameSection.mb-4 {
+margin-bottom: 12px !important;
+}

@@ -1,0 +1,141 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Tfadhloon - Game Results</title>
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.6/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css"
+    />
+
+    <!-- Custom CSS -->
+    <link href="custom/custom.css" rel="stylesheet" type="text/css" />
+    <link rel="stylesheet" href="tfadhloon-finalresults.css?v=20260816-results-top1" />
+    <link rel="stylesheet" href="tfadhloon-theme.css" />
+  </head>
+  <body>
+
+    <!-- Back Button -->
+    <button id="backButton" class="back-button small-button compact shape-1">
+      <i class="bi bi-arrow-left" style="margin-right: 8px"></i>
+      <span id="backBtnText">Back</span>
+    </button>
+
+   
+
+    <div class="game-container text-center">
+      <h2 id="finalResultsTitle">النتائج النهائية</h2>
+      
+     <div class="metro-0">
+  <h5 class="scores-title" id="playerResultsHeading">🏅 نتائج اللاعبين</h5>
+  <img
+    src="gallary/d39efcec86aa7ccd39911144434a880bdb183cc8.png"
+    class="img-fluid"
+    alt="Spyfall Logo"
+    onerror="this.onerror=null; this.src='gallary/fallback-logo.png'"
+  />
+</div>
+      <div id="result" class="result-box"></div>
+      
+      <div id="spyNameBox" style="display: none" class="spy-info"></div>
+      
+      <ul id="scoresList" class="list-group list-group-flush mb-3"></ul>
+      
+      <h5 id="locationsTitle" class="locations-title" style="display: none">
+        📍 Locations Chosen by Spy
+      </h5>
+      
+      <ul id="locationsList" class="list-group list-group-flush mb-4"></ul>
+      
+      <!-- Admin-only: New Category + New Game Same Category -->
+      <div id="hostActionsSection" style="display:none" class="host-actions">
+
+        <button id="newGameSameCategoryBtn" class="btn-results btn-results-same menu-button full-width shape-1">
+          <i class="bi bi-arrow-repeat"></i>
+          <span id="newGameSameCategoryBtnText">نفس الفئة — لعبة جديدة</span>
+        </button>
+
+        <div class="new-category-wrapper">
+          <button id="newCategoryBtn" class="btn-results btn-results-new menu-button full-width shape-2">
+            <i class="bi bi-grid-3x3-gap-fill"></i>
+            <span id="newCategoryBtnText">فئة جديدة</span>
+          </button>
+          <div id="categoryDropdown" class="category-dropdown" style="display:none">
+            <select id="categorySelect" class="category-select">
+              <option value="" id="chooseCategoryOption">— اختر فئة —</option>
+              <option value="Islamic Things">🕌 أشياء دينية</option>
+              <option value="Kuwaiti Girls">💅 بنات الكويت</option>
+              <option value="Everything">🌍 كل شي</option>
+              <option value="Dubai Life">🏙️ دبي</option>
+              <option value="Work">💼 دوام</option>
+              <option value="Gamers">🎮 اللعيبة</option>
+            </select>
+            <button id="confirmCategoryBtn" class="btn-results btn-results-confirm menu-button compact shape-3">
+              <i class="bi bi-check-lg"></i> <span id="confirmCategoryBtnText">تأكيد</span>
+            </button>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Everyone sees this -->
+      <a id="startNewGameLink" href="../tfadhloon/tfadhloon-homepage.html" class="mt-2 menu-button full-width shape-1">
+        <i class="bi bi-plus-circle"></i> <span id="startNewGameText">ابدأ لعبة جديدة</span>
+      </a>
+    </div>
+
+    <!-- Scripts -->
+    <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-database-compat.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.6/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js"></script>
+
+    <!-- Voice Chat (keep as is) -->
+    <script src="voiceChat.js"></script>
+
+    <script src="custom/lang.js"></script>
+    <script src="backgrounds-config.js"></script>
+    <script src="wave-bg.js"></script>
+    <script src="theme-engine.js"></script>
+    <!-- Main Results Script -->
+    <script src="tfadhloon-finalresults.js"></script>
+
+    <!-- Voice Chat Buttons -->
+    <button
+      id="micBtn"
+      class="small-button icon shape-1"
+      style="
+        position: fixed;
+        bottom: 20px;
+        right: 20px;
+        z-index: 999;
+        width: 60px;
+        height: 60px;
+        font-size: 24px;
+      "
+    >
+      <i id="micIcon" class="bi bi-mic-mute-fill"></i>
+    </button>
+
+    <button
+      id="speakerBtn"
+      class="small-button icon shape-4"
+      style="
+        position: fixed;
+        bottom: 90px;
+        right: 20px;
+        z-index: 999;
+        width: 60px;
+        height: 60px;
+        font-size: 24px;
+      "
+    >
+      <i id="speakerIcon" class="bi bi-volume-up-fill"></i>
+    </button>
+  </body>
+</html>

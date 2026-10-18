@@ -1,0 +1,271 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+<title>Tfadhloon Online Guessing Game | لعبة تفضلون اونلاين</title>
+
+<meta name="description" content="العب لعبة تفضلون أونلاين مع الأصدقاء. لعبة تخمين ممتعة باللغة العربية. Tfadhloon Online Guessing Game - play with friends and guess answers together." />
+
+<meta name="keywords" content="tfadhloon game, لعبة تفضلون, arabic guessing game, online party game, spyfall alternative, arabic multiplayer game, guessing game online" />
+
+<meta name="author" content="Tfadhloon Game" />
+
+<!-- Open Graph (for WhatsApp / Facebook sharing) -->
+<meta property="og:title" content="Tfadhloon Online Guessing Game | لعبة تفضلون" />
+<meta property="og:description" content="العب لعبة تفضلون أونلاين مع الأصدقاء واكتشف من يستطيع التخمين الصحيح!" />
+<meta property="og:type" content="website" />
+<meta property="og:url" content="https://yourdomain.com" />
+<meta property="og:image" content="https://yourdomain.com/preview.jpg" />
+
+<!-- Twitter Card -->
+<meta name="twitter:card" content="summary_large_image" />
+<meta name="twitter:title" content="Tfadhloon Online Guessing Game" />
+<meta name="twitter:description" content="Play the Arabic Tfadhloon guessing game online with friends." />
+<meta name="twitter:image" content="https://yourdomain.com/preview.jpg" />
+
+<link rel="canonical" href="https://yourdomain.com" />
+
+<script>
+  (function () {
+    var lang = localStorage.getItem("lang") === "en" ? "en" : "ar";
+    document.documentElement.lang = lang;
+    document.documentElement.dir = lang === "ar" ? "rtl" : "ltr";
+  })();
+</script>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Playpen+Sans+Arabic:wght@400&family=Sniglet:wght@400&display=block" rel="stylesheet" />
+<link rel="preload" as="image" href="gallary/name-12.png" />
+<link rel="preload" as="image" href="tutorial.png" />
+<link rel="preload" as="image" href="buttons/blob-circle.webp" />
+<link rel="preload" as="image" href="buttons/blob-wide-1.webp" />
+<link rel="preload" as="image" href="buttons/blob-wide-2.webp" />
+<link rel="preload" as="image" href="buttons/blob-cloud.svg" />
+<link rel="preload" as="image" href="buttons/blob-triangle.svg" />
+<link rel="preload" as="image" href="buttons/blob-crescent.svg" />
+<link rel="preload" as="image" href="buttons/blob-star.svg" />
+<style>
+  html, body { background: #2b061b; }
+  #tfBootOverlay {
+    position: fixed;
+    inset: 0;
+    z-index: 2147483000;
+    display: grid;
+    place-items: center;
+    padding: 24px;
+    background: #2b061b;
+    opacity: 1;
+    visibility: visible;
+    transition: opacity 260ms ease-out, visibility 260ms ease-out;
+  }
+  #tfBootOverlay.is-leaving {
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+  }
+  .tf-boot-blob {
+    width: min(86vw, 500px);
+    aspect-ratio: 1453 / 843;
+    display: grid;
+    place-items: center;
+    padding: clamp(38px, 9vw, 64px) clamp(46px, 11vw, 82px);
+    box-sizing: border-box;
+    color: #F2F459;
+    background: #701444;
+    text-align: center;
+    font-family: var(--tf-font-active);
+    font-size: clamp(1.35rem, 5.6vw, 2rem);
+    font-weight: 400;
+    line-height: 1.25;
+    -webkit-mask: url('buttons/blob-wide-1.webp') center / 100% 100% no-repeat;
+    mask: url('buttons/blob-wide-1.webp') center / 100% 100% no-repeat;
+  }
+  .tf-boot-ar { font-family: "Playpen Sans Arabic", cursive; font-weight: 400; }
+  .tf-boot-en { display: none; font-family: "Sniglet", cursive; font-weight: 400; }
+  html[lang="en"] .tf-boot-ar { display: none; }
+  html[lang="en"] .tf-boot-en { display: inline; }
+  @media (prefers-reduced-motion: reduce) {
+    #tfBootOverlay { transition-duration: 1ms; }
+  }
+</style>
+
+<link
+href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.6/dist/css/bootstrap.min.css"
+rel="stylesheet"
+crossorigin="anonymous"
+/>
+
+<link
+rel="stylesheet"
+href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css"
+/>
+
+<link href="custom/custom.css?v=20260806-feedback-palette1" rel="stylesheet" type="text/css" />
+<script src="custom/lang.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+    <script src="supabase-client.js"></script>
+
+<link rel="stylesheet" href="tfadhloon-homepage.css?v=20260806-feedback-palette2" />
+<link rel="stylesheet" href="tfadhloon-theme.css?v=20260818-english-ui-polish1" />
+
+</head>
+
+
+  <body>
+    <div id="tfBootOverlay" role="status" aria-live="polite">
+      <div class="tf-boot-blob">
+        <span class="tf-boot-ar">خل نلعب تفضلون</span>
+        <span class="tf-boot-en">Let's Play TFADHLOON</span>
+      </div>
+    </div>
+
+    <!-- Room-code modal — name is entered directly on the home screen. -->
+    <div id="roomCodeOverlay" class="nickname-overlay" aria-hidden="true">
+      <div class="nickname-card room-code-card" role="dialog" aria-modal="true" aria-labelledby="roomCodeTitle">
+        <button id="roomCodeCloseBtn" class="nickname-close-btn small-button icon shape-3" data-blob-variant="triangle" type="button" aria-label="Close">
+          &times;
+        </button>
+        <h2 id="roomCodeTitle" class="room-code-title">Enter room code</h2>
+        <input
+          type="text"
+          id="joinGameInput"
+          class="nickname-blob-input form-control-custom"
+          inputmode="numeric"
+          pattern="[0-9]{5}"
+          maxlength="5"
+          autocomplete="one-time-code"
+          aria-label="Enter room code"
+        />
+        <button id="roomCodeSubmitBtn" class="nickname-start-btn small-button" type="button">
+          <span id="roomCodeSubmitBtnText">Join</span>
+        </button>
+      </div>
+    </div>
+
+    
+    
+
+    <div class="tf-app-shell">
+      <header class="tf-topbar" aria-label="Page controls">
+        <div class="tf-topbar-start">
+          <button id="backBtn" class="back-btn" type="button">
+            <i class="bi bi-arrow-left"></i>
+            <span id="backBtnText">Back to Home</span>
+          </button>
+        </div>
+        <div class="tf-topbar-center" aria-hidden="true"></div>
+        <div class="tf-topbar-end">
+          <div id="langSwitcherContainer" class="language-switcher-container">
+            <div class="language-blob-group" role="group" aria-label="Language">
+              <button type="button" class="language-option language-blob menu-button compact shape-2" data-lang="ar" aria-label="العربية">ع</button>
+              <button type="button" class="language-option language-blob menu-button compact shape-1" data-lang="en" aria-label="English">EN</button>
+            </div>
+          </div>
+        </div>
+      </header>
+      <main class="tf-app-content">
+        <div class="container tf-screen-content">
+      <section class="tf-home-hero" aria-label="Game setup">
+      <div class="header">
+        <img src="gallary/name-12.png" class="img-fluid" alt="img" />
+      </div>
+
+      <div class="game-container">
+        <div class="spy-icon"></div>
+
+        <label id="homeNameLabel" class="home-name-label" for="homeNameInput">Enter your name</label>
+        <div class="home-name-field">
+          <input
+            type="text"
+            id="homeNameInput"
+            class="form-control form-control-custom"
+            placeholder="Enter your name"
+            autocomplete="nickname"
+            autofocus
+          />
+        </div>
+
+        <div id="newGameSection" class="text-center">
+          <button id="newGameBtn" class="new-game-btn menu-button full-width shape-1"></button>
+        </div>
+
+        <div id="homeGuidanceOutline" class="tf-onboarding-outline" aria-hidden="true"></div>
+
+        <div id="joinGameSection" class="text-center button-settings-p">
+          <button id="joinGameBtn" class="join-game-btn menu-button full-width shape-2"></button>
+        </div>
+
+        <div id="howToPlaySection" class="text-center button-settings-p">
+          <button id="howToPlayBtn" class="how-to-play-btn menu-button full-width shape-3" type="button">How to Play</button>
+        </div>
+
+        <div class="character">
+          <div class="character-head">
+            <div class="character-eye eye-left"></div>
+            <div class="character-eye eye-right"></div>
+            <div class="character-mouth"></div>
+          </div>
+          <div class="character-body"></div>
+        </div>
+      </div>
+      </section>
+
+        </div>
+      </main>
+    </div>
+
+    <div id="tutorialOverlay" class="tutorial-overlay" role="dialog" aria-modal="true" aria-labelledby="tutorialTitle" aria-hidden="true">
+      <div class="tutorial-dialog">
+        <button id="tutorialCloseBtn" class="tutorial-close" type="button" aria-label="Close how to play">&times;</button>
+        <h2 id="tutorialTitle">How to Play</h2>
+        <img src="tutorial.png" class="tutorial-inline-image" alt="Game introduction" />
+      </div>
+    </div>
+
+    <script
+      src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.6/dist/js/bootstrap.bundle.min.js"
+      crossorigin="anonymous"
+    ></script>
+
+    <button
+      id="micBtn"
+      class="small-button icon shape-1"
+      style="
+        position: fixed;
+        bottom: 20px;
+        right: 20px;
+        z-index: 999;
+        width: 60px;
+        height: 60px;
+        font-size: 24px;
+      "
+    >
+      <i id="micIcon" class="bi bi-mic-mute-fill"></i>
+    </button>
+
+    <button
+      id="speakerBtn"
+      class="small-button icon shape-4" data-blob-variant="star"
+      style="
+        position: fixed;
+        bottom: 90px;
+        right: 20px;
+        z-index: 999;
+        width: 60px;
+        height: 60px;
+        font-size: 24px;
+      "
+    >
+      <i id="speakerIcon" class="bi bi-volume-mute-fill"></i>
+    </button>
+    
+    <script src="backgrounds-config.js"></script>
+    <script src="wave-bg.js"></script>
+    <script src="theme-engine.js?v=20260806-feedback-palette1"></script>
+    <script src="tfadhloon-ui.js?v=20260802-gameplay-loading2"></script>
+    <script src="tfadhloon-homepage.js?v=20260806-feedback-palette1"></script>
+  </body>
+</html>

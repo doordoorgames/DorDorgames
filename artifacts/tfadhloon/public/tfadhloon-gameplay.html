@@ -1,0 +1,180 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <!-- Updated Title for SEO -->
+    <title>Tfadhloon Online Guessing Game - Playing</title>
+
+    <!-- Primary SEO -->
+    <meta name="description" content="Play Tfadhloon Online Guessing Game with friends. A fun Arabic multiplayer guessing game you can play online from your phone or computer." />
+    <meta name="keywords" content="tfadhloon game, لعبة تفضلون, arabic guessing game, online party game, multiplayer guessing game, arabic online games" />
+    <meta name="author" content="Tfadhloon Game" />
+    <meta name="robots" content="index, follow" />
+
+    <!-- Open Graph -->
+    <meta property="og:type" content="website">
+    <meta property="og:title" content="Tfadhloon Online Guessing Game">
+    <meta property="og:description" content="Play the Tfadhloon guessing game online with friends.">
+    <meta property="og:image" content="gallary/name-12.png">
+    <meta property="og:url" content="https://yourdomain.com">
+
+    <!-- Twitter -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="Tfadhloon Online Guessing Game">
+    <meta name="twitter:description" content="Play the Arabic Tfadhloon guessing game online with friends.">
+    <meta name="twitter:image" content="gallary/name-12.png">
+
+    <!-- Canonical URL -->
+    <link rel="canonical" href="https://yourdomain.com">
+
+    <!-- Language & Theme -->
+    <meta http-equiv="content-language" content="en, ar">
+    <meta name="theme-color" content="#20bb58">
+
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Playpen+Sans+Arabic:wght@400&family=Sniglet:wght@400&display=block" rel="stylesheet" />
+    <link rel="preload" as="image" href="buttons/blob-wide-2.webp" />
+    <link rel="preload" as="image" href="buttons/blob-triangle.svg" />
+    <link rel="preload" as="image" href="buttons/blob-crescent.svg" />
+
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.6/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+    />
+    <link href="custom/custom.css?v=20260806-preload-crash3" rel="stylesheet" type="text/css" />
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css"
+    />
+    <link rel="stylesheet" href="tfadhloon-gameplay.css?v=20260816-party-cycle1" />
+    <link rel="stylesheet" href="tfadhloon-theme.css?v=20260818-english-ui-polish1" />
+  </head>
+
+  <body class="tf-gameplay-page">
+
+
+    <!-- Hidden SEO Heading -->
+    <h1 style="display:none;">Tfadhloon Online Guessing Game</h1>
+
+    <div class="tf-app-shell">
+      <header class="tf-topbar" aria-label="Page controls">
+        <div class="tf-topbar-start">
+          <button id="backButton" class="back-button small-button compact shape-4">
+            <i class="bi bi-arrow-left"></i>
+            <span>Back</span>
+          </button>
+        </div>
+        <div class="tf-topbar-center" aria-hidden="true"></div>
+        <div class="tf-topbar-end"></div>
+      </header>
+      <main class="tf-app-content">
+        <div id="adBanner" class="ad-banner">
+      <div class="ad-content">
+        <span class="ad-text"></span>
+      </div>
+    </div>
+
+    <!-- Points Dashboard - Sidebar -->
+    <div class="points-dashboard-container">
+
+      <div class="score-popup-composition">
+        <div class="score-popup-stack">
+      <div class="points-dashboard" id="pointsDashboard">
+
+        <div class="dashboard-header">
+
+          <div class="dashboard-title-content">
+            <span>Rewards</span>
+          </div>
+
+          <div class="dashboard-subtitle-container">
+            <div class="round-info" id="roundInfo">Round 1</div>
+            <div class="action-info" id="actionInfo">Action 1/2</div>
+          </div>
+
+          <div class="close-dashboard small-button icon shape-4" id="closeDashboard" data-blob-variant="circle">
+            <i class="bi bi-x"></i>
+          </div>
+
+        </div>
+
+        <div id="pointsContainer" class="points-container"></div>
+
+      </div>
+
+      <div class="score-star-crown" aria-hidden="true">
+        <span></span><span></span><span></span><span></span><span></span>
+      </div>
+        </div>
+      </div>
+
+<div class="dashboard-toggle small-button icon shape-1" id="dashboardToggle" data-blob-variant="circle">
+  <img 
+    src="gallary/leaderboard-icon.png" 
+    alt="Leaderboard" 
+    class="dashboard-icon"
+  >
+</div>
+      <!-- END CHANGE -->
+
+    </div>
+
+    <!-- Notification System -->
+    <div id="notificationContainer" class="notification-container"></div>
+    <div id="resultFeed" class="result-feed" aria-live="polite" aria-atomic="false"></div>
+
+    <div class="container text-center tf-screen-content tf-gameplay-content">
+
+      <p id="roundProgress" class="btn btn-success mb-2"></p>
+      <p id="turnProgress" class="progress-text mb-2"></p>
+      <h3 id="waitingHeader" dir="auto" style="display: none"></h3>
+      <h3 id="chooseHeader" dir="auto"></h3>
+
+      <div id="questionSectionprime" dir="auto"></div>
+      <div id="optionsContainer" class="mb-3"></div>
+
+      <button id="submitAnswerBtn" class="mb-2 menu-button full-width shape-1 d-none"></button>
+      <div id="nextAction" class="tf-next-action">
+        <button id="nextRoundBtn" class="menu-button full-width shape-2 d-none"></button>
+        <div id="nextRoundOrbit" class="tf-onboarding-outline tf-next-orbit" aria-hidden="true" hidden></div>
+      </div>
+
+      <h5 id="playersHeader">Players</h5>
+      <div id="playersContainer" class="d-flex flex-wrap justify-content-center"></div>
+
+        </div>
+
+        <section class="tf-suggestion-footer" aria-label="Question suggestions">
+          <button type="button" id="suggestQuestionBtn" class="tf-suggest-question-btn menu-button full-width shape-2">
+            <i class="bi bi-lightbulb" aria-hidden="true"></i>
+            <span>Want to suggest a question for us?</span>
+          </button>
+        </section>
+      </main>
+    </div>
+
+    <!-- Voice Controls -->
+    <div class="voice-controls">
+      <button id="speakerBtn" class="voice-btn small-button icon shape-4">
+        <i id="speakerIcon" class="bi bi-volume-up-fill"></i>
+      </button>
+      <button id="micBtn" class="voice-btn small-button icon shape-3">
+        <i id="micIcon" class="bi bi-mic-fill"></i>
+      </button>
+    </div>
+<script src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js"></script>
+    <script src="custom/lang.js"></script>
+    <script src="backgrounds-config.js"></script>
+    <script src="wave-bg.js"></script>
+    <script src="theme-engine.js?v=20260818-english-ui-polish1"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+    <script src="supabase-client.js?v=20260816-turn-token1"></script>
+    <script src="tfadhloon-ui.js?v=20260816-clickable-scroll-cue1"></script>
+    <script src="tfadhloon-gameplay.js?v=20260818-english-ui-polish1"></script>
+    <script src="voiceChat.js"></script>
+
+  </body>
+</html>

@@ -1,0 +1,231 @@
+@import "tailwindcss";
+@import "tw-animate-css";
+@plugin "@tailwindcss/typography";
+
+@custom-variant dark (&:is(.dark *));
+@custom-variant landscape (@media (orientation: landscape));
+
+@theme inline {
+  --color-background: hsl(var(--background));
+  --color-foreground: hsl(var(--foreground));
+  --color-border: hsl(var(--border));
+  --color-input: hsl(var(--input));
+  --color-ring: hsl(var(--ring));
+
+  --color-card: hsl(var(--card));
+  --color-card-foreground: hsl(var(--card-foreground));
+  --color-card-border: hsl(var(--card-border));
+
+  --color-popover: hsl(var(--popover));
+  --color-popover-foreground: hsl(var(--popover-foreground));
+  --color-popover-border: hsl(var(--popover-border));
+
+  --color-primary: hsl(var(--primary));
+  --color-primary-foreground: hsl(var(--primary-foreground));
+  --color-primary-border: var(--primary-border);
+
+  --color-secondary: hsl(var(--secondary));
+  --color-secondary-foreground: hsl(var(--secondary-foreground));
+  --color-secondary-border: var(--secondary-border);
+
+  --color-muted: hsl(var(--muted));
+  --color-muted-foreground: hsl(var(--muted-foreground));
+  --color-muted-border: var(--muted-border);
+
+  --color-accent: hsl(var(--accent));
+  --color-accent-foreground: hsl(var(--accent-foreground));
+  --color-accent-border: var(--accent-border);
+
+  --color-destructive: hsl(var(--destructive));
+  --color-destructive-foreground: hsl(var(--destructive-foreground));
+  --color-destructive-border: var(--destructive-border);
+
+  --font-sans: var(--app-font-sans);
+  --font-serif: var(--app-font-serif);
+  --font-mono: var(--app-font-mono);
+  --font-display: var(--app-font-display);
+
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+}
+
+:root {
+  --button-outline: rgba(0,0,0, .10);
+  --badge-outline: rgba(0,0,0, .05);
+  --opaque-button-border-intensity: -8;
+  --elevate-1: rgba(0,0,0, .03);
+  --elevate-2: rgba(0,0,0, .08);
+
+  /* Very bright, game-show vibe: Cyan bg, Hot Pink primary, Yellow secondary */
+  --background: 180 100% 95%; /* Very light cyan */
+  --foreground: 220 50% 10%; /* Very dark blue */
+
+  --border: 180 30% 80%;
+  
+  --card: 0 0% 100%;
+  --card-foreground: 220 50% 10%;
+  --card-border: 180 30% 80%;
+
+  --popover: 0 0% 100%;
+  --popover-foreground: 220 50% 10%;
+  --popover-border: 180 30% 80%;
+
+  --primary: 330 100% 55%; /* Hot Pink */
+  --primary-foreground: 0 0% 100%;
+
+  --secondary: 45 100% 50%; /* Bright Yellow */
+  --secondary-foreground: 220 50% 10%;
+
+  --muted: 180 20% 90%;
+  --muted-foreground: 220 20% 40%;
+
+  --accent: 280 100% 60%; /* Vibrant Purple */
+  --accent-foreground: 0 0% 100%;
+
+  --destructive: 0 85% 60%;
+  --destructive-foreground: 0 0% 100%;
+
+  --input: 180 30% 80%;
+  --ring: 330 100% 55%;
+
+  --app-font-sans: 'Inter', sans-serif;
+  --app-font-display: 'Bebas Neue', 'Impact', 'Arial Black', sans-serif;
+  --app-font-serif: Georgia, serif;
+  --app-font-mono: Menlo, monospace;
+  --radius: 1.5rem; /* Very chunky rounded corners */
+
+  --primary-border: hsl(var(--primary));
+  --secondary-border: hsl(var(--secondary));
+  --muted-border: hsl(var(--muted));
+  --accent-border: hsl(var(--accent));
+  --destructive-border: hsl(var(--destructive));
+}
+
+.dark {
+  --background: 220 50% 10%;
+  --foreground: 0 0% 100%;
+  --border: 220 30% 20%;
+  --card: 220 40% 15%;
+  --card-foreground: 0 0% 100%;
+  --card-border: 220 30% 20%;
+  --popover: 220 40% 15%;
+  --popover-foreground: 0 0% 100%;
+  --popover-border: 220 30% 20%;
+  --primary: 330 100% 65%;
+  --primary-foreground: 0 0% 100%;
+  --secondary: 45 100% 55%;
+  --secondary-foreground: 220 50% 10%;
+  --muted: 220 30% 20%;
+  --muted-foreground: 220 20% 70%;
+  --accent: 280 100% 70%;
+  --accent-foreground: 0 0% 100%;
+  --destructive: 0 85% 65%;
+  --destructive-foreground: 0 0% 100%;
+  --input: 220 30% 20%;
+  --ring: 330 100% 65%;
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  html {
+    background: #13141a;
+  }
+  body {
+    @apply font-sans antialiased text-foreground;
+    background: transparent;
+  }
+  h1, h2, h3, h4, h5, h6 {
+    @apply tracking-tight;
+    font-family: var(--app-font-display);
+    font-weight: 400;
+  }
+}
+
+/* Arabic mode — Changa font, RTL */
+.lang-ar .neon-word,
+.lang-ar h1, .lang-ar h2, .lang-ar h3 {
+  font-family: 'Changa', 'Arial', sans-serif !important;
+  font-weight: 800;
+}
+
+/* Neon game word — thick Broadway-style with pink glow + black stroke */
+.neon-word {
+  font-family: 'Bebas Neue', 'Impact', 'Arial Black', sans-serif;
+  font-weight: 400;
+  color: #ffffff;
+  -webkit-text-stroke: 5px #000000;
+  paint-order: stroke fill;
+  text-shadow:
+    0 0 20px rgba(255, 79, 163, 0.9),
+    0 0 50px rgba(255, 79, 163, 0.6),
+    0 4px 12px rgba(0, 0, 0, 0.8);
+  letter-spacing: 0.03em;
+}
+
+
+/* ── Cyberpunk parallax keyframes ── */
+@keyframes cbDriftBack {
+  from { transform: translateX(0); }
+  to   { transform: translateX(-25%); }
+}
+@keyframes cbDriftMid {
+  from { transform: translateX(0); }
+  to   { transform: translateX(-25%); }
+}
+@keyframes cbDriftFront {
+  from { transform: translateX(0); }
+  to   { transform: translateX(-25%); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  [style*="cbDrift"] {
+    animation: none !important;
+  }
+  .cb-win {
+    transition: none !important;
+  }
+}
+
+/* ── Neon blob flicker animations for character room ────────────────────── */
+/* Pattern: long silence → sharp double-pulse → smooth fade → silence       */
+/* Each blob has its own keyframe so staggered delays never overlap.        */
+
+@keyframes neon-blob-a {
+  0%, 62%, 100% { opacity: 0; }
+  64.8%         { opacity: 0.88; }
+  66.6%         { opacity: 0.12; }
+  68.4%         { opacity: 0.95; }
+  74.7%         { opacity: 0; }
+}
+@keyframes neon-blob-b {
+  0%, 58%, 100% { opacity: 0; }
+  60.3%         { opacity: 0.82; }
+  62.1%         { opacity: 0.08; }
+  63.9%         { opacity: 0.90; }
+  70.2%         { opacity: 0; }
+}
+@keyframes neon-blob-c {
+  0%, 70%, 100% { opacity: 0; }
+  72.0%         { opacity: 0.78; }
+  73.8%         { opacity: 0.14; }
+  75.6%         { opacity: 0.86; }
+  81.0%         { opacity: 0; }
+}
+@keyframes neon-blob-d {
+  0%, 55%, 100% { opacity: 0; }
+  57.6%         { opacity: 0.92; }
+  59.4%         { opacity: 0.06; }
+  61.2%         { opacity: 0.96; }
+  67.5%         { opacity: 0; }
+}
+@keyframes neon-blob-e {
+  0%, 75%, 100% { opacity: 0; }
+  77.4%         { opacity: 0.72; }
+  79.2%         { opacity: 0.16; }
+  81.0%         { opacity: 0.80; }
+  87.3%         { opacity: 0; }
+}
