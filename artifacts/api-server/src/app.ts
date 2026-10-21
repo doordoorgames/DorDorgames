@@ -9,10 +9,19 @@ import tfadhloonRouter from "./games/tfadhloon/routes/index.js";
 
 const app: Express = express();
 app.set("trust proxy", 1);
-const allowedOrigins = (process.env["CLIENT_ORIGIN"] ?? "")
-  .split(",")
-  .map((origin) => origin.trim())
-  .filter(Boolean);
+const allowedOrigins = new Set([
+  "https://dordor.games",
+  "https://www.dordor.games",
+  "https://spy.dordor.games",
+  "https://tfadhloon.dordor.games",
+  "https://guessyourword.dordor.games",
+  "https://guessthecharacter.dordor.games",
+  "https://charades.dordor.games",
+  ...(process.env["CLIENT_ORIGIN"] ?? "")
+    .split(",")
+    .map((origin) => origin.trim())
+    .filter(Boolean),
+]);
 
 app.use(
   pinoHttp({
@@ -36,7 +45,7 @@ app.use(
 app.use(
   cors({
     origin(origin, callback) {
-      if (!origin || allowedOrigins.includes(origin)) {
+      if (!origin || allowedOrigins.has(origin)) {
         callback(null, true);
         return;
       }
@@ -59,7 +68,7 @@ app.use((req, res, next) => {
   const unsafe = !["GET", "HEAD", "OPTIONS"].includes(req.method);
   const hasSessionCookie = Boolean(req.headers.cookie?.includes("dordor_"));
   const origin = req.get("origin");
-  if (unsafe && hasSessionCookie && (!origin || !allowedOrigins.includes(origin))) {
+  if (unsafe && hasSessionCookie && (!origin || !allowedOrigins.has(origin))) {
     res.status(403).json({ error: "Untrusted request origin" });
     return;
   }
