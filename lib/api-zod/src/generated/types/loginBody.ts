@@ -5,8 +5,10 @@
  * DoorDoor.games API specification
  * OpenAPI spec version: 0.1.0
  */
+import type { LoginBodyRole } from "./loginBodyRole";
 
 export interface LoginBody {
+  role: LoginBodyRole;
   /** Email address or phone number */
   identifier: string;
   password: string;

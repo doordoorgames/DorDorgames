@@ -1,7 +1,11 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useLocation, useParams } from "wouter";
 import { Layout } from "@/components/layout";
-import { useJoinRoom } from "@workspace/api-client-react";
+import {
+  getGetAuthMeQueryKey,
+  useGetAuthMe,
+  useJoinRoom,
+} from "@workspace/api-client-react";
 import { useToast } from "@/hooks/use-toast";
 import { motion } from "framer-motion";
 
@@ -14,10 +18,30 @@ export default function Join() {
   const [nickname, setNickname] = useState("");
   
   const joinRoom = useJoinRoom();
+  const { data: account, error: accountError, isLoading: accountLoading } = useGetAuthMe({
+    query: { queryKey: getGetAuthMeQueryKey(), retry: false },
+  });
   const { toast } = useToast();
+
+  useEffect(() => {
+    if (accountError) {
+      const returnTo = initialCode ? `/join/${initialCode}` : "/join";
+      setLocation(`/account?returnTo=${encodeURIComponent(returnTo)}`);
+    }
+  }, [accountError, initialCode, setLocation]);
+
+  useEffect(() => {
+    if (!nickname && account?.fullName) {
+      setNickname(account.fullName.slice(0, 15));
+    }
+  }, [account?.fullName, nickname]);
 
   const handleJoin = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!account) {
+      setLocation(`/account?returnTo=${encodeURIComponent(initialCode ? `/join/${initialCode}` : "/join")}`);
+      return;
+    }
     if (!code || !nickname) {
       toast({ title: "ERROR", description: "ENTER CODE AND NICKNAME", variant: "destructive" });
       return;
@@ -37,6 +61,10 @@ export default function Join() {
     });
   };
 
+  if (accountLoading || !account) {
+    return <Layout><div className="min-h-[70vh] grid place-items-center font-mono text-secondary animate-pulse">VERIFYING ACCOUNT...</div></Layout>;
+  }
+
   return (
     <Layout>
       <motion.div 
@@ -52,6 +80,9 @@ export default function Join() {
           </div>
 
           <form onSubmit={handleJoin} className="space-y-6">
+            <p className="text-center font-mono text-xs text-muted-foreground">
+              Signed in as {account.fullName}
+            </p>
             <div className="space-y-4">
               <div>
                 <input

@@ -1,5 +1,5 @@
 import { Switch, Route, Router as WouterRouter, Redirect, useLocation } from "wouter";
-import { useEffect } from "react";
+import { useEffect, useState, type ReactNode } from "react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -17,6 +17,49 @@ import { apiBaseUrl } from "@/lib/backend";
 setBaseUrl(apiBaseUrl);
 
 const queryClient = new QueryClient();
+
+function AccountGate({ children }: { children: ReactNode }) {
+  const [status, setStatus] = useState<"loading" | "ready" | "error">(
+    window.location.pathname.startsWith("/admin") ? "ready" : "loading",
+  );
+
+  useEffect(() => {
+    if (status === "ready") return undefined;
+    const controller = new AbortController();
+    const authOrigin = apiBaseUrl.replace(/\/forehead$/, "");
+    const request = (path: string, method = "GET") => fetch(`${authOrigin}${path}`, {
+      method,
+      credentials: "include",
+      signal: controller.signal,
+      headers: { Accept: "application/json" },
+    });
+
+    void (async () => {
+      try {
+        let response = await request("/api/auth/me");
+        if (response.status === 401) {
+          const refresh = await request("/api/auth/refresh", "POST");
+          if (refresh.ok) response = await request("/api/auth/me");
+        }
+        if (response.status === 401 || response.status === 403) {
+          const accountUrl = `https://www.dordor.games/account?returnTo=${encodeURIComponent(window.location.href)}`;
+          window.location.replace(accountUrl);
+          return;
+        }
+        if (!response.ok) throw new Error(`Account verification returned ${response.status}`);
+        (window as typeof window & { DordorAccount?: unknown }).DordorAccount = await response.json();
+        setStatus("ready");
+      } catch (error) {
+        if (!(error instanceof DOMException && error.name === "AbortError")) setStatus("error");
+      }
+    })();
+    return () => controller.abort();
+  }, [status]);
+
+  if (status === "loading") return <div className="min-h-screen grid place-items-center text-white">Verifying account...</div>;
+  if (status === "error") return <div className="min-h-screen grid place-items-center text-white text-center p-6"><div><p>Unable to verify your account.</p><button className="mt-4 underline" onClick={() => setStatus("loading")}>Try again</button></div></div>;
+  return children;
+}
 
 const hostedModePaths: Record<string, string> = {
   "guessyourword.dordor.games": "/forehead",
@@ -78,7 +121,7 @@ function App() {
         <TooltipProvider>
           <div style={{ position: 'relative', zIndex: 1 }}>
             <WouterRouter base={import.meta.env.BASE_URL.replace(/\/$/, "")}>
-              <Router />
+              <AccountGate><Router /></AccountGate>
             </WouterRouter>
           </div>
           <Toaster />

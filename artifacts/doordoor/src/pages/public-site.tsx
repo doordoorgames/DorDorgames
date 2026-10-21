@@ -54,7 +54,7 @@ function PublicLayout({ children }: { children: (ar: boolean) => ReactNode }) {
           <a href="/#games">{t("Games", "الألعاب")}</a>
           <a href="/#how-it-works">{t("How It Works", "كيف تلعب")}</a>
           <Link href="/pricing">{t("Pricing", "الأسعار")}</Link>
-          <Link href="/host">{t("Login", "تسجيل الدخول")}</Link>
+          <Link href="/account">{t("Account", "الحساب")}</Link>
         </nav>
         <button
           className="dd-language"

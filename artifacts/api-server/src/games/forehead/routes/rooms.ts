@@ -8,6 +8,7 @@ import {
   JoinRoomParams,
   JoinRoomBody,
 } from "@workspace/forehead-api-zod";
+import { requireAccount, requireHostIdentity } from "../../../lib/auth.js";
 
 const router = Router();
 
@@ -47,7 +48,7 @@ async function getRoomWithPlayers(roomId: number) {
 }
 
 // POST /api/rooms
-router.post("/rooms", async (req, res) => {
+router.post("/rooms", requireHostIdentity, async (req, res) => {
   const body = CreateRoomBody.safeParse(req.body);
   if (!body.success) {
     res.status(400).json({ error: "Invalid body" });
@@ -86,7 +87,7 @@ router.post("/rooms", async (req, res) => {
 });
 
 // GET /api/rooms/:code
-router.get("/rooms/:code", async (req, res) => {
+router.get("/rooms/:code", requireAccount, async (req, res) => {
   const params = GetRoomParams.safeParse({ code: req.params.code });
   if (!params.success) {
     res.status(400).json({ error: "Invalid params" });
@@ -102,7 +103,7 @@ router.get("/rooms/:code", async (req, res) => {
 });
 
 // POST /api/rooms/:code/join
-router.post("/rooms/:code/join", async (req, res) => {
+router.post("/rooms/:code/join", requireAccount, async (req, res) => {
   const params = JoinRoomParams.safeParse({ code: req.params.code });
   const body = JoinRoomBody.safeParse(req.body);
   if (!params.success || !body.success) {

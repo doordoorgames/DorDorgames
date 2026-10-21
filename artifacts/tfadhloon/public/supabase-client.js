@@ -19,12 +19,13 @@
   "use strict";
 
   const API_BASE = (function () {
-    const backendOrigin = window.DORDOR_API_ORIGIN || window.location.origin;
+    const backendOrigin = window.DORDOR_API_ORIGIN || "https://dordorgames-production.up.railway.app";
     return backendOrigin.replace(/\/+$/, "") + "/tfadhloon/api";
   })();
 
   let _supabase = null;
   let _initPromise = null;
+  let _refreshPromise = null;
 
   /**
    * Initialise (or return cached) Supabase client.
@@ -58,10 +59,25 @@
   // ─── REST helpers that go through the API server ─────────────────────────
 
   async function apiFetch(path, options = {}) {
-    const res = await fetch(API_BASE + path, {
+    let res = await fetch(API_BASE + path, {
       headers: { "Content-Type": "application/json" },
+      credentials: "include",
       ...options,
     });
+    if (res.status === 401) {
+      const authBase = API_BASE.replace(/\/tfadhloon\/api$/, "");
+      _refreshPromise ||= fetch(authBase + "/api/auth/refresh", {
+        method: "POST",
+        credentials: "include",
+      }).then((response) => response.ok).catch(() => false).finally(() => { _refreshPromise = null; });
+      if (await _refreshPromise) {
+        res = await fetch(API_BASE + path, {
+          headers: { "Content-Type": "application/json" },
+          credentials: "include",
+          ...options,
+        });
+      }
+    }
     if (!res.ok) {
       const body = await res.json().catch(() => ({}));
       throw new Error(body.error || "API error " + res.status);

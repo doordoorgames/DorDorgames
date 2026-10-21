@@ -238,7 +238,7 @@ export const SwitchRoomGameResponse = zod.object({
 });
 
 /**
- * @summary Guest joins a room with nickname
+ * @summary Signed-in participant joins a room with nickname
  */
 export const JoinRoomParams = zod.object({
   code: zod.coerce.string(),
@@ -277,15 +277,20 @@ export const JoinRoomResponse = zod.object({
 });
 
 /**
- * @summary Start host signup — collect details and send OTP to phone
+ * @summary Start host or participant signup and send a phone OTP
  */
-export const authSignupRequestOtpBodyPasswordMin = 8;
+export const authSignupRequestOtpBodyPasswordMin = 10;
+export const authSignupRequestOtpBodyPasswordMax = 72;
 
 export const AuthSignupRequestOtpBody = zod.object({
+  role: zod.enum(["host", "participant"]),
   fullName: zod.string(),
   email: zod.string().email(),
   phone: zod.string(),
-  password: zod.string().min(authSignupRequestOtpBodyPasswordMin),
+  password: zod
+    .string()
+    .min(authSignupRequestOtpBodyPasswordMin)
+    .max(authSignupRequestOtpBodyPasswordMax),
 });
 
 export const AuthSignupRequestOtpResponse = zod.object({
@@ -294,10 +299,10 @@ export const AuthSignupRequestOtpResponse = zod.object({
 });
 
 /**
- * @summary Verify OTP and create host account with 60-min free trial
+ * @summary Verify OTP and create an account
  */
-export const authSignupVerifyOtpBodyOtpMin = 4;
-export const authSignupVerifyOtpBodyOtpMax = 4;
+export const authSignupVerifyOtpBodyOtpMin = 6;
+export const authSignupVerifyOtpBodyOtpMax = 6;
 
 export const AuthSignupVerifyOtpBody = zod.object({
   phone: zod.string(),
@@ -311,14 +316,15 @@ export const AuthSignupVerifyOtpBody = zod.object({
  * @summary Login with email/phone and password
  */
 export const AuthLoginBody = zod.object({
+  role: zod.enum(["host", "participant"]),
   identifier: zod.string().describe("Email address or phone number"),
   password: zod.string(),
 });
 
 export const AuthLoginResponse = zod.object({
-  token: zod.string(),
-  host: zod.object({
+  account: zod.object({
     id: zod.string(),
+    role: zod.enum(["host", "participant"]),
     fullName: zod.string(),
     email: zod.string(),
     phone: zod.string(),
@@ -331,10 +337,11 @@ export const AuthLoginResponse = zod.object({
 });
 
 /**
- * @summary Get current authenticated host profile
+ * @summary Get the current authenticated account profile
  */
 export const GetAuthMeResponse = zod.object({
   id: zod.string(),
+  role: zod.enum(["host", "participant"]),
   fullName: zod.string(),
   email: zod.string(),
   phone: zod.string(),
@@ -343,6 +350,64 @@ export const GetAuthMeResponse = zod.object({
   remainingMinutes: zod.number(),
   createdAt: zod.string(),
   updatedAt: zod.string(),
+});
+
+/**
+ * @summary Rotate the refresh session and issue a new access cookie
+ */
+export const AuthRefreshResponse = zod.object({
+  account: zod.object({
+    id: zod.string(),
+    role: zod.enum(["host", "participant"]),
+    fullName: zod.string(),
+    email: zod.string(),
+    phone: zod.string(),
+    phoneVerified: zod.boolean(),
+    trialUsed: zod.boolean(),
+    remainingMinutes: zod.number(),
+    createdAt: zod.string(),
+    updatedAt: zod.string(),
+  }),
+});
+
+/**
+ * @summary Update the current account profile
+ */
+export const updateAuthProfileBodyFullNameMin = 2;
+export const updateAuthProfileBodyFullNameMax = 80;
+
+export const UpdateAuthProfileBody = zod.object({
+  fullName: zod
+    .string()
+    .min(updateAuthProfileBodyFullNameMin)
+    .max(updateAuthProfileBodyFullNameMax),
+});
+
+export const UpdateAuthProfileResponse = zod.object({
+  id: zod.string(),
+  role: zod.enum(["host", "participant"]),
+  fullName: zod.string(),
+  email: zod.string(),
+  phone: zod.string(),
+  phoneVerified: zod.boolean(),
+  trialUsed: zod.boolean(),
+  remainingMinutes: zod.number(),
+  createdAt: zod.string(),
+  updatedAt: zod.string(),
+});
+
+/**
+ * @summary Change password and revoke other sessions
+ */
+export const changeAuthPasswordBodyNewPasswordMin = 10;
+export const changeAuthPasswordBodyNewPasswordMax = 72;
+
+export const ChangeAuthPasswordBody = zod.object({
+  currentPassword: zod.string(),
+  newPassword: zod
+    .string()
+    .min(changeAuthPasswordBodyNewPasswordMin)
+    .max(changeAuthPasswordBodyNewPasswordMax),
 });
 
 /**

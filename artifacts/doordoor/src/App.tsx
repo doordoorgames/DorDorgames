@@ -1,14 +1,19 @@
+import { Switch, Route, Router as WouterRouter } from "wouter";
 import { useEffect } from "react";
-import { Switch, Route, Router as WouterRouter, useLocation } from "wouter";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { AnimatePresence } from "framer-motion";
-import { setAuthTokenGetter, setBaseUrl } from "@workspace/api-client-react";
+import {
+  getGetAuthMeQueryKey,
+  setBaseUrl,
+  useGetAuthMe,
+} from "@workspace/api-client-react";
 import NotFound from "@/pages/not-found";
 import { PublicHome as Home, Pricing, Purchase } from "@/pages/public-site";
 import Join from "@/pages/join";
 import Host from "@/pages/host";
+import Account from "@/pages/account";
 import HostDashboard from "@/pages/host-dashboard";
 import RoomView from "@/pages/room";
 import AdminLogin from "@/pages/admin";
@@ -17,38 +22,33 @@ import GameLauncher from "@/pages/game-launcher";
 import ShelvedGames from "@/pages/shelved-games";
 
 setBaseUrl(import.meta.env.VITE_API_BASE_URL ?? null);
-setAuthTokenGetter(() => localStorage.getItem("host_token"));
 
 const queryClient = new QueryClient();
 
-const HOST_ALLOWED_PATHS = [
-  "/host",
-  "/host/dashboard",
-  "/pricing",
-  "/checkout",
-  "/purchase",
-];
-
-// A logged-in host is locked to their own pages — they cannot browse to
-// the homepage, join screen, or admin panel while a host session is active.
-function HostRouteGuard() {
-  const [location, setLocation] = useLocation();
-
+function AuthenticatedRoom() {
+  const account = useGetAuthMe({
+    query: { queryKey: getGetAuthMeQueryKey(), retry: false },
+  });
   useEffect(() => {
-    const token = localStorage.getItem("host_token");
-    if (!token) return;
-    if (!HOST_ALLOWED_PATHS.includes(location)) {
-      setLocation("/host/dashboard");
+    if (account.error) {
+      window.location.replace(
+        `/account?returnTo=${encodeURIComponent(window.location.pathname)}`,
+      );
     }
-  }, [location, setLocation]);
-
-  return null;
+  }, [account.error]);
+  if (account.isLoading || !account.data) {
+    return (
+      <div className="min-h-screen grid place-items-center font-mono text-secondary">
+        VERIFYING ACCOUNT...
+      </div>
+    );
+  }
+  return <RoomView />;
 }
 
 function Router() {
   return (
     <AnimatePresence mode="wait">
-      <HostRouteGuard />
       <Switch>
         {/* Platform routes */}
         <Route path="/" component={Home} />
@@ -57,9 +57,10 @@ function Router() {
         <Route path="/purchase" component={Purchase} />
         <Route path="/join" component={Join} />
         <Route path="/join/:code" component={Join} />
+        <Route path="/account" component={Account} />
         <Route path="/host" component={Host} />
         <Route path="/host/dashboard" component={HostDashboard} />
-        <Route path="/room/:code" component={RoomView} />
+        <Route path="/room/:code" component={AuthenticatedRoom} />
         <Route path="/admin" component={AdminLogin} />
         <Route path="/admin/dashboard" component={AdminDashboard} />
         <Route path="/shelved" component={ShelvedGames} />
@@ -98,4 +99,3 @@ function App() {
 }
 
 export default App;
-

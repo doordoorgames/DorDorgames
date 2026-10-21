@@ -251,6 +251,27 @@ transform: translateY(-2px);
 box-shadow: 6px -6px 0 rgba(0, 0, 0, 0.8);
 }
 
+.account-btn {
+position: fixed;
+top: 14px;
+right: 20px;
+z-index: 2000;
+display: inline-flex;
+align-items: center;
+gap: 8px;
+min-height: 44px;
+padding: 9px 13px;
+color: #f5e6c8;
+background-color: #5c2d91;
+border: 2px solid rgba(212,170,112,0.6);
+font-family: "AbdoMaster";
+font-weight: bold;
+text-decoration: none;
+box-shadow: 4px -4px 0 rgba(0, 0, 0, 0.8);
+}
+
+.account-btn:hover { color: #fff; background: #3d1a66; }
+
 /* ===== ALERT SYSTEM ===== */
 .alert-overlay {
 position: fixed;

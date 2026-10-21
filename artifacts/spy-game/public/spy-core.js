@@ -62,6 +62,8 @@
   }
 
   async function createRoom(nickname, language) {
+    const account = await window.DordorAccountReady;
+    if (account?.role !== "host") throw new Error("HOST_ACCOUNT_REQUIRED");
     nickname = cleanName(nickname); if (!nickname) throw new Error("NAME_REQUIRED");
     const code = await uniqueCode(); const id=randomId(); const t=now();
     await roomRef(code).set({ schemaVersion:2, gameType:"spy", status:"waiting", phase:"lobby", phaseVersion:0, createdAt:SERVER_TIMESTAMP, updatedAt:SERVER_TIMESTAMP, language:language === "en" ? "en" : "ar", hostId:id, round:0, matchId:"m_"+t, nicknameClaims:{[nameKey(nickname)]:id}, playersById:{[id]:{nickname,joinedAt:t,online:true,lastSeenAt:t,score:0}}, playerOrder:[id] });
@@ -79,6 +81,7 @@
   }
 
   async function joinRoom(code,nickname) {
+    await window.DordorAccountReady;
     code=cleanCode(code); nickname=cleanName(nickname); if (!nickname) throw new Error("NAME_REQUIRED");
     const snapshot=await roomRef(code).once("value"); if(!snapshot.exists())throw new Error("MISSING");
     const room=snapshot.val(), prior=getIdentity(code);
@@ -221,7 +224,7 @@
   async function advanceExpiredPhase(code) { await roomRef(code).once("value"); await roomRef(code).transaction(room=>{if(!room||!room.phaseEndsAt||now()<Number(room.phaseEndsAt))return;if(room.phase==="discussion"){Object.assign(room,phaseFields("voting",VOTING_MS,room.phaseVersion));room.votes={};return room;}if(room.phase==="voting")return resolve(room,"timeout");return room;}); }
   async function endMatch(code,requester){await roomRef(code).once("value");await roomRef(code).transaction(room=>{if(!room||room.hostId!==requester||room.phase!=="results")return;room.status="ended";room.phase="ended";room.phaseVersion=Number(room.phaseVersion||0)+1;room.phaseStartedAt=now();room.phaseEndsAt=0;return room;});}
   async function resetToLobby(code,requester){await roomRef(code).once("value");const r=await roomRef(code).transaction(room=>{if(!room||room.hostId!==requester)return;Object.entries(room.playersById||{}).forEach(([id,p])=>{if(p.removed||p.left||!isOnline(p))delete room.playersById[id];else p.score=0;});room.playerOrder=orderedIds(room);room.round=0;room.status="waiting";Object.assign(room,phaseFields("lobby",0,room.phaseVersion));delete room.roundId;delete room.roundState;delete room.votes;delete room.spyGuesses;delete room.result;room.matchId="m_"+now();return room;});if(!r.committed)throw new Error("RESET_FAILED");}
-  function message(error){const key=String(error?.message||error);return ({NAME_REQUIRED:"Enter a nickname.",INVALID:"Enter a valid five-digit room code.",MISSING:"This room no longer exists or has expired.",STARTED:"This round has already started. Join again after the room returns to the lobby.",FULL:"This room is full.",NAME_TAKEN:"That nickname is already in use in this room.",VOTE_REJECTED:"Your vote could not be submitted. It may already be locked.",GUESS_REJECTED:"This guess could not be submitted or your attempt was already used."})[key]||"Something went wrong. Please try again.";}
+  function message(error){const key=String(error?.message||error);return ({NAME_REQUIRED:"Enter a nickname.",HOST_ACCOUNT_REQUIRED:"A host account is required to create a room.",INVALID:"Enter a valid five-digit room code.",MISSING:"This room no longer exists or has expired.",STARTED:"This round has already started. Join again after the room returns to the lobby.",FULL:"This room is full.",NAME_TAKEN:"That nickname is already in use in this room.",VOTE_REJECTED:"Your vote could not be submitted. It may already be locked.",GUESS_REJECTED:"This guess could not be submitted or your attempt was already used."})[key]||"Something went wrong. Please try again.";}
 
   window.SpyCore={db,GRACE_MS,MAX_PLAYERS,now,cleanCode,cleanName,isTest99,roomRef,getIdentity,requireIdentity,createRoom,inspectRoom,joinRoom,ensureTestBots,driveTestBots,startPresence,leaveRoom,claimHost,removePlayer,getWordPair,startRound,submitVote,submitSpyGuess,advanceExpiredPhase,endMatch,resetToLobby,activePlayers,eligiblePlayers,orderedIds,isOnline,playerName,message};
 })();

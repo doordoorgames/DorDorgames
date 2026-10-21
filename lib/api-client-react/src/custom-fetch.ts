@@ -17,6 +17,7 @@ const DEFAULT_JSON_ACCEPT = "application/json, application/problem+json";
 
 let _baseUrl: string | null = null;
 let _authTokenGetter: AuthTokenGetter | null = null;
+let _refreshPromise: Promise<boolean> | null = null;
 
 /**
  * Set a base URL that is prepended to every relative request URL
@@ -42,6 +43,22 @@ export function setBaseUrl(url: string | null): void {
  */
 export function setAuthTokenGetter(getter: AuthTokenGetter | null): void {
   _authTokenGetter = getter;
+}
+
+function refreshSession(): Promise<boolean> {
+  if (_refreshPromise) return _refreshPromise;
+  const url = `${_baseUrl ?? ""}/api/auth/refresh`;
+  _refreshPromise = fetch(url, {
+    method: "POST",
+    credentials: "include",
+    headers: { accept: DEFAULT_JSON_ACCEPT },
+  })
+    .then((response) => response.ok)
+    .catch(() => false)
+    .finally(() => {
+      _refreshPromise = null;
+    });
+  return _refreshPromise;
 }
 
 function isRequest(input: RequestInfo | URL): input is Request {
@@ -360,7 +377,29 @@ export async function customFetch<T = unknown>(
 
   const requestInfo = { method, url: resolveUrl(input) };
 
-  const response = await fetch(input, { ...init, method, headers });
+  let response = await fetch(input, {
+    ...init,
+    method,
+    headers,
+    credentials: init.credentials ?? "include",
+  });
+
+  const requestUrl = requestInfo.url;
+  const mayRefresh =
+    response.status === 401 &&
+    !isRequest(input) &&
+    !requestUrl.includes("/auth/login") &&
+    !requestUrl.includes("/auth/signup/") &&
+    !requestUrl.includes("/auth/refresh");
+
+  if (mayRefresh && (await refreshSession())) {
+    response = await fetch(input, {
+      ...init,
+      method,
+      headers,
+      credentials: init.credentials ?? "include",
+    });
+  }
 
   if (!response.ok) {
     const errorData = await parseErrorBody(response, method);

@@ -17,6 +17,18 @@ const DEFAULT_JSON_ACCEPT = "application/json, application/problem+json";
 
 let _baseUrl: string | null = null;
 let _authTokenGetter: AuthTokenGetter | null = null;
+let _refreshPromise: Promise<boolean> | null = null;
+
+function refreshSession(): Promise<boolean> {
+  if (_refreshPromise) return _refreshPromise;
+  const refreshUrl = `${_baseUrl?.replace(/\/forehead$/, "") ?? ""}/api/auth/refresh`;
+  _refreshPromise = fetch(refreshUrl, {
+    method: "POST",
+    credentials: "include",
+    headers: { accept: DEFAULT_JSON_ACCEPT },
+  }).then((result) => result.ok).catch(() => false).finally(() => { _refreshPromise = null; });
+  return _refreshPromise;
+}
 
 /**
  * Set a base URL that is prepended to every relative request URL
@@ -360,7 +372,24 @@ export async function customFetch<T = unknown>(
 
   const requestInfo = { method, url: resolveUrl(input) };
 
-  const response = await fetch(input, { ...init, method, headers });
+  let response = await fetch(input, {
+    ...init,
+    method,
+    headers,
+    credentials: init.credentials ?? "include",
+  });
+
+  const requestUrl = requestInfo.url;
+  if (response.status === 401 && !requestUrl.includes("/auth/refresh")) {
+    if (await refreshSession()) {
+      response = await fetch(input, {
+        ...init,
+        method,
+        headers,
+        credentials: init.credentials ?? "include",
+      });
+    }
+  }
 
   if (!response.ok) {
     const errorData = await parseErrorBody(response, method);

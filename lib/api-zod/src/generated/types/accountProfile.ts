@@ -5,9 +5,11 @@
  * DoorDoor.games API specification
  * OpenAPI spec version: 0.1.0
  */
+import type { AccountProfileRole } from "./accountProfileRole";
 
-export interface HostProfile {
+export interface AccountProfile {
   id: string;
+  role: AccountProfileRole;
   fullName: string;
   email: string;
   phone: string;

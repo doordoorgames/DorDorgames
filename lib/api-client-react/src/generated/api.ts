@@ -17,6 +17,7 @@ import type {
 } from "@tanstack/react-query";
 
 import type {
+  AccountProfile,
   AdminCredentials,
   AdminSession,
   AdminStats,
@@ -26,10 +27,11 @@ import type {
   GameUpdate,
   GuestJoin,
   HealthStatus,
-  HostProfile,
   LoginBody,
+  PasswordChangeBody,
   PaymentRequest,
   PaymentResult,
+  ProfileUpdateBody,
   PromoCode,
   PromoCodeInput,
   PromoResult,
@@ -925,7 +927,7 @@ export const useSwitchRoomGame = <
 };
 
 /**
- * @summary Guest joins a room with nickname
+ * @summary Signed-in participant joins a room with nickname
  */
 export const getJoinRoomUrl = (code: string) => {
   return `/api/rooms/${code}/join`;
@@ -989,7 +991,7 @@ export type JoinRoomMutationBody = BodyType<GuestJoin>;
 export type JoinRoomMutationError = ErrorType<void>;
 
 /**
- * @summary Guest joins a room with nickname
+ * @summary Signed-in participant joins a room with nickname
  */
 export const useJoinRoom = <
   TError = ErrorType<void>,
@@ -1012,7 +1014,7 @@ export const useJoinRoom = <
 };
 
 /**
- * @summary Start host signup — collect details and send OTP to phone
+ * @summary Start host or participant signup and send a phone OTP
  */
 export const getAuthSignupRequestOtpUrl = () => {
   return `/api/auth/signup/request-otp`;
@@ -1075,7 +1077,7 @@ export type AuthSignupRequestOtpMutationBody = BodyType<SignupRequestOtpBody>;
 export type AuthSignupRequestOtpMutationError = ErrorType<void>;
 
 /**
- * @summary Start host signup — collect details and send OTP to phone
+ * @summary Start host or participant signup and send a phone OTP
  */
 export const useAuthSignupRequestOtp = <
   TError = ErrorType<void>,
@@ -1098,7 +1100,7 @@ export const useAuthSignupRequestOtp = <
 };
 
 /**
- * @summary Verify OTP and create host account with 60-min free trial
+ * @summary Verify OTP and create an account
  */
 export const getAuthSignupVerifyOtpUrl = () => {
   return `/api/auth/signup/verify-otp`;
@@ -1161,7 +1163,7 @@ export type AuthSignupVerifyOtpMutationBody = BodyType<SignupVerifyOtpBody>;
 export type AuthSignupVerifyOtpMutationError = ErrorType<void>;
 
 /**
- * @summary Verify OTP and create host account with 60-min free trial
+ * @summary Verify OTP and create an account
  */
 export const useAuthSignupVerifyOtp = <
   TError = ErrorType<void>,
@@ -1270,7 +1272,7 @@ export const useAuthLogin = <
 };
 
 /**
- * @summary Get current authenticated host profile
+ * @summary Get the current authenticated account profile
  */
 export const getGetAuthMeUrl = () => {
   return `/api/auth/me`;
@@ -1278,8 +1280,8 @@ export const getGetAuthMeUrl = () => {
 
 export const getAuthMe = async (
   options?: RequestInit,
-): Promise<HostProfile> => {
-  return customFetch<HostProfile>(getGetAuthMeUrl(), {
+): Promise<AccountProfile> => {
+  return customFetch<AccountProfile>(getGetAuthMeUrl(), {
     ...options,
     method: "GET",
   });
@@ -1317,7 +1319,7 @@ export type GetAuthMeQueryResult = NonNullable<
 export type GetAuthMeQueryError = ErrorType<void>;
 
 /**
- * @summary Get current authenticated host profile
+ * @summary Get the current authenticated account profile
  */
 
 export function useGetAuthMe<
@@ -1335,6 +1337,417 @@ export function useGetAuthMe<
 
   return { ...query, queryKey: queryOptions.queryKey };
 }
+
+/**
+ * @summary Rotate the refresh session and issue a new access cookie
+ */
+export const getAuthRefreshUrl = () => {
+  return `/api/auth/refresh`;
+};
+
+export const authRefresh = async (
+  options?: RequestInit,
+): Promise<AuthResult> => {
+  return customFetch<AuthResult>(getAuthRefreshUrl(), {
+    ...options,
+    method: "POST",
+  });
+};
+
+export const getAuthRefreshMutationOptions = <
+  TError = ErrorType<void>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof authRefresh>>,
+    TError,
+    void,
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationOptions<
+  Awaited<ReturnType<typeof authRefresh>>,
+  TError,
+  void,
+  TContext
+> => {
+  const mutationKey = ["authRefresh"];
+  const { mutation: mutationOptions, request: requestOptions } = options
+    ? options.mutation &&
+      "mutationKey" in options.mutation &&
+      options.mutation.mutationKey
+      ? options
+      : { ...options, mutation: { ...options.mutation, mutationKey } }
+    : { mutation: { mutationKey }, request: undefined };
+
+  const mutationFn: MutationFunction<
+    Awaited<ReturnType<typeof authRefresh>>,
+    void
+  > = () => {
+    return authRefresh(requestOptions);
+  };
+
+  return { mutationFn, ...mutationOptions };
+};
+
+export type AuthRefreshMutationResult = NonNullable<
+  Awaited<ReturnType<typeof authRefresh>>
+>;
+
+export type AuthRefreshMutationError = ErrorType<void>;
+
+/**
+ * @summary Rotate the refresh session and issue a new access cookie
+ */
+export const useAuthRefresh = <
+  TError = ErrorType<void>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof authRefresh>>,
+    TError,
+    void,
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationResult<
+  Awaited<ReturnType<typeof authRefresh>>,
+  TError,
+  void,
+  TContext
+> => {
+  return useMutation(getAuthRefreshMutationOptions(options));
+};
+
+/**
+ * @summary Revoke the current session
+ */
+export const getAuthLogoutUrl = () => {
+  return `/api/auth/logout`;
+};
+
+export const authLogout = async (options?: RequestInit): Promise<void> => {
+  return customFetch<void>(getAuthLogoutUrl(), {
+    ...options,
+    method: "POST",
+  });
+};
+
+export const getAuthLogoutMutationOptions = <
+  TError = ErrorType<unknown>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof authLogout>>,
+    TError,
+    void,
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationOptions<
+  Awaited<ReturnType<typeof authLogout>>,
+  TError,
+  void,
+  TContext
+> => {
+  const mutationKey = ["authLogout"];
+  const { mutation: mutationOptions, request: requestOptions } = options
+    ? options.mutation &&
+      "mutationKey" in options.mutation &&
+      options.mutation.mutationKey
+      ? options
+      : { ...options, mutation: { ...options.mutation, mutationKey } }
+    : { mutation: { mutationKey }, request: undefined };
+
+  const mutationFn: MutationFunction<
+    Awaited<ReturnType<typeof authLogout>>,
+    void
+  > = () => {
+    return authLogout(requestOptions);
+  };
+
+  return { mutationFn, ...mutationOptions };
+};
+
+export type AuthLogoutMutationResult = NonNullable<
+  Awaited<ReturnType<typeof authLogout>>
+>;
+
+export type AuthLogoutMutationError = ErrorType<unknown>;
+
+/**
+ * @summary Revoke the current session
+ */
+export const useAuthLogout = <
+  TError = ErrorType<unknown>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof authLogout>>,
+    TError,
+    void,
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationResult<
+  Awaited<ReturnType<typeof authLogout>>,
+  TError,
+  void,
+  TContext
+> => {
+  return useMutation(getAuthLogoutMutationOptions(options));
+};
+
+/**
+ * @summary Revoke every session for the current account
+ */
+export const getAuthLogoutAllUrl = () => {
+  return `/api/auth/logout-all`;
+};
+
+export const authLogoutAll = async (options?: RequestInit): Promise<void> => {
+  return customFetch<void>(getAuthLogoutAllUrl(), {
+    ...options,
+    method: "POST",
+  });
+};
+
+export const getAuthLogoutAllMutationOptions = <
+  TError = ErrorType<unknown>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof authLogoutAll>>,
+    TError,
+    void,
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationOptions<
+  Awaited<ReturnType<typeof authLogoutAll>>,
+  TError,
+  void,
+  TContext
+> => {
+  const mutationKey = ["authLogoutAll"];
+  const { mutation: mutationOptions, request: requestOptions } = options
+    ? options.mutation &&
+      "mutationKey" in options.mutation &&
+      options.mutation.mutationKey
+      ? options
+      : { ...options, mutation: { ...options.mutation, mutationKey } }
+    : { mutation: { mutationKey }, request: undefined };
+
+  const mutationFn: MutationFunction<
+    Awaited<ReturnType<typeof authLogoutAll>>,
+    void
+  > = () => {
+    return authLogoutAll(requestOptions);
+  };
+
+  return { mutationFn, ...mutationOptions };
+};
+
+export type AuthLogoutAllMutationResult = NonNullable<
+  Awaited<ReturnType<typeof authLogoutAll>>
+>;
+
+export type AuthLogoutAllMutationError = ErrorType<unknown>;
+
+/**
+ * @summary Revoke every session for the current account
+ */
+export const useAuthLogoutAll = <
+  TError = ErrorType<unknown>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof authLogoutAll>>,
+    TError,
+    void,
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationResult<
+  Awaited<ReturnType<typeof authLogoutAll>>,
+  TError,
+  void,
+  TContext
+> => {
+  return useMutation(getAuthLogoutAllMutationOptions(options));
+};
+
+/**
+ * @summary Update the current account profile
+ */
+export const getUpdateAuthProfileUrl = () => {
+  return `/api/auth/profile`;
+};
+
+export const updateAuthProfile = async (
+  profileUpdateBody: ProfileUpdateBody,
+  options?: RequestInit,
+): Promise<AccountProfile> => {
+  return customFetch<AccountProfile>(getUpdateAuthProfileUrl(), {
+    ...options,
+    method: "PATCH",
+    headers: { "Content-Type": "application/json", ...options?.headers },
+    body: JSON.stringify(profileUpdateBody),
+  });
+};
+
+export const getUpdateAuthProfileMutationOptions = <
+  TError = ErrorType<unknown>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof updateAuthProfile>>,
+    TError,
+    { data: BodyType<ProfileUpdateBody> },
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationOptions<
+  Awaited<ReturnType<typeof updateAuthProfile>>,
+  TError,
+  { data: BodyType<ProfileUpdateBody> },
+  TContext
+> => {
+  const mutationKey = ["updateAuthProfile"];
+  const { mutation: mutationOptions, request: requestOptions } = options
+    ? options.mutation &&
+      "mutationKey" in options.mutation &&
+      options.mutation.mutationKey
+      ? options
+      : { ...options, mutation: { ...options.mutation, mutationKey } }
+    : { mutation: { mutationKey }, request: undefined };
+
+  const mutationFn: MutationFunction<
+    Awaited<ReturnType<typeof updateAuthProfile>>,
+    { data: BodyType<ProfileUpdateBody> }
+  > = (props) => {
+    const { data } = props ?? {};
+
+    return updateAuthProfile(data, requestOptions);
+  };
+
+  return { mutationFn, ...mutationOptions };
+};
+
+export type UpdateAuthProfileMutationResult = NonNullable<
+  Awaited<ReturnType<typeof updateAuthProfile>>
+>;
+export type UpdateAuthProfileMutationBody = BodyType<ProfileUpdateBody>;
+export type UpdateAuthProfileMutationError = ErrorType<unknown>;
+
+/**
+ * @summary Update the current account profile
+ */
+export const useUpdateAuthProfile = <
+  TError = ErrorType<unknown>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof updateAuthProfile>>,
+    TError,
+    { data: BodyType<ProfileUpdateBody> },
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationResult<
+  Awaited<ReturnType<typeof updateAuthProfile>>,
+  TError,
+  { data: BodyType<ProfileUpdateBody> },
+  TContext
+> => {
+  return useMutation(getUpdateAuthProfileMutationOptions(options));
+};
+
+/**
+ * @summary Change password and revoke other sessions
+ */
+export const getChangeAuthPasswordUrl = () => {
+  return `/api/auth/change-password`;
+};
+
+export const changeAuthPassword = async (
+  passwordChangeBody: PasswordChangeBody,
+  options?: RequestInit,
+): Promise<void> => {
+  return customFetch<void>(getChangeAuthPasswordUrl(), {
+    ...options,
+    method: "POST",
+    headers: { "Content-Type": "application/json", ...options?.headers },
+    body: JSON.stringify(passwordChangeBody),
+  });
+};
+
+export const getChangeAuthPasswordMutationOptions = <
+  TError = ErrorType<unknown>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof changeAuthPassword>>,
+    TError,
+    { data: BodyType<PasswordChangeBody> },
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationOptions<
+  Awaited<ReturnType<typeof changeAuthPassword>>,
+  TError,
+  { data: BodyType<PasswordChangeBody> },
+  TContext
+> => {
+  const mutationKey = ["changeAuthPassword"];
+  const { mutation: mutationOptions, request: requestOptions } = options
+    ? options.mutation &&
+      "mutationKey" in options.mutation &&
+      options.mutation.mutationKey
+      ? options
+      : { ...options, mutation: { ...options.mutation, mutationKey } }
+    : { mutation: { mutationKey }, request: undefined };
+
+  const mutationFn: MutationFunction<
+    Awaited<ReturnType<typeof changeAuthPassword>>,
+    { data: BodyType<PasswordChangeBody> }
+  > = (props) => {
+    const { data } = props ?? {};
+
+    return changeAuthPassword(data, requestOptions);
+  };
+
+  return { mutationFn, ...mutationOptions };
+};
+
+export type ChangeAuthPasswordMutationResult = NonNullable<
+  Awaited<ReturnType<typeof changeAuthPassword>>
+>;
+export type ChangeAuthPasswordMutationBody = BodyType<PasswordChangeBody>;
+export type ChangeAuthPasswordMutationError = ErrorType<unknown>;
+
+/**
+ * @summary Change password and revoke other sessions
+ */
+export const useChangeAuthPassword = <
+  TError = ErrorType<unknown>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof changeAuthPassword>>,
+    TError,
+    { data: BodyType<PasswordChangeBody> },
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationResult<
+  Awaited<ReturnType<typeof changeAuthPassword>>,
+  TError,
+  { data: BodyType<PasswordChangeBody> },
+  TContext
+> => {
+  return useMutation(getChangeAuthPasswordMutationOptions(options));
+};
 
 /**
  * @summary Validate a promo code

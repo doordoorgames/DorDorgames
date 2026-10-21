@@ -1,6 +1,7 @@
 document.addEventListener("DOMContentLoaded", () => {
   "use strict";
   const C = window.SpyCore;
+  let accountName = "";
   document.body.style.backgroundImage = "url('gallary/interrogation-bg.jpeg')";
   localStorage.setItem("selectedGameType", "spy");
   const $ = id => document.getElementById(id);
@@ -18,6 +19,14 @@ document.addEventListener("DOMContentLoaded", () => {
   document.documentElement.lang=lang(); document.documentElement.dir=lang()==="ar"?"rtl":"ltr";
   $("langToggleText").textContent=lang()==="ar"?"English":"العربية";
   const t=copy[lang()];$("gameSubtitle").textContent=t.subtitle;$("newGameBtn").textContent=t.create;$("joinGameBtn").textContent=t.join;$("newGameInput").placeholder=t.name;$("joinGameInput").placeholder=t.code;$("inviteRoomText").childNodes[0].textContent=t.joining+" ";$("inviteNicknameInput").placeholder=t.name;$("inviteJoinBtn").textContent=t.joinRoom;$("howToPlayBtn").textContent="▶ "+t.how;$("howToPlayTitle").textContent=t.how+":";
+  fetch("https://dordorgames-production.up.railway.app/api/auth/me", { credentials: "include", headers: { Accept: "application/json" } })
+    .then(response => response.ok ? response.json() : null)
+    .then(account => {
+      accountName = typeof account?.fullName === "string" ? account.fullName.trim().slice(0, 24) : "";
+      if (accountName && !$("newGameInput").value) $("newGameInput").value = accountName;
+      if (accountName && !$("inviteNicknameInput").value) $("inviteNicknameInput").value = accountName;
+    })
+    .catch(() => console.debug("[Account] Profile name could not be loaded."));
 
   const instructionsOverlay=$("instructionsOverlay");
   const closeInstructions=()=>{instructionsOverlay.classList.remove("open");instructionsOverlay.setAttribute("aria-hidden","true");$("howToPlayBtn").focus();};
@@ -47,7 +56,7 @@ document.addEventListener("DOMContentLoaded", () => {
     if($("joinGameInput").classList.contains("d-none")){$("joinGameInput").classList.remove("d-none");$("newGameSection").classList.add("d-none");$("joinGameInput").focus();return;}
     const code=C.cleanCode($("joinGameInput").value); if(code.length!==5){alert(C.message(new Error("INVALID")));return;}
     const check=await C.inspectRoom(code).catch(()=>({ok:false,reason:"missing"})); if(!check.ok){alert(C.message(new Error(check.reason.toUpperCase())));return;}
-    const existing=C.getIdentity(code); const nickname=prompt("Enter your nickname:",existing?.nickname || "");
+    const existing=C.getIdentity(code); const nickname=prompt("Enter your nickname:",existing?.nickname || accountName);
     if(!nickname||joining)return;joining=true;await doJoin(code,nickname);joining=false;
   };
   $("clearNameBtn").onclick=()=>{Object.keys(localStorage).filter(k=>k.startsWith("spyIdentity:")).forEach(k=>localStorage.removeItem(k));$("clearNameBtn").classList.add("d-none");};

@@ -12,6 +12,7 @@ import {
   useGetRoom,
   useGetAuthMe,
   getGetAuthMeQueryKey,
+  useAuthLogout,
   useProcessPayment,
   useValidatePromo,
 } from "@workspace/api-client-react";
@@ -179,8 +180,6 @@ export default function HostDashboard() {
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
-  const token = localStorage.getItem("host_token");
-
   const {
     data: host,
     isLoading: hostLoading,
@@ -188,7 +187,6 @@ export default function HostDashboard() {
   } = useGetAuthMe({
     query: {
       queryKey: getGetAuthMeQueryKey(),
-      enabled: !!token,
       retry: false,
     },
   });
@@ -199,6 +197,7 @@ export default function HostDashboard() {
   const createRoom = useCreateRoom();
   const closeRoom = useCloseRoom();
   const switchGame = useSwitchRoomGame();
+  const logout = useAuthLogout();
 
   const activeRoom = rooms?.find(
     (r) => r.hostPhone === host?.phone && r.open,
@@ -241,20 +240,21 @@ export default function HostDashboard() {
   }, [activeRoom, displayMinutes]);
 
   const handleLogout = () => {
-    localStorage.removeItem("host_token");
-    setLocation("/");
+    logout.mutate(undefined, {
+      onSettled: () => {
+        queryClient.clear();
+        setLocation("/");
+      },
+    });
   };
 
   useEffect(() => {
-    if (!token) {
-      setLocation("/host");
-      return;
-    }
     if (hostError) {
-      localStorage.removeItem("host_token");
       setLocation("/host");
+    } else if (host && host.role !== "host") {
+      setLocation("/account");
     }
-  }, [token, hostError, setLocation]);
+  }, [host, hostError, setLocation]);
 
   const handleBuyTimeSuccess = (remainingMinutes?: number) => {
     queryClient.invalidateQueries({ queryKey: getGetAuthMeQueryKey() });
@@ -266,7 +266,7 @@ export default function HostDashboard() {
     }
   };
 
-  if (!token || hostLoading) {
+  if (hostLoading) {
     return (
       <Layout>
         <div className="flex items-center justify-center min-h-[60vh]">
@@ -475,7 +475,7 @@ export default function HostDashboard() {
 
                 <div className="w-full space-y-2">
                   <p className="font-mono text-sm text-center text-muted-foreground">
-                    CONNECTED GUESTS: {roomData?.guests?.length || 0}
+                    CONNECTED PLAYERS: {roomData?.guests?.length || 0}
                   </p>
                   <div className="flex flex-wrap gap-2 justify-center">
                     {roomData?.guests?.map((g, i) => (

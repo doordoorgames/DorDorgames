@@ -9,7 +9,7 @@ import {
 } from "@workspace/api-zod";
 import { z } from "zod";
 import { store } from "../lib/store.js";
-import { requireHost, requireHostIdentity } from "../lib/auth.js";
+import { requireAccount, requireHost, requireHostIdentity } from "../lib/auth.js";
 
 const router: IRouter = Router();
 
@@ -23,8 +23,8 @@ function roomWithGame(room: ReturnType<typeof store.rooms.get>) {
   return { ...room, activeGame: game ?? null };
 }
 
-router.get("/rooms", (_req, res) => {
-  const rooms = store.rooms.list().map((r) => {
+router.get("/rooms", requireHostIdentity, (req, res) => {
+  const rooms = store.rooms.list().filter((room) => room.hostPhone === req.hostAccount!.phone).map((r) => {
     const game = store.games.get(r.activeGameId);
     return { ...r, activeGame: game ?? null };
   });
@@ -60,7 +60,7 @@ router.post("/rooms", requireHost, async (req, res) => {
   res.status(201).json(roomWithGame(room));
 });
 
-router.get("/rooms/:code", (req, res) => {
+router.get("/rooms/:code", requireAccount, (req, res) => {
   const { code } = GetRoomParams.parse(req.params);
   const room = store.rooms.get(code);
   if (!room) {
@@ -106,7 +106,7 @@ router.patch("/rooms/:code/game", requireHostIdentity, (req, res) => {
   res.json(roomWithGame(updated));
 });
 
-router.post("/rooms/:code/join", (req, res) => {
+router.post("/rooms/:code/join", requireAccount, (req, res) => {
   const { code } = JoinRoomParams.parse(req.params);
   const body = JoinRoomBody.parse(req.body);
   const room = store.rooms.addGuest(code, body.nickname);
