@@ -6,6 +6,8 @@
  * OpenAPI spec version: 0.1.0
  */
 
+export * from "./accountProfile";
+export * from "./accountProfileRole";
 export * from "./adminCredentials";
 export * from "./adminSession";
 export * from "./adminStats";
@@ -18,10 +20,12 @@ export * from "./gameUpdate";
 export * from "./gameUpdateStatus";
 export * from "./guestJoin";
 export * from "./healthStatus";
-export * from "./hostProfile";
 export * from "./loginBody";
+export * from "./loginBodyRole";
+export * from "./passwordChangeBody";
 export * from "./paymentRequest";
 export * from "./paymentResult";
+export * from "./profileUpdateBody";
 export * from "./promoCode";
 export * from "./promoCodeInput";
 export * from "./promoResult";
@@ -30,5 +34,6 @@ export * from "./room";
 export * from "./roomGameSwitch";
 export * from "./roomInput";
 export * from "./signupRequestOtpBody";
+export * from "./signupRequestOtpBodyRole";
 export * from "./signupRequestOtpResult";
 export * from "./signupVerifyOtpBody";

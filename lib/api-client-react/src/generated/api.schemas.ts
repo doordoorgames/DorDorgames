@@ -105,8 +105,17 @@ export interface GuestJoin {
   nickname: string;
 }
 
-export interface HostProfile {
+export type AccountProfileRole =
+  (typeof AccountProfileRole)[keyof typeof AccountProfileRole];
+
+export const AccountProfileRole = {
+  host: "host",
+  participant: "participant",
+} as const;
+
+export interface AccountProfile {
   id: string;
+  role: AccountProfileRole;
   fullName: string;
   email: string;
   phone: string;
@@ -117,11 +126,23 @@ export interface HostProfile {
   updatedAt: string;
 }
 
+export type SignupRequestOtpBodyRole =
+  (typeof SignupRequestOtpBodyRole)[keyof typeof SignupRequestOtpBodyRole];
+
+export const SignupRequestOtpBodyRole = {
+  host: "host",
+  participant: "participant",
+} as const;
+
 export interface SignupRequestOtpBody {
+  role: SignupRequestOtpBodyRole;
   fullName: string;
   email: string;
   phone: string;
-  /** @minLength 8 */
+  /**
+   * @minLength 10
+   * @maxLength 72
+   */
   password: string;
 }
 
@@ -133,21 +154,45 @@ export interface SignupRequestOtpResult {
 export interface SignupVerifyOtpBody {
   phone: string;
   /**
-   * @minLength 4
-   * @maxLength 4
+   * @minLength 6
+   * @maxLength 6
    */
   otp: string;
 }
 
 export interface AuthResult {
-  token: string;
-  host: HostProfile;
+  account: AccountProfile;
 }
 
+export type LoginBodyRole = (typeof LoginBodyRole)[keyof typeof LoginBodyRole];
+
+export const LoginBodyRole = {
+  host: "host",
+  participant: "participant",
+} as const;
+
 export interface LoginBody {
+  role: LoginBodyRole;
   /** Email address or phone number */
   identifier: string;
   password: string;
+}
+
+export interface ProfileUpdateBody {
+  /**
+   * @minLength 2
+   * @maxLength 80
+   */
+  fullName: string;
+}
+
+export interface PasswordChangeBody {
+  currentPassword: string;
+  /**
+   * @minLength 10
+   * @maxLength 72
+   */
+  newPassword: string;
 }
 
 export interface PromoValidate {

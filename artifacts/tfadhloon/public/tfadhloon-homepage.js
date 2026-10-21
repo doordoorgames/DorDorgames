@@ -66,6 +66,18 @@ document.addEventListener("DOMContentLoaded", function () {
   updateLanguageDisplay(selectedLang);
 
   homeNameInput.value = localStorage.getItem("playerName") || "";
+  if (!homeNameInput.value) {
+    fetch("https://dordorgames-production.up.railway.app/api/auth/me", { credentials: "include", headers: { Accept: "application/json" } })
+      .then((response) => response.ok ? response.json() : null)
+      .then((account) => {
+        const name = typeof account?.fullName === "string" ? account.fullName.trim().slice(0, 24) : "";
+        if (name && !homeNameInput.value) {
+          homeNameInput.value = name;
+          updateNameOutline();
+        }
+      })
+      .catch(() => console.debug("[Account] Profile name could not be loaded."));
+  }
   homeNameInput.addEventListener("input", updateNameOutline);
   homeNameInput.addEventListener("keydown", (event) => {
     if (event.key === "Enter") {
@@ -97,7 +109,7 @@ document.addEventListener("DOMContentLoaded", function () {
     tutorialOverlay.setAttribute("aria-hidden", "true");
     howToPlayBtn.focus();
   };
-  backBtn?.addEventListener("click", () => { window.location.href = "https://dordor.games/"; });
+  backBtn?.addEventListener("click", () => { window.location.href = "https://www.dordor.games/"; });
   howToPlayBtn.addEventListener("click", () => {
     tutorialOverlay.classList.add("open");
     tutorialOverlay.setAttribute("aria-hidden", "false");
@@ -205,6 +217,11 @@ function closeRoomCodeModal() {
 }
 
 async function submitNewGame() {
+  const account = await window.DordorAccountReady;
+  if (account?.role !== "host") {
+    window.beautifulAlert.error("A host account is required to create a room.");
+    return;
+  }
   const name = validHomeName();
   if (!name) return;
 
@@ -343,7 +360,7 @@ function updateLocalizedUI() {
   const roomCodeSubmitText = document.getElementById("roomCodeSubmitBtnText");
   if (roomCodeSubmitText) roomCodeSubmitText.textContent = lang === "ar" ? "دخول" : "Join";
   if (backBtnText) backBtnText.textContent = "Back to Home";
-  if (howToPlayBtn) howToPlayBtn.textContent = lang === "ar" ? "طريقة اللعب" : "How to Play";
+  if (howToPlayBtn) howToPlayBtn.textContent = lang === "ar" ? "▶ طريقة اللعب" : "▶ How to Play";
   const tutorialTitle = document.getElementById("tutorialTitle");
   if (tutorialTitle) tutorialTitle.textContent = lang === "ar" ? "طريقة اللعب" : "How to Play";
 

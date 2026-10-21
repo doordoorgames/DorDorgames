@@ -5,11 +5,16 @@
  * DoorDoor.games API specification
  * OpenAPI spec version: 0.1.0
  */
+import type { SignupRequestOtpBodyRole } from "./signupRequestOtpBodyRole";
 
 export interface SignupRequestOtpBody {
+  role: SignupRequestOtpBodyRole;
   fullName: string;
   email: string;
   phone: string;
-  /** @minLength 8 */
+  /**
+   * @minLength 10
+   * @maxLength 72
+   */
   password: string;
 }

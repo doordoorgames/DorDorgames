@@ -142,7 +142,7 @@ paths:
       tags: [rooms]
       summary: Create a new room (requires host auth)
       security:
-        - BearerAuth: []
+        - CookieAuth: []
       requestBody:
         required: true
         content:
@@ -166,6 +166,8 @@ paths:
       operationId: getRoom
       tags: [rooms]
       summary: Get room by code
+      security:
+        - CookieAuth: []
       parameters:
         - name: code
           in: path
@@ -186,7 +188,7 @@ paths:
       tags: [rooms]
       summary: Close/delete a room
       security:
-        - BearerAuth: []
+        - CookieAuth: []
       parameters:
         - name: code
           in: path
@@ -207,7 +209,7 @@ paths:
       tags: [rooms]
       summary: Switch the active game in a lobby without closing the room
       security:
-        - BearerAuth: []
+        - CookieAuth: []
       parameters:
         - name: code
           in: path
@@ -232,7 +234,9 @@ paths:
     post:
       operationId: joinRoom
       tags: [rooms]
-      summary: Guest joins a room with nickname
+      summary: Signed-in participant joins a room with nickname
+      security:
+        - CookieAuth: []
       parameters:
         - name: code
           in: path
@@ -252,6 +256,8 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/Room"
+        "401":
+          description: Authentication required
         "404":
           description: Room not found
 
@@ -259,7 +265,7 @@ paths:
     post:
       operationId: authSignupRequestOtp
       tags: [auth]
-      summary: Start host signup — collect details and send OTP to phone
+      summary: Start host or participant signup and send a phone OTP
       requestBody:
         required: true
         content:
@@ -282,7 +288,7 @@ paths:
     post:
       operationId: authSignupVerifyOtp
       tags: [auth]
-      summary: Verify OTP and create host account with 60-min free trial
+      summary: Verify OTP and create an account
       requestBody:
         required: true
         content:
@@ -291,7 +297,7 @@ paths:
               $ref: "#/components/schemas/SignupVerifyOtpBody"
       responses:
         "201":
-          description: Account created — returns JWT and host profile
+          description: Account created and secure session cookie issued
           content:
             application/json:
               schema:
@@ -314,7 +320,7 @@ paths:
               $ref: "#/components/schemas/LoginBody"
       responses:
         "200":
-          description: Login successful — returns JWT and host profile
+          description: Login successful and secure session cookie issued
           content:
             application/json:
               schema:
@@ -328,18 +334,91 @@ paths:
     get:
       operationId: getAuthMe
       tags: [auth]
-      summary: Get current authenticated host profile
+      summary: Get the current authenticated account profile
       security:
-        - BearerAuth: []
+        - CookieAuth: []
       responses:
         "200":
-          description: Host profile
+          description: Account profile
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/HostProfile"
+                $ref: "#/components/schemas/AccountProfile"
         "401":
           description: Authentication required
+
+  /auth/refresh:
+    post:
+      operationId: authRefresh
+      tags: [auth]
+      summary: Rotate the refresh session and issue a new access cookie
+      responses:
+        "200":
+          description: Session refreshed
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AuthResult"
+        "401":
+          description: Session expired
+
+  /auth/logout:
+    post:
+      operationId: authLogout
+      tags: [auth]
+      summary: Revoke the current session
+      responses:
+        "204":
+          description: Logged out
+
+  /auth/logout-all:
+    post:
+      operationId: authLogoutAll
+      tags: [auth]
+      summary: Revoke every session for the current account
+      security:
+        - CookieAuth: []
+      responses:
+        "204":
+          description: All sessions revoked
+
+  /auth/profile:
+    patch:
+      operationId: updateAuthProfile
+      tags: [auth]
+      summary: Update the current account profile
+      security:
+        - CookieAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ProfileUpdateBody"
+      responses:
+        "200":
+          description: Updated account profile
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AccountProfile"
+
+  /auth/change-password:
+    post:
+      operationId: changeAuthPassword
+      tags: [auth]
+      summary: Change password and revoke other sessions
+      security:
+        - CookieAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/PasswordChangeBody"
+      responses:
+        "204":
+          description: Password changed
 
   /checkout/validate-promo:
     post:
@@ -462,10 +541,10 @@ paths:
 
 components:
   securitySchemes:
-    BearerAuth:
-      type: http
-      scheme: bearer
-      bearerFormat: JWT
+    CookieAuth:
+      type: apiKey
+      in: cookie
+      name: __Host-dordor_access
 
   schemas:
     HealthStatus:
@@ -606,12 +685,15 @@ components:
         nickname:
           type: string
 
-    HostProfile:
+    AccountProfile:
       type: object
-      required: [id, fullName, email, phone, phoneVerified, trialUsed, remainingMinutes, createdAt, updatedAt]
+      required: [id, role, fullName, email, phone, phoneVerified, trialUsed, remainingMinutes, createdAt, updatedAt]
       properties:
         id:
           type: string
+        role:
+          type: string
+          enum: [host, participant]
         fullName:
           type: string
         email:
@@ -631,8 +713,11 @@ components:
 
     SignupRequestOtpBody:
       type: object
-      required: [fullName, email, phone, password]
+      required: [role, fullName, email, phone, password]
       properties:
+        role:
+          type: string
+          enum: [host, participant]
         fullName:
           type: string
         email:
@@ -642,7 +727,8 @@ components:
           type: string
         password:
           type: string
-          minLength: 8
+          minLength: 10
+          maxLength: 72
 
     SignupRequestOtpResult:
       type: object
@@ -661,27 +747,48 @@ components:
           type: string
         otp:
           type: string
-          minLength: 4
-          maxLength: 4
+          minLength: 6
+          maxLength: 6
 
     AuthResult:
       type: object
-      required: [token, host]
+      required: [account]
       properties:
-        token:
-          type: string
-        host:
-          $ref: "#/components/schemas/HostProfile"
+        account:
+          $ref: "#/components/schemas/AccountProfile"
 
     LoginBody:
       type: object
-      required: [identifier, password]
+      required: [role, identifier, password]
       properties:
+        role:
+          type: string
+          enum: [host, participant]
         identifier:
           type: string
           description: Email address or phone number
         password:
           type: string
+
+    ProfileUpdateBody:
+      type: object
+      required: [fullName]
+      properties:
+        fullName:
+          type: string
+          minLength: 2
+          maxLength: 80
+
+    PasswordChangeBody:
+      type: object
+      required: [currentPassword, newPassword]
+      properties:
+        currentPassword:
+          type: string
+        newPassword:
+          type: string
+          minLength: 10
+          maxLength: 72
 
     PromoValidate:
       type: object

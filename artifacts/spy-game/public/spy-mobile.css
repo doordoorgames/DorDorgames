@@ -69,6 +69,14 @@ button, input, select, textarea { max-width: 100%; }
   min-height: 44px;
 }
 
+.account-btn {
+  top: max(60px, calc(var(--spy-safe-top) + 52px));
+  right: max(8px, var(--spy-safe-right));
+  min-height: 40px;
+  padding: 6px 10px;
+  font-size: 0.85rem;
+}
+
 .alert-overlay,
 .word-guess-modal {
   padding: calc(12px + var(--spy-safe-top)) calc(12px + var(--spy-safe-right))

@@ -42,6 +42,7 @@ export async function ensureDatabaseSchema(): Promise<void> {
   try {
     await client.query("BEGIN");
     await client.query("CREATE SCHEMA IF NOT EXISTS forehead");
+    await client.query("CREATE EXTENSION IF NOT EXISTS pgcrypto");
     await client.query("SET LOCAL search_path TO forehead, public");
     await client.query("SELECT pg_advisory_xact_lock(1179864656)");
     await client.query(`
@@ -113,6 +114,55 @@ export async function ensureDatabaseSchema(): Promise<void> {
         started_at TIMESTAMP NOT NULL DEFAULT NOW(),
         ended_at TIMESTAMP,
         turn_number INTEGER NOT NULL DEFAULT 0
+      );
+
+      CREATE TABLE IF NOT EXISTS public.participants (
+        id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+        full_name TEXT NOT NULL,
+        email TEXT NOT NULL,
+        phone TEXT NOT NULL,
+        password_hash TEXT NOT NULL,
+        phone_verified BOOLEAN NOT NULL DEFAULT FALSE,
+        created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+        updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+      );
+
+      CREATE UNIQUE INDEX IF NOT EXISTS participants_email_key
+        ON public.participants (LOWER(email));
+      CREATE UNIQUE INDEX IF NOT EXISTS participants_phone_key
+        ON public.participants (phone);
+
+      CREATE TABLE IF NOT EXISTS public.pending_registrations (
+        phone TEXT PRIMARY KEY,
+        role TEXT NOT NULL CHECK (role IN ('host', 'participant')),
+        full_name TEXT NOT NULL,
+        email TEXT NOT NULL,
+        password_hash TEXT NOT NULL,
+        expires_at TIMESTAMPTZ NOT NULL,
+        created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+      );
+
+      CREATE TABLE IF NOT EXISTS public.auth_sessions (
+        id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+        account_id UUID NOT NULL,
+        role TEXT NOT NULL CHECK (role IN ('host', 'participant')),
+        refresh_token_hash TEXT NOT NULL UNIQUE,
+        user_agent TEXT,
+        expires_at TIMESTAMPTZ NOT NULL,
+        revoked_at TIMESTAMPTZ,
+        created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+        last_used_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+      );
+
+      CREATE INDEX IF NOT EXISTS auth_sessions_account_idx
+        ON public.auth_sessions (account_id, role);
+      CREATE INDEX IF NOT EXISTS auth_sessions_expiry_idx
+        ON public.auth_sessions (expires_at);
+
+      CREATE TABLE IF NOT EXISTS public.auth_rate_limits (
+        key_hash TEXT PRIMARY KEY,
+        attempts INTEGER NOT NULL,
+        reset_at TIMESTAMPTZ NOT NULL
       );
     `);
     await client.query("COMMIT");

@@ -147,7 +147,7 @@ export default function AdminDashboard() {
             {[
               { label: "TOTAL GAMES", value: stats.totalGames },
               { label: "ACTIVE ROOMS", value: stats.activeRooms },
-              { label: "TOTAL GUESTS", value: stats.totalGuests },
+              { label: "TOTAL PLAYERS", value: stats.totalGuests },
               { label: "ACTIVE GAMES", value: stats.activeGames },
             ].map((s) => (
               <div key={s.label} className="border border-destructive p-3 bg-destructive/10 text-center">
@@ -284,7 +284,7 @@ export default function AdminDashboard() {
                 <p className="text-xs font-mono text-muted-foreground">
                   GAME: {room.activeGame?.title || room.activeGameId}
                 </p>
-                <p className="text-xs font-mono text-muted-foreground">GUESTS: {room.guests.length}</p>
+                <p className="text-xs font-mono text-muted-foreground">PLAYERS: {room.guests.length}</p>
                 <button
                   onClick={() => handleCloseRoom(room.code)}
                   className="w-full py-1 border border-destructive text-destructive text-[10px] font-mono hover:bg-destructive/10"

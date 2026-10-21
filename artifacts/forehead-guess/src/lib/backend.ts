@@ -1,4 +1,7 @@
-const configuredApiOrigin = (import.meta.env.VITE_API_BASE_URL as string | undefined)?.replace(/\/+$/, "");
+const configuredApiOrigin = (
+  (import.meta.env.VITE_API_BASE_URL as string | undefined) ??
+  "https://dordorgames-production.up.railway.app"
+).replace(/\/+$/, "");
 
 export const apiBaseUrl = `${configuredApiOrigin ?? ""}/forehead`;
 

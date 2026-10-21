@@ -67,6 +67,28 @@ export default function Home({ mode }: { mode: 'forehead' | 'character' | 'chara
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => {
+    const controller = new AbortController();
+    fetch('https://dordorgames-production.up.railway.app/api/auth/me', {
+      credentials: 'include',
+      signal: controller.signal,
+      headers: { Accept: 'application/json' },
+    })
+      .then(async (response) => response.ok ? response.json() as Promise<{ fullName?: string }> : null)
+      .then((account) => {
+        const name = account?.fullName?.trim().slice(0, 20);
+        if (!name) return;
+        if (!createForm.getValues('hostName')) createForm.setValue('hostName', name);
+        if (!joinForm.getValues('playerName')) joinForm.setValue('playerName', name);
+      })
+      .catch((error: unknown) => {
+        if (!(error instanceof DOMException && error.name === 'AbortError')) {
+          console.debug('[Account] Profile name could not be loaded.');
+        }
+      });
+    return () => controller.abort();
+  }, [createForm, joinForm]);
+
+  useEffect(() => {
     if (!tutorial) return undefined;
     const closeOnEscape = (event: KeyboardEvent) => {
       if (event.key === 'Escape') setTutorial(null);
@@ -76,6 +98,11 @@ export default function Home({ mode }: { mode: 'forehead' | 'character' | 'chara
   }, [tutorial]);
 
   const onCreateSubmit = (values: z.infer<typeof createRoomSchema>) => {
+    const account = (window as typeof window & { DordorAccount?: { role?: string } }).DordorAccount;
+    if (account?.role !== 'host') {
+      toast({ title: 'Host account required', description: 'Sign in with a host account to create a room.', variant: 'destructive' });
+      return;
+    }
     console.log('[CreateRoom] submitting', { hostName: values.hostName, mode, lang });
     createRoomMutation.mutate(
       { data: { hostName: values.hostName, mode: mode === 'dykm' ? 'forehead' : mode, lang } },
@@ -137,7 +164,7 @@ export default function Home({ mode }: { mode: 'forehead' | 'character' | 'chara
       : (tutorial === 'ar' ? foreheadHowToAr : foreheadHowToEn);
   const backToGamesLink = (
     <a
-      href="https://dordor.games/"
+      href="https://www.dordor.games/"
       aria-label="Back to Home"
       style={{
         position: 'fixed', top: 'max(14px, env(safe-area-inset-top))', left: 16, zIndex: 60,
@@ -153,21 +180,39 @@ export default function Home({ mode }: { mode: 'forehead' | 'character' | 'chara
     </a>
   );
   const languageSwitcher = (
-    <button
-      type="button"
-      onClick={() => setLang(lang === 'ar' ? 'en' : 'ar')}
-      aria-label="Switch language"
+    <div
       style={{
         position: 'fixed', top: 'max(14px, env(safe-area-inset-top))', right: 16, zIndex: 60,
-        minWidth: 72, minHeight: 42, padding: '8px 12px',
-        color: '#fff', background: 'rgba(8, 8, 18, 0.78)',
-        border: '1px solid rgba(255,255,255,0.45)', borderRadius: 10,
-        fontSize: 14, fontWeight: 800, cursor: 'pointer',
-        boxShadow: '0 4px 16px rgba(0,0,0,0.28)', backdropFilter: 'blur(8px)',
+        display: 'flex', alignItems: 'center', gap: 8,
       }}
     >
-      {lang === 'ar' ? 'English' : 'العربية'}
-    </button>
+      <a
+        href="https://www.dordor.games/account"
+        style={{
+          minHeight: 42, padding: '8px 12px', display: 'inline-flex', alignItems: 'center',
+          color: '#fff', background: 'rgba(8, 8, 18, 0.78)', textDecoration: 'none',
+          border: '1px solid rgba(255,255,255,0.45)', borderRadius: 10,
+          fontSize: 14, fontWeight: 800, boxSizing: 'border-box',
+          boxShadow: '0 4px 16px rgba(0,0,0,0.28)', backdropFilter: 'blur(8px)',
+        }}
+      >
+        {lang === 'ar' ? 'الحساب' : 'Account'}
+      </a>
+      <button
+        type="button"
+        onClick={() => setLang(lang === 'ar' ? 'en' : 'ar')}
+        aria-label="Switch language"
+        style={{
+          minWidth: 72, minHeight: 42, padding: '8px 12px',
+          color: '#fff', background: 'rgba(8, 8, 18, 0.78)',
+          border: '1px solid rgba(255,255,255,0.45)', borderRadius: 10,
+          fontSize: 14, fontWeight: 800, cursor: 'pointer',
+          boxShadow: '0 4px 16px rgba(0,0,0,0.28)', backdropFilter: 'blur(8px)',
+        }}
+      >
+        {lang === 'ar' ? 'English' : 'العربية'}
+      </button>
+    </div>
   );
   const tutorialOverlay = tutorial ? (
     <div
@@ -237,11 +282,12 @@ export default function Home({ mode }: { mode: 'forehead' | 'character' | 'chara
           ))}
           <button type="button" onClick={() => setTutorial(lang)} style={{
             width: '100%', minHeight: 52, padding: '10px 18px',
-            background: 'rgba(255,255,255,0.12)', color: '#fff',
-            border: '2px solid rgba(255,255,255,0.72)', borderRadius: 12,
+            background: '#fff4d6', color: '#28143f',
+            border: '2px solid #fff', borderRadius: 12,
             fontSize: 17, fontWeight: 800, cursor: 'pointer',
             fontFamily: isAr ? "'Marhey', sans-serif" : "'Patrick Hand', cursive",
-          }}>{howToLabel}</button>
+            boxShadow: '0 5px 0 rgba(0,0,0,0.35)',
+          }}>▶ {howToLabel}</button>
         </div>
         {tutorialOverlay}
       </div>
@@ -705,11 +751,12 @@ export default function Home({ mode }: { mode: 'forehead' | 'character' | 'chara
                   onClick={() => setTutorial(lang)}
                   className="w-full h-12 font-bold tracking-wide transition-transform active:scale-95"
                   style={{
-                    background: 'rgba(255,255,255,0.08)', border: '2px solid rgba(255,255,255,0.65)',
-                    color: '#fff', fontFamily: isAr ? "'Changa', sans-serif" : undefined,
+                    background: '#f8e8ff', border: '2px solid #c219a6',
+                    color: '#4f0750', fontFamily: isAr ? "'Changa', sans-serif" : undefined,
+                    boxShadow: '0 4px 0 #7b126d',
                   }}
                 >
-                  {howToLabel}
+                  ▶ {howToLabel}
                 </button>
               </>
             ) : mode === 'forehead' ? (
@@ -751,11 +798,12 @@ export default function Home({ mode }: { mode: 'forehead' | 'character' | 'chara
                   onClick={() => setTutorial(lang)}
                   className="w-full h-12 font-bold tracking-wide transition-transform active:scale-95"
                   style={{
-                    background: 'rgba(255,255,255,0.08)', border: '2px solid rgba(255,255,255,0.65)',
-                    color: '#fff', fontFamily: isAr ? "'Changa', sans-serif" : "Arial, 'Helvetica Neue', sans-serif",
+                    background: '#fff', border: '2px solid #ff4fa3',
+                    color: '#8b0048', fontFamily: isAr ? "'Changa', sans-serif" : "Arial, 'Helvetica Neue', sans-serif",
+                    boxShadow: '0 4px 0 #a8005a',
                   }}
                 >
-                  {howToLabel}
+                  ▶ {howToLabel}
                 </button>
               </>
             ) : (

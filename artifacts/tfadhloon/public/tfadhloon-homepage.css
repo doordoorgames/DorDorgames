@@ -980,10 +980,16 @@ ALERT SYSTEM — full match with lobby CSS improvements
   width: min(76%, 350px) !important;
   min-height: 64px !important;
   height: auto !important;
+  padding: 14px 20px !important;
   margin-inline: auto !important;
   background: rgba(255, 248, 236, 0.94) !important;
   color: #761d49 !important;
   border: 3px solid #9e315f !important;
+  border-radius: 12px !important;
+  box-shadow: 0 5px 0 #6d173d !important;
+  font-size: clamp(1rem, 3.8vw, 1.25rem) !important;
+  font-weight: 900 !important;
+  cursor: pointer !important;
 }
 
 html body #backBtn {
