@@ -21,7 +21,9 @@ import AdminDashboard from "@/pages/admin-dashboard";
 import GameLauncher from "@/pages/game-launcher";
 import ShelvedGames from "@/pages/shelved-games";
 
-setBaseUrl(import.meta.env.VITE_API_BASE_URL ?? null);
+setBaseUrl(
+  import.meta.env.VITE_API_BASE_URL ?? "https://dordorgames-production.up.railway.app",
+);
 
 const queryClient = new QueryClient();
 
