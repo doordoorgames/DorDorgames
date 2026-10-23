@@ -14,7 +14,7 @@
   },
   "deploy": {
     "startCommand": "cd artifacts/api-server && node --enable-source-maps ./dist/index.mjs",
-    "healthcheckPath": "/",
-    "healthcheckTimeout": 100
+    "healthcheckPath": "/api/healthz",
+    "healthcheckTimeout": 300
   }
 }
