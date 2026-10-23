@@ -70,6 +70,7 @@ router.post("/rooms", requireHostIdentity, async (req, res) => {
     mode,
     lang,
     categoryId: body.data.categoryId ?? null,
+    fullAccess: req.hostAccount!.fullAccess,
     turnDuration: body.data.turnDuration ?? 60,
     roundCount: body.data.roundCount ?? 1,
   }).returning();

@@ -148,6 +148,7 @@ export async function ensureDatabaseSchema(): Promise<void> {
         phone_verified BOOLEAN NOT NULL DEFAULT FALSE,
         trial_used BOOLEAN NOT NULL DEFAULT FALSE,
         remaining_minutes INTEGER NOT NULL DEFAULT 0,
+        full_access BOOLEAN NOT NULL DEFAULT FALSE,
         created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
         updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
       );
@@ -187,6 +188,12 @@ export async function ensureDatabaseSchema(): Promise<void> {
         attempts INTEGER NOT NULL,
         reset_at TIMESTAMPTZ NOT NULL
       );
+
+      ALTER TABLE public.hosts
+        ADD COLUMN IF NOT EXISTS full_access BOOLEAN NOT NULL DEFAULT FALSE;
+
+      ALTER TABLE forehead.rooms
+        ADD COLUMN IF NOT EXISTS full_access BOOLEAN NOT NULL DEFAULT FALSE;
     `);
     await client.query("COMMIT");
   } catch (error) {

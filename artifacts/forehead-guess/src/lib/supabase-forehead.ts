@@ -79,7 +79,7 @@ export async function fetchForeheadCategories(
     // Build and sort alphabetically; filter out any accidental 0-count entries
     const categories: ForeheadCategory[] = Object.entries(countMap)
       .filter(([, count]) => count > 0)
-      .sort(([a], [b]) => a.localeCompare(b))
+      .sort(([a], [b]) => a.localeCompare(b, 'en'))
       .map(([name, wordCount], i) => ({ id: i + 1, name, wordCount }));
 
     const totalCategories = categories.length;

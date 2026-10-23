@@ -61,16 +61,19 @@ router.post("/checkout/pay", requireHostIdentity, async (req, res) => {
       });
       return;
     }
+
+    res.status(400).json({
+      success: false,
+      free: false,
+      message: "Invalid or expired promo code",
+    });
+    return;
   }
 
-  const remainingMinutes = await creditHost(hostId);
-  req.log.info({ phone: body.phone, hostId }, "Simulated payment processed");
-  res.json({
-    success: true,
+  res.status(503).json({
+    success: false,
     free: false,
-    message: "Payment of 2 KD processed (simulated). 3-hour host pass activated.",
-    expiresAt,
-    ...(remainingMinutes !== undefined ? { remainingMinutes } : {}),
+    message: "Payment gateway is not active yet.",
   });
 });
 

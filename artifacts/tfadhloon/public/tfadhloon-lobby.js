@@ -44,6 +44,9 @@
     Gamers: { ar: "اللعيبة", en: "Gamers" },
     Couples: { ar: "كبلز", en: "Couples" },
   };
+  const TRIAL_CATEGORIES = new Set(["Kuwaiti Girls", "Islamic Things", "Everything"]);
+  const hasFullAccess = () =>
+    window.DordorAccount?.role === "host" && window.DordorAccount.fullAccess === true;
 
   let game = null;
   let categories = [];
@@ -492,9 +495,10 @@
   function showCategoryDialog() {
     const dialog = document.createElement("div");
     dialog.className = "category-dialog";
-    const buttons = categories.map((category, index) =>
-      `<button type="button" data-category="${category}" class="category-dialog-btn menu-button compact shape-${index % 4 + 1}">${categoryLabel(category)}</button>`
-    ).join("");
+    const buttons = categories.map((category, index) => {
+      const locked = !hasFullAccess() && !TRIAL_CATEGORIES.has(category);
+      return `<button type="button" data-category="${category}" data-locked="${locked}" class="category-dialog-btn menu-button compact shape-${index % 4 + 1}${locked ? " trial-category-locked" : ""}" aria-label="${locked ? text("يتطلب الوصول الكامل", "Requires full access") + ": " : ""}${categoryLabel(category)}">${locked ? "🔒 " : ""}${categoryLabel(category)}</button>`;
+    }).join("");
     dialog.innerHTML = `
       <div class="category-dialog-container">
         <div class="category-dialog-header"><button class="category-dialog-close small-button icon shape-4" data-blob-variant="crescent">×</button><h2 class="category-dialog-heading">${text("اختر الفئة", "Select Category")}</h2></div>
@@ -503,6 +507,10 @@
     dialog.querySelector(".category-dialog-close").addEventListener("click", () => dialog.remove());
     dialog.querySelectorAll("[data-category]").forEach((button) => {
       button.addEventListener("click", async () => {
+        if (button.dataset.locked === "true") {
+          window.location.href = "https://www.dordor.games/pricing?game=tfadhloon";
+          return;
+        }
         const selected = button.dataset.category;
         const previousCategory = game?.selected_category || null;
 

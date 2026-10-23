@@ -11,6 +11,7 @@ export const roomsTable = foreheadSchema.table("rooms", {
   mode: text("mode").notNull().default("forehead"), // "forehead" | "character" | "charades"
   lang: text("lang").notNull().default("en"), // "en" | "ar"
   categoryId: integer("category_id").references(() => categoriesTable.id),
+  fullAccess: boolean("full_access").notNull().default(false),
   turnDuration: integer("turn_duration").notNull().default(60),
   roundCount: integer("round_count").notNull().default(1),
   currentTurnPlayerId: integer("current_turn_player_id"),

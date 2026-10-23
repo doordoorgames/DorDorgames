@@ -180,6 +180,7 @@ router.post("/auth/signup/verify-otp", async (req, res) => {
           phoneVerified,
           trialUsed: true,
           remainingMinutes: 60,
+          fullAccess: false,
         }), role: "host" as const }
       : { ...await participants.create({
           fullName: pending.fullName,

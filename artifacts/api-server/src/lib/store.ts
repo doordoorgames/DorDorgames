@@ -86,6 +86,7 @@ export interface Host {
   phoneVerified: boolean;
   trialUsed: boolean;
   remainingMinutes: number;
+  fullAccess: boolean;
   createdAt: string;
   updatedAt: string;
 }
@@ -110,6 +111,7 @@ interface HostRow {
   phone_verified: boolean;
   trial_used: boolean;
   remaining_minutes: number;
+  full_access: boolean;
   created_at: string;
   updated_at: string;
 }
@@ -124,6 +126,7 @@ function rowToHost(row: HostRow): Host {
     phoneVerified: row.phone_verified,
     trialUsed: row.trial_used,
     remainingMinutes: row.remaining_minutes,
+    fullAccess: row.full_access,
     createdAt: row.created_at,
     updatedAt: row.updated_at,
   };
@@ -167,8 +170,8 @@ const hostsStore = {
   ): Promise<Host> {
     const result = await pool.query<HostRow>(
       `INSERT INTO public.hosts
-        (full_name, email, phone, password_hash, phone_verified, trial_used, remaining_minutes)
-       VALUES ($1, $2, $3, $4, $5, $6, $7)
+        (full_name, email, phone, password_hash, phone_verified, trial_used, remaining_minutes, full_access)
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
        RETURNING *`,
       [
         input.fullName,
@@ -178,6 +181,7 @@ const hostsStore = {
         input.phoneVerified,
         input.trialUsed,
         input.remainingMinutes,
+        input.fullAccess,
       ],
     );
     return rowToHost(result.rows[0]);
@@ -192,7 +196,8 @@ const hostsStore = {
     const result = await pool.query<HostRow>(
       `UPDATE public.hosts SET
         full_name = $2, email = $3, phone = $4, password_hash = $5,
-        phone_verified = $6, trial_used = $7, remaining_minutes = $8, updated_at = NOW()
+        phone_verified = $6, trial_used = $7, remaining_minutes = $8,
+        full_access = $9, updated_at = NOW()
        WHERE id = $1 RETURNING *`,
       [
         id,
@@ -203,6 +208,7 @@ const hostsStore = {
         next.phoneVerified,
         next.trialUsed,
         next.remainingMinutes,
+        next.fullAccess,
       ],
     );
     return result.rows[0] ? rowToHost(result.rows[0]) : undefined;
@@ -219,6 +225,7 @@ const hostsStore = {
     if (!current) return undefined;
     return this.update(id, {
       remainingMinutes: current.remainingMinutes + minutes,
+      fullAccess: true,
     });
   },
 };

@@ -754,6 +754,16 @@ CATEGORY DIALOG
   text-shadow: var(--tf-text-shadow) !important;
 }
 
+.category-dialog-btn.trial-category-locked {
+  filter: saturate(0.35);
+  opacity: 0.72;
+  cursor: pointer;
+}
+
+.category-dialog-btn.trial-category-locked:hover {
+  opacity: 0.9;
+}
+
 .category-dialog-footer {
   flex-shrink: 0;
   text-align: center;

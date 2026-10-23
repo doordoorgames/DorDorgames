@@ -19,6 +19,25 @@ const HEADERS = {
 
 const ARABIC_RE = /[\u0600-\u06FF]/;
 
+export async function fetchForeheadCategoryNames(lang?: string): Promise<string[]> {
+  const table = lang === 'ar' ? 'forehead_arabic_1' : 'forehead_english';
+  const names = new Set<string>();
+  const pageSize = 1000;
+
+  for (let offset = 0; ; offset += pageSize) {
+    const url =
+      `${SUPABASE_URL}/rest/v1/${table}` +
+      `?active=eq.true&select=category&limit=${pageSize}&offset=${offset}`;
+    const response = await fetch(url, { headers: HEADERS });
+    if (!response.ok) throw new Error(`Unable to load ${table} categories`);
+    const rows = (await response.json()) as Array<{ category?: string }>;
+    for (const row of rows) if (row.category) names.add(row.category);
+    if (rows.length < pageSize) break;
+  }
+
+  return [...names].sort((a, b) => a.localeCompare(b, 'en'));
+}
+
 export async function fetchCharactersFromSupabase(
   lang?: string,
 ): Promise<{ characters: SupabaseCharacterEntry[]; error: string | null }> {

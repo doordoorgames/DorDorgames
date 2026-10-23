@@ -178,6 +178,6 @@ export const requireHost: RequestHandler = async (req, res, next) => {
 export function safeAccount(account: Account) {
   const { passwordHash: _, ...safe } = account;
   return account.role === "participant"
-    ? { ...safe, trialUsed: false, remainingMinutes: 0 }
+    ? { ...safe, trialUsed: false, remainingMinutes: 0, fullAccess: false }
     : safe;
 }

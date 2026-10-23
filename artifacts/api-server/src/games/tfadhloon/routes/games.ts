@@ -1,6 +1,10 @@
 import { Router, type IRouter, type Request, type Response } from "express";
 import { getSupabaseClient } from "../lib/supabase.js";
 import { requireAccount, requireHostIdentity } from "../../../lib/auth.js";
+import {
+  canUseTrialCategory,
+  TFADHLOON_TRIAL_CATEGORIES,
+} from "../../../lib/category-access.js";
 
 const router: IRouter = Router();
 
@@ -201,7 +205,7 @@ router.use(requireAccount);
 
 // ─── UPDATE GAME SETTINGS (host only) ────────────────────────────────────────
 
-router.patch("/games/:code", async (req: Request, res: Response) => {
+router.patch("/games/:code", requireHostIdentity, async (req: Request, res: Response) => {
   const { code } = req.params;
   const updates = req.body as Record<string, unknown>;
   const db = getSupabaseClient();
@@ -214,6 +218,14 @@ router.patch("/games/:code", async (req: Request, res: Response) => {
   const filtered: Record<string, unknown> = {};
   for (const k of allowed) {
     if (k in updates) filtered[k] = updates[k];
+  }
+
+  if (
+    typeof filtered.selected_category === "string" &&
+    !canUseTrialCategory(req.account, filtered.selected_category, TFADHLOON_TRIAL_CATEGORIES)
+  ) {
+    sendError(res, 403, "This category requires full access");
+    return;
   }
 
   if (Object.keys(filtered).length === 0) {
@@ -231,7 +243,7 @@ router.patch("/games/:code", async (req: Request, res: Response) => {
 
 // ─── START GAME (host only) ──────────────────────────────────────────────────
 
-router.post("/games/:code/start", async (req: Request, res: Response) => {
+router.post("/games/:code/start", requireHostIdentity, async (req: Request, res: Response) => {
   const { code } = req.params;
   const db = getSupabaseClient();
 
@@ -279,6 +291,10 @@ router.post("/games/:code/start", async (req: Request, res: Response) => {
   }
   if (!game.selected_category) {
     sendError(res, 400, "A category must be selected before starting");
+    return;
+  }
+  if (!canUseTrialCategory(req.account, game.selected_category, TFADHLOON_TRIAL_CATEGORIES)) {
+    sendError(res, 403, "This category requires full access");
     return;
   }
 

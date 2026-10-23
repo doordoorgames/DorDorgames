@@ -9,7 +9,8 @@ import {
 } from "@workspace/db";
 import { eq, and } from "drizzle-orm";
 import { logger } from "../../../lib/logger";
-import { fetchForeheadWordsByFlatCategory, fetchCharactersFromSupabase, fetchCharadesFromSupabase, SupabaseCharacterEntry } from "../lib/supabase-forehead";
+import { fetchForeheadCategoryNames, fetchForeheadWordsByFlatCategory, fetchCharactersFromSupabase, fetchCharadesFromSupabase, SupabaseCharacterEntry } from "../lib/supabase-forehead";
+import { TRIAL_CATEGORY_LIMIT } from "../../../lib/category-access.js";
 type CharacterEntry = SupabaseCharacterEntry;
 
 // ── CLIENT REGISTRY ──────────────────────────────────────────────────────────
@@ -514,6 +515,19 @@ async function handleMessage(ws: WebSocket, client: WsClient, raw: string) {
     });
     if (host?.id !== client.playerId) return;
     if (kkCategoryId != null && supabaseCategory) {
+      if (!room.fullAccess) {
+        try {
+          const trialCategories = (await fetchForeheadCategoryNames(room.lang)).slice(0, TRIAL_CATEGORY_LIMIT);
+          if (!trialCategories.includes(supabaseCategory)) {
+            sendTo(ws, { type: "error", payload: { message: "This category requires full access" } });
+            return;
+          }
+        } catch (error) {
+          logger.error({ error, roomCode }, "Could not validate trial category");
+          sendTo(ws, { type: "error", payload: { message: "Could not validate category access" } });
+          return;
+        }
+      }
       roomSupabaseCategory.set(roomCode, { kkCategoryId, categoryName: supabaseCategory });
       await db.update(roomsTable).set({ categoryId: null }).where(eq(roomsTable.code, roomCode));
     } else {
@@ -535,6 +549,20 @@ async function handleMessage(ws: WebSocket, client: WsClient, raw: string) {
     if (!room.categoryId && !roomSupabaseCategory.has(roomCode)) {
       sendTo(ws, { type: "error", payload: { message: "Please select a category first" } });
       return;
+    }
+    const selectedSupabaseCategory = roomSupabaseCategory.get(roomCode)?.categoryName;
+    if (!room.fullAccess && selectedSupabaseCategory) {
+      try {
+        const trialCategories = (await fetchForeheadCategoryNames(room.lang)).slice(0, TRIAL_CATEGORY_LIMIT);
+        if (!trialCategories.includes(selectedSupabaseCategory)) {
+          sendTo(ws, { type: "error", payload: { message: "This category requires full access" } });
+          return;
+        }
+      } catch (error) {
+        logger.error({ error, roomCode }, "Could not validate trial category before start");
+        sendTo(ws, { type: "error", payload: { message: "Could not validate category access" } });
+        return;
+      }
     }
     const players = await db.select().from(playersTable).where(eq(playersTable.roomId, room.id));
     const connected = players.filter((p) => p.connected);
