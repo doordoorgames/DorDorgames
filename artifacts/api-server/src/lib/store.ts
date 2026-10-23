@@ -1,6 +1,6 @@
 import fs from "fs";
 import path from "path";
-import { getSupabase } from "./supabase.js";
+import { pool } from "@workspace/db";
 
 // NOTE: do not derive this from import.meta.url / __dirname. The production
 // build bundles the whole server into a single flat dist/index.mjs, which
@@ -100,11 +100,7 @@ export interface PromoCode {
 
 const BUILT_IN_PROMO_CODES = ["DOORDOOR"];
 
-// ---- Hosts (Supabase-backed) ----
-// Host accounts live in Supabase (table: public.hosts), not in the local
-// JSON files, so account data survives redeploys/restarts and is not tied
-// to this container's filesystem. See
-// artifacts/api-server/supabase/migrations/0001_create_hosts_table.sql.
+// ---- Hosts (PostgreSQL-backed) ----
 interface HostRow {
   id: string;
   full_name: string;
@@ -133,93 +129,83 @@ function rowToHost(row: HostRow): Host {
   };
 }
 
-function assertNoError<T>(
-  result: { data: T | null; error: { message: string } | null },
-  context: string,
-): T {
-  if (result.error) {
-    throw new Error(`Supabase hosts.${context} failed: ${result.error.message}`);
-  }
-  if (result.data === null) {
-    throw new Error(`Supabase hosts.${context} returned no data`);
-  }
-  return result.data;
-}
-
 const hostsStore = {
   async list(): Promise<Host[]> {
-    const result = await getSupabase().from("hosts").select("*");
-    return assertNoError(result, "list").map((row) => rowToHost(row as HostRow));
+    const result = await pool.query<HostRow>(
+      "SELECT * FROM public.hosts ORDER BY created_at DESC",
+    );
+    return result.rows.map(rowToHost);
   },
   async get(id: string): Promise<Host | undefined> {
-    const result = await getSupabase()
-      .from("hosts")
-      .select("*")
-      .eq("id", id)
-      .maybeSingle();
-    const row = assertNoError(result, "get");
-    return row ? rowToHost(row) : undefined;
+    const result = await pool.query<HostRow>(
+      "SELECT * FROM public.hosts WHERE id = $1",
+      [id],
+    );
+    return result.rows[0] ? rowToHost(result.rows[0]) : undefined;
   },
   async getByPhone(phone: string): Promise<Host | undefined> {
-    const result = await getSupabase()
-      .from("hosts")
-      .select("*")
-      .eq("phone", phone)
-      .maybeSingle();
-    const row = assertNoError(result, "getByPhone");
-    return row ? rowToHost(row) : undefined;
+    const result = await pool.query<HostRow>(
+      "SELECT * FROM public.hosts WHERE phone = $1",
+      [phone],
+    );
+    return result.rows[0] ? rowToHost(result.rows[0]) : undefined;
   },
   async getByEmail(email: string): Promise<Host | undefined> {
-    const result = await getSupabase()
-      .from("hosts")
-      .select("*")
-      .ilike("email", email)
-      .maybeSingle();
-    const row = assertNoError(result, "getByEmail");
-    return row ? rowToHost(row) : undefined;
+    const result = await pool.query<HostRow>(
+      "SELECT * FROM public.hosts WHERE LOWER(email) = LOWER($1)",
+      [email],
+    );
+    return result.rows[0] ? rowToHost(result.rows[0]) : undefined;
   },
   async getByIdentifier(identifier: string): Promise<Host | undefined> {
     const byEmail = await this.getByEmail(identifier);
     if (byEmail) return byEmail;
     return this.getByPhone(identifier);
   },
-  async create(input: Omit<Host, "id" | "createdAt" | "updatedAt">): Promise<Host> {
-    const result = await getSupabase()
-      .from("hosts")
-      .insert({
-        full_name: input.fullName,
-        email: input.email,
-        phone: input.phone,
-        password_hash: input.passwordHash,
-        phone_verified: input.phoneVerified,
-        trial_used: input.trialUsed,
-        remaining_minutes: input.remainingMinutes,
-      })
-      .select("*")
-      .single();
-    return rowToHost(assertNoError(result, "create"));
+  async create(
+    input: Omit<Host, "id" | "createdAt" | "updatedAt">,
+  ): Promise<Host> {
+    const result = await pool.query<HostRow>(
+      `INSERT INTO public.hosts
+        (full_name, email, phone, password_hash, phone_verified, trial_used, remaining_minutes)
+       VALUES ($1, $2, $3, $4, $5, $6, $7)
+       RETURNING *`,
+      [
+        input.fullName,
+        input.email.toLowerCase(),
+        input.phone,
+        input.passwordHash,
+        input.phoneVerified,
+        input.trialUsed,
+        input.remainingMinutes,
+      ],
+    );
+    return rowToHost(result.rows[0]);
   },
   async update(
     id: string,
     updates: Partial<Omit<Host, "id" | "createdAt">>,
   ): Promise<Host | undefined> {
-    const patch: Record<string, unknown> = { updated_at: new Date().toISOString() };
-    if (updates.fullName !== undefined) patch.full_name = updates.fullName;
-    if (updates.email !== undefined) patch.email = updates.email;
-    if (updates.phone !== undefined) patch.phone = updates.phone;
-    if (updates.passwordHash !== undefined) patch.password_hash = updates.passwordHash;
-    if (updates.phoneVerified !== undefined) patch.phone_verified = updates.phoneVerified;
-    if (updates.trialUsed !== undefined) patch.trial_used = updates.trialUsed;
-    if (updates.remainingMinutes !== undefined) patch.remaining_minutes = updates.remainingMinutes;
-
-    const result = await getSupabase()
-      .from("hosts")
-      .update(patch)
-      .eq("id", id)
-      .select("*")
-      .maybeSingle();
-    const row = assertNoError(result, "update");
-    return row ? rowToHost(row) : undefined;
+    const current = await this.get(id);
+    if (!current) return undefined;
+    const next = { ...current, ...updates };
+    const result = await pool.query<HostRow>(
+      `UPDATE public.hosts SET
+        full_name = $2, email = $3, phone = $4, password_hash = $5,
+        phone_verified = $6, trial_used = $7, remaining_minutes = $8, updated_at = NOW()
+       WHERE id = $1 RETURNING *`,
+      [
+        id,
+        next.fullName,
+        next.email.toLowerCase(),
+        next.phone,
+        next.passwordHash,
+        next.phoneVerified,
+        next.trialUsed,
+        next.remainingMinutes,
+      ],
+    );
+    return result.rows[0] ? rowToHost(result.rows[0]) : undefined;
   },
   async deductTime(id: string, minutes: number): Promise<Host | undefined> {
     const current = await this.get(id);
@@ -260,7 +246,10 @@ export const store = {
       writeJson("games.json", games);
       return game;
     },
-    update(id: string, updates: Partial<Omit<Game, "id" | "createdAt">>): Game | undefined {
+    update(
+      id: string,
+      updates: Partial<Omit<Game, "id" | "createdAt">>,
+    ): Game | undefined {
       const games = readJson<Game[]>("games.json", getDefaultGames()).map(
         (g) => ({ ...g, externalUrl: g.externalUrl ?? null }),
       );
@@ -309,7 +298,11 @@ export const store = {
       }
       return count;
     },
-    create(hostPhone: string, gameId: string, durationMinutes: number = 180): Room {
+    create(
+      hostPhone: string,
+      gameId: string,
+      durationMinutes: number = 180,
+    ): Room {
       const rooms = readJson<Room[]>("rooms.json", []);
       const code = generateRoomCode();
       const now = new Date();
@@ -328,7 +321,10 @@ export const store = {
       writeJson("rooms.json", rooms);
       return room;
     },
-    update(code: string, updates: Partial<Omit<Room, "id" | "code" | "createdAt">>): Room | undefined {
+    update(
+      code: string,
+      updates: Partial<Omit<Room, "id" | "code" | "createdAt">>,
+    ): Room | undefined {
       const rooms = readJson<Room[]>("rooms.json", []);
       const idx = rooms.findIndex((r) => r.code === code);
       if (idx === -1) return undefined;
@@ -390,7 +386,10 @@ export const store = {
       return true;
     },
     incrementUsage(code: string): void {
-      const codes = readJson<PromoCode[]>("promo_codes.json", getDefaultPromoCodes());
+      const codes = readJson<PromoCode[]>(
+        "promo_codes.json",
+        getDefaultPromoCodes(),
+      );
       const idx = codes.findIndex(
         (p) => p.code.toUpperCase() === code.toUpperCase(),
       );
@@ -474,7 +473,6 @@ function getDefaultGames(): Game[] {
     },
   ];
 }
-
 
 function getDefaultPromoCodes(): PromoCode[] {
   return [

@@ -21,12 +21,19 @@ export const pool = new Pool({
 export const db = drizzle(pool, { schema });
 
 pool.on("error", (error) => {
-  console.error("[database] unexpected idle client error", formatDatabaseError(error));
+  console.error(
+    "[database] unexpected idle client error",
+    formatDatabaseError(error),
+  );
 });
 
 export function formatDatabaseError(error: unknown) {
   if (!(error instanceof Error)) return { message: String(error) };
-  const pgError = error as Error & { code?: string; detail?: string; hint?: string };
+  const pgError = error as Error & {
+    code?: string;
+    detail?: string;
+    hint?: string;
+  };
   return {
     name: pgError.name,
     message: pgError.message,
@@ -131,6 +138,22 @@ export async function ensureDatabaseSchema(): Promise<void> {
         ON public.participants (LOWER(email));
       CREATE UNIQUE INDEX IF NOT EXISTS participants_phone_key
         ON public.participants (phone);
+
+      CREATE TABLE IF NOT EXISTS public.hosts (
+        id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+        full_name TEXT NOT NULL,
+        email TEXT NOT NULL,
+        phone TEXT NOT NULL,
+        password_hash TEXT NOT NULL,
+        phone_verified BOOLEAN NOT NULL DEFAULT FALSE,
+        trial_used BOOLEAN NOT NULL DEFAULT FALSE,
+        remaining_minutes INTEGER NOT NULL DEFAULT 0,
+        created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+        updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+      );
+
+      CREATE UNIQUE INDEX IF NOT EXISTS hosts_email_key ON public.hosts (LOWER(email));
+      CREATE UNIQUE INDEX IF NOT EXISTS hosts_phone_key ON public.hosts (phone);
 
       CREATE TABLE IF NOT EXISTS public.pending_registrations (
         phone TEXT PRIMARY KEY,
