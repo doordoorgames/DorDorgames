@@ -59,7 +59,11 @@ export function AccountPortal({ initialRole }: { initialRole: Role }) {
   const [newPassword, setNewPassword] = useState("");
 
   const me = useGetAuthMe({
-    query: { queryKey: getGetAuthMeQueryKey(), retry: false },
+    query: {
+      queryKey: getGetAuthMeQueryKey(),
+      retry: false,
+      refetchOnWindowFocus: false,
+    },
   });
   const login = useAuthLogin();
   const requestOtp = useAuthSignupRequestOtp();
