@@ -545,14 +545,13 @@ export function PublicHome() {
                 {ids.map((id) => {
                   const g = games.find((game) => game.id === id);
                   if (!g) return null;
-                  const pricingUrl = `/pricing?game=${encodeURIComponent(id)}`;
                   return (
                     <article className="dd-game" key={id}>
-                      <Link
-                        href={pricingUrl}
+                      <a
+                        href={g.externalUrl}
                         aria-label={t(
-                          `View hosting options for ${g.title}`,
-                          `عرض باقات استضافة ${arabicNames[id]}`,
+                          `Start a free trial of ${g.title}`,
+                          `ابدأ التجربة المجانية للعبة ${arabicNames[id]}`,
                         )}
                       >
                         <img
@@ -560,14 +559,14 @@ export function PublicHome() {
                           alt={ar ? arabicNames[id] : g.title}
                           loading="lazy"
                         />
-                      </Link>
+                      </a>
                       <h3>{ar ? arabicNames[id] : g.title}</h3>
                       <p>{ar ? g.descriptionAr : g.description}</p>
                       <div>
-                        <Link href={pricingUrl}>
-                          {t("Host Game", "استضف اللعبة")}
+                        <a href={g.externalUrl}>
+                          {t("Free Trial", "تجربة مجانية")}
                           <ArrowUpRight size={16} />
-                        </Link>
+                        </a>
                       </div>
                     </article>
                   );
