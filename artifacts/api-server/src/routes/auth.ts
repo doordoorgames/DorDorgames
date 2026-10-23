@@ -27,7 +27,7 @@ import {
   safeAccount,
   setSessionCookies,
 } from "../lib/auth.js";
-import { sendVerification, checkVerification } from "../lib/twilio.js";
+import { sendVerification, checkVerification, isMockVerification } from "../lib/twilio.js";
 
 const router: IRouter = Router();
 const RoleSchema = z.enum(["host", "participant"]);
@@ -170,13 +170,14 @@ router.post("/auth/signup/verify-otp", async (req, res) => {
   }
 
   try {
+    const phoneVerified = !isMockVerification(phone);
     const account = pending.role === "host"
       ? { ...await store.hosts.create({
           fullName: pending.fullName,
           email: pending.email,
           phone: pending.phone,
           passwordHash: pending.passwordHash,
-          phoneVerified: true,
+          phoneVerified,
           trialUsed: true,
           remainingMinutes: 60,
         }), role: "host" as const }
@@ -185,7 +186,7 @@ router.post("/auth/signup/verify-otp", async (req, res) => {
           email: pending.email,
           phone: pending.phone,
           passwordHash: pending.passwordHash,
-          phoneVerified: true,
+          phoneVerified,
         }), role: "participant" as const };
 
     await deletePendingRegistration(phone);
@@ -212,7 +213,7 @@ router.post("/auth/login", async (req, res) => {
 
   const account = await findAccountByIdentifier(role, normalizedIdentifier);
   const valid = account ? await comparePassword(password, account.passwordHash) : false;
-  if (!account || !valid || !account.phoneVerified) {
+  if (!account || !valid || (!account.phoneVerified && !isMockVerification(account.phone))) {
     res.status(401).json({ error: "Invalid credentials" });
     return;
   }
