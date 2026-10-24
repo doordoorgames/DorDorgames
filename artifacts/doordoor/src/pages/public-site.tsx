@@ -578,12 +578,6 @@ export function PublicHome() {
                       </a>
                       <h3>{ar ? arabicNames[id] : g.title}</h3>
                       <p>{ar ? g.descriptionAr : g.description}</p>
-                      <div>
-                        <a href={gameHref(g.externalUrl)}>
-                          {t("Play Game", "العب الآن")}
-                          <ArrowUpRight size={16} />
-                        </a>
-                      </div>
                     </article>
                   );
                 })}

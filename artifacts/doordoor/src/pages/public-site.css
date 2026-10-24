@@ -262,21 +262,6 @@
   font-size: 12px;
   line-height: 1.5;
 }
-.dd-game > div {
-  display: flex;
-  justify-content: space-between;
-  gap: 12px;
-  font-size: 14px;
-  color: #c8c2d9;
-}
-.dd-game > div a {
-  display: inline-flex;
-  gap: 5px;
-  align-items: center;
-}
-.dd-game > div a:last-child {
-  color: #ffca36;
-}
 .dd-how {
   background: linear-gradient(120deg, #161020, #11101d 65%, #1d1620);
   border-block: 1px solid #302b40;

@@ -46,9 +46,18 @@ document.addEventListener("DOMContentLoaded", () => {
 
   let creating=false;
   $("newGameBtn").onclick=async()=>{
+    let account=await window.DordorAccountReady;
+    try{let response=await fetch("https://dordorgames-production.up.railway.app/api/auth/me",{credentials:"include",headers:{Accept:"application/json"}});if(response.status===401){const refreshed=await fetch("https://dordorgames-production.up.railway.app/api/auth/refresh",{method:"POST",credentials:"include"});if(refreshed.ok)response=await fetch("https://dordorgames-production.up.railway.app/api/auth/me",{credentials:"include",headers:{Accept:"application/json"}});}if(!response.ok)throw new Error("ACCOUNT_CHECK_FAILED");account=await response.json();}catch(_){alert(lang()==="ar"?"تعذر التحقق من وقت الاستضافة. حاول مرة أخرى.":"Unable to verify hosting time. Please try again.");return;}
+    if(account?.role!=="host"){
+      const wantsPass=confirm(lang()==="ar"?"إنشاء لعبة يتطلب باقة استضافة مدفوعة. هل تريد عرض الباقات؟":"Creating a game requires a paid hosting pass. View plans now?");
+      if(wantsPass)location.href="https://www.dordor.games/pricing?game=spy";
+      return;
+    }
+    const active=account.activeSessionEndsAt&&new Date(account.activeSessionEndsAt).getTime()>Date.now();
+    if(!active&&Number(account.remainingMinutes||0)<=0){const wantsTime=confirm(lang()==="ar"?"انتهى وقت الاستضافة. هل تريد شراء وقت إضافي؟":"Your hosting time has ended. Buy more time?");if(wantsTime)location.href="https://www.dordor.games/pricing?game=spy";return;}
     if($("newGameInput").classList.contains("d-none")){$("newGameInput").classList.remove("d-none");$("joinGameSection").classList.add("d-none");$("newGameInput").focus();return;}
     if(creating)return;creating=true;
-    try{const created=await C.createRoom($("newGameInput").value,lang());navigate(created.code);}catch(e){alert(C.message(e));creating=false;}
+    try{const created=await C.createRoom($("newGameInput").value,lang());navigate(created.code);}catch(e){if(String(e?.message)==="HOSTING_TIME_REQUIRED"&&confirm(lang()==="ar"?"انتهى وقت الاستضافة. هل تريد شراء وقت إضافي؟":"Your hosting time has ended. Buy more time?"))location.href="https://www.dordor.games/pricing?game=spy";else if(String(e?.message)!=="HOSTING_TIME_REQUIRED")alert(C.message(e));creating=false;}
   };
 
   let joining=false;

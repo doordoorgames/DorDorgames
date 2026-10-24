@@ -40,16 +40,6 @@ export default function Room() {
 
   const socket = useGameSocket(code || '', playerId, playerName);
 
-  if (!code || !playerId || !playerName) return null;
-
-  if (isRoomLoading && !socket.roomState) {
-    return (
-      <div className="min-h-[100dvh] flex items-center justify-center">
-        <Loader2 className="w-16 h-16 animate-spin text-primary" />
-      </div>
-    );
-  }
-
   const roomState = socket.roomState || (initialRoom ? {
     code: initialRoom.code,
     status: initialRoom.status as RoomState['status'],
@@ -62,6 +52,43 @@ export default function Room() {
   const status = roomState?.status || 'waiting';
   const mode = roomState?.mode ?? 'forehead';
   const hostReconnecting = socket.roomState?.hostReconnecting ?? false;
+  const gameIsActive = status !== 'waiting' && status !== 'finished';
+
+  const goHome = () => {
+    if (gameIsActive && !window.confirm(lang === 'ar' ? 'هل تريد مغادرة اللعبة الجارية؟' : 'Leave the active game?')) return;
+    setLocation('/home');
+  };
+
+  useEffect(() => {
+    if (!gameIsActive) return undefined;
+    const confirmBrowserLeave = (event: BeforeUnloadEvent) => {
+      event.preventDefault();
+      event.returnValue = '';
+    };
+    window.addEventListener('beforeunload', confirmBrowserLeave);
+    return () => window.removeEventListener('beforeunload', confirmBrowserLeave);
+  }, [gameIsActive]);
+
+  const backToHome = (
+    <button
+      type="button"
+      onClick={goHome}
+      aria-label={lang === 'ar' ? 'العودة للرئيسية' : 'Back to Home'}
+      className="fixed left-4 top-4 z-[110] min-h-11 rounded-xl border border-white/50 bg-black/85 px-4 py-2 text-sm font-extrabold text-white shadow-xl backdrop-blur-md"
+    >
+      ← {lang === 'ar' ? 'الرئيسية' : 'Back to Home'}
+    </button>
+  );
+
+  if (!code || !playerId || !playerName) return null;
+
+  if (isRoomLoading && !socket.roomState) {
+    return (
+      <div className="min-h-[100dvh] flex items-center justify-center">
+        <Loader2 className="w-16 h-16 animate-spin text-primary" />
+      </div>
+    );
+  }
 
   const hostReconnectingBanner = hostReconnecting ? (
     <div style={{
@@ -76,17 +103,30 @@ export default function Room() {
     </div>
   ) : null;
 
+  const accessErrorBanner = socket.error ? (
+    <div className="fixed left-1/2 top-20 z-[120] w-[min(92vw,560px)] -translate-x-1/2 rounded-xl border border-red-300/60 bg-black/95 p-4 text-center font-bold text-white shadow-2xl">
+      <p>{socket.error}</p>
+      {socket.error.includes('hosting session') && (
+        <a href="https://www.dordor.games/pricing" className="mt-3 inline-block rounded-lg bg-yellow-300 px-5 py-2 text-black">
+          {lang === 'ar' ? 'اشترِ وقتًا' : 'Buy Time'}
+        </a>
+      )}
+    </div>
+  ) : null;
+
   // Character mode: render dedicated component
   if (mode === 'character') {
     return (
       <>
+        {backToHome}
         {hostReconnectingBanner}
+        {accessErrorBanner}
         <CharacterRoom
           code={code}
           playerId={playerId}
           roomState={roomState}
           socket={socket}
-          onGoHome={() => setLocation('/home')}
+          onGoHome={goHome}
         />
       </>
     );
@@ -96,13 +136,15 @@ export default function Room() {
   if (mode === 'charades') {
     return (
       <>
+        {backToHome}
         {hostReconnectingBanner}
+        {accessErrorBanner}
         <CharadesRoom
           code={code}
           playerId={playerId}
           roomState={roomState}
           socket={socket}
-          onGoHome={() => setLocation('/home')}
+          onGoHome={goHome}
         />
       </>
     );
@@ -111,12 +153,9 @@ export default function Room() {
   // Forehead mode
   return (
     <div className="game-container min-h-[100dvh] text-foreground flex flex-col relative" style={{ overflowX: 'hidden', overflowY: 'auto' }}>
+      {backToHome}
       {hostReconnectingBanner}
-      {socket.error && (
-        <div className="fixed top-0 left-0 right-0 z-50 bg-destructive text-destructive-foreground p-3 text-center font-bold text-lg">
-          {socket.error}
-        </div>
-      )}
+      {accessErrorBanner}
 
       {status === 'waiting' && roomState && (
         <LobbyView
@@ -157,7 +196,7 @@ export default function Room() {
       )}
 
       {status === 'finished' && (
-        <FinishedView onGoHome={() => setLocation('/home')} />
+        <FinishedView onGoHome={goHome} />
       )}
     </div>
   );

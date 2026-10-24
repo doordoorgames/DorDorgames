@@ -20,6 +20,7 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { useToast } from '@/hooks/use-toast';
 import { useLang } from '@/context/LanguageContext';
+import { apiBaseUrl } from '@/lib/backend';
 
 const createRoomSchema = z.object({
   hostName: z.string().min(1).max(20),
@@ -97,12 +98,45 @@ export default function Home({ mode }: { mode: 'forehead' | 'character' | 'chara
     return () => document.removeEventListener('keydown', closeOnEscape);
   }, [tutorial]);
 
-  const onCreateSubmit = (values: z.infer<typeof createRoomSchema>) => {
-    const account = (window as typeof window & { DordorAccount?: { role?: string } }).DordorAccount;
-    if (account?.role !== 'host') {
-      toast({ title: 'Host account required', description: 'Sign in with a host account to create a room.', variant: 'destructive' });
-      return;
+  const requestCreateAccess = async () => {
+    type AccountAccess = { role?: string; remainingMinutes?: number; activeSessionEndsAt?: string | null };
+    let account = (window as typeof window & { DordorAccount?: AccountAccess }).DordorAccount;
+    try {
+      const authOrigin = apiBaseUrl.replace(/\/forehead$/, '');
+      let response = await fetch(`${authOrigin}/api/auth/me`, {
+        credentials: 'include',
+        headers: { Accept: 'application/json' },
+      });
+      if (response.status === 401) {
+        const refreshed = await fetch(`${authOrigin}/api/auth/refresh`, { method: 'POST', credentials: 'include' });
+        if (refreshed.ok) response = await fetch(`${authOrigin}/api/auth/me`, { credentials: 'include', headers: { Accept: 'application/json' } });
+      }
+      if (!response.ok) throw new Error('Account verification failed');
+      account = await response.json() as AccountAccess;
+      (window as typeof window & { DordorAccount?: AccountAccess }).DordorAccount = account;
+    } catch {
+      toast({ title: t.errorTitle, description: 'Unable to verify hosting time. Please try again.', variant: 'destructive' });
+      return false;
     }
+
+    const active = !!account?.activeSessionEndsAt && new Date(account.activeSessionEndsAt).getTime() > Date.now();
+    if (account?.role === 'host' && (active || (account.remainingMinutes ?? 0) > 0)) return true;
+    const message = lang === 'ar'
+      ? 'انتهى وقت الاستضافة. اشترِ وقتًا إضافيًا لإنشاء لعبة جديدة؟'
+      : 'Your hosting time has ended. Buy more time to create a new game?';
+    if (window.confirm(message)) {
+      const gameId = mode === 'character' ? 'guessthecharacter' : mode;
+      window.location.assign(`https://www.dordor.games/pricing?game=${encodeURIComponent(gameId)}`);
+    }
+    return false;
+  };
+
+  const openCreateView = async () => {
+    if (await requestCreateAccess()) setView('create');
+  };
+
+  const onCreateSubmit = async (values: z.infer<typeof createRoomSchema>) => {
+    if (!(await requestCreateAccess())) return;
     console.log('[CreateRoom] submitting', { hostName: values.hostName, mode, lang });
     createRoomMutation.mutate(
       { data: { hostName: values.hostName, mode: mode === 'dykm' ? 'forehead' : mode, lang } },
@@ -129,6 +163,11 @@ export default function Home({ mode }: { mode: 'forehead' | 'character' | 'chara
         },
         onError: (err) => {
           console.error('[CreateRoom] error', err);
+          if ((err as { status?: number }).status === 403) {
+            const message = lang === 'ar' ? 'انتهى وقت الاستضافة. هل تريد شراء وقت إضافي؟' : 'Your hosting time has ended. Buy more time?';
+            if (window.confirm(message)) window.location.assign('https://www.dordor.games/pricing');
+            return;
+          }
           const msg = err instanceof Error ? err.message : String(err);
           toast({ title: t.errorTitle, description: msg || t.errorCreate, variant: 'destructive' });
         }
@@ -263,7 +302,7 @@ export default function Home({ mode }: { mode: 'forehead' | 'character' | 'chara
           border: '2px solid rgba(255,255,255,0.72)', borderRadius: 18,
           boxShadow: '0 18px 50px rgba(0,0,0,0.42)', backdropFilter: 'blur(8px)',
         }}>
-          {[{ label: t.createRoom, action: () => setView('create'), color: '#ffb703' },
+          {[{ label: t.createRoom, action: openCreateView, color: '#ffb703' },
             { label: t.joinRoom, action: () => setView('join'), color: '#a855f7' }].map(({ label, action, color }) => (
             <button key={label} type="button" onClick={action} style={{
               width: '100%', minHeight: 56, padding: '12px 18px',
@@ -686,7 +725,7 @@ export default function Home({ mode }: { mode: 'forehead' | 'character' | 'chara
                     fontWeight: 700,
                     letterSpacing: '0.05em',
                   }}
-                  onClick={() => setView('create')}
+                  onClick={openCreateView}
                 >
                   {t.createRoom}
                 </button>
@@ -721,7 +760,7 @@ export default function Home({ mode }: { mode: 'forehead' | 'character' | 'chara
                     boxShadow: '0 0 12px rgba(194,25,166,0.6), inset 0 0 12px rgba(194,25,166,0.08)',
                     ...(isAr ? { fontFamily: "'Changa', sans-serif", fontWeight: 700 } : {}),
                   }}
-                  onClick={() => setView('create')}
+                  onClick={openCreateView}
                 >
                   {t.createRoom}
                 </button>
@@ -767,7 +806,7 @@ export default function Home({ mode }: { mode: 'forehead' | 'character' | 'chara
                     letterSpacing: '0.04em',
                     boxShadow: '0 5px 0 #a8005a, 0 0 24px rgba(255,79,163,0.5)',
                   }}
-                  onClick={() => setView('create')}
+                  onClick={openCreateView}
                 >
                   {t.createRoom}
                 </button>
@@ -806,7 +845,7 @@ export default function Home({ mode }: { mode: 'forehead' | 'character' | 'chara
                   size="lg"
                   className="w-full text-xl h-16 rounded-full shadow-[0_6px_0_0_hsl(var(--primary-border))]"
                   style={isAr ? { fontFamily: "'Changa', sans-serif", fontWeight: 700 } : {}}
-                  onClick={() => setView('create')}
+                  onClick={openCreateView}
                 >
                   {t.createRoom}
                 </Button>

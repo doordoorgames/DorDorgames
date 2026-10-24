@@ -389,7 +389,7 @@ router.get("/games/:code/round", async (req: Request, res: Response) => {
   res.json(data);
 });
 
-router.post("/games/:code/next", requireActiveHostSession, async (req: Request, res: Response) => {
+router.post("/games/:code/next", requireHostIdentity, async (req: Request, res: Response) => {
   const { code } = req.params;
   const db = getSupabaseClient();
   const { data, error } = await db.rpc("advance_tfadhloon_turn", { p_game_code: code });

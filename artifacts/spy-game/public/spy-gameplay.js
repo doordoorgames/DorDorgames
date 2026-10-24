@@ -2,10 +2,10 @@ document.addEventListener("DOMContentLoaded", async () => {
   "use strict";
   const C=window.SpyCore,$=id=>document.getElementById(id),code=C.cleanCode(new URLSearchParams(location.search).get("code"));
   if(code.length!==5){location.href="spy-homepage.html";return;}const identity=await C.requireIdentity(code);if(!identity){location.href=`spy-homepage.html?room=${code}`;return;}
-  const id=identity.playerId,ref=C.roomRef(code);C.startPresence(code,id);let room=null,selected=null,lastRound=null,botRunKey="",botRun=null;
+  const id=identity.playerId,ref=C.roomRef(code);C.startPresence(code,id);let room=null,selected=null,lastRound=null,botRunKey="",botRun=null,allowPageExit=false;
   const show=(el,on)=>{$(el).style.display=on?"":"none";};
   const esc=s=>String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;"}[c]));
-  $("backButton").onclick=async()=>{if(confirm("Leave the game? Your seat will be marked as left.")){await C.leaveRoom(code,id);location.href="spy-homepage.html";}};
+  $("backButton").onclick=async()=>{if(confirm("Leave the game? Your seat will be marked as left.")){allowPageExit=true;await C.leaveRoom(code,id);location.href="spy-homepage.html";}};
   $("dashboardToggle").onclick=()=>$("pointsDashboard").classList.add("show");$("closeDashboard").onclick=()=>$("pointsDashboard").classList.remove("show");
   $("submitVoteBtn").onclick=async()=>{if(!selected)return;const name=C.playerName(room,selected);if(!confirm(`Lock your vote for ${name}? You cannot change it.`))return;try{await C.submitVote(code,id,selected);}catch(e){alert(C.message(e));}};
   $("guessWordBtn").onclick=()=>show("wordGuessModal",true);$("cancelGuessBtn").onclick=()=>show("wordGuessModal",false);
@@ -34,6 +34,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     show("discussionSection",room.phase==="discussion");show("votingSection",room.phase==="voting");show("resultsSection",room.phase==="results");$("gamePhase").textContent=room.phase==="discussion"?(ar?"النقاش — أعطوا التلميحات الآن":"Discussion — give clues now"):room.phase==="voting"?(ar?"التصويت — اختر بعناية":"Voting — choose carefully"):room.phase==="results"?(ar?"نتائج الجولة":"Round results"):(ar?"جارٍ المزامنة…":"Synchronizing…");
     if(room.phase==="voting"){renderPlayers();$("guessWordBtn").style.display=isSpy&&!room.spyGuesses?.[id]?"":"none";}if(room.phase==="results")renderResult();
   }
+  addEventListener("beforeunload",event=>{if(room?.status==="playing"&&!allowPageExit){event.preventDefault();event.returnValue="";}});
   ref.on("value",s=>{room=s.val();if(!room){location.href="spy-homepage.html";return;}render();
     if(room.testMode&&room.testControllerId===id&&room.phase==="voting"){
       const key=`${room.roundId}:${room.phaseVersion}`;

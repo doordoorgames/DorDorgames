@@ -11,7 +11,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   $("copyCodeBtn").onclick=()=>copy(code,"Room code copied.");
   if(navigator.share){$("shareBtn").style.display="inline-block";$("shareBtn").onclick=()=>navigator.share({title:"Join Spy",text:`Join my Spy room ${code}`,url:invite}).catch(()=>{});}
   $("backBtn").onclick=async()=>{if(confirm("Leave this room?")){await C.leaveRoom(code,id);location.href="spy-homepage.html";}};
-  $("startGameBtn").onclick=async function(){this.disabled=true;try{const s=await ref.once("value"),room=s.val();const words=await C.getWordPair(room.language,room.roundState?.word);await C.startRound(code,id,words,true);}catch(e){alert(C.message(e));this.disabled=false;}};
+  $("startGameBtn").onclick=async function(){this.disabled=true;try{const s=await ref.once("value"),room=s.val();const words=await C.getWordPair(room.language,room.roundState?.word);await C.startRound(code,id,words,true);}catch(e){if(String(e?.message)==="HOSTING_TIME_REQUIRED"&&confirm("Your hosting time has ended. Buy more time?"))location.href="https://www.dordor.games/pricing?game=spy";else if(String(e?.message)!=="HOSTING_TIME_REQUIRED")alert(C.message(e));this.disabled=false;}};
   let lastRoom=null;
   ref.on("value",s=>{
     const room=s.val();lastRoom=room;if(!room||room.playersById?.[id]?.removed){location.href="spy-homepage.html";return;}

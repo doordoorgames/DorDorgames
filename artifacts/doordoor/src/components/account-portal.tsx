@@ -157,30 +157,30 @@ export function AccountPortal({ initialRole }: { initialRole: Role }) {
   };
 
   if (me.isLoading) {
-    return <Layout><div className="min-h-[65vh] grid place-items-center font-mono text-cyan-300 animate-pulse">RESTORING SESSION...</div></Layout>;
+    return <Layout wide><div className="min-h-[65vh] grid place-items-center px-4 text-center font-mono text-cyan-300 animate-pulse">RESTORING SESSION...</div></Layout>;
   }
 
   if (me.data) {
     const account = me.data;
     return (
-      <Layout>
-        <div className="min-h-[70vh] flex items-center justify-center py-8">
-          <motion.section initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} className="w-full max-w-lg border border-fuchsia-400/45 bg-black/70 backdrop-blur-xl rounded-3xl p-6 sm:p-8 shadow-[0_0_50px_rgba(217,70,239,0.16)]">
-            <div className="flex items-start justify-between gap-4 mb-8">
+      <Layout wide>
+        <div className="min-h-[calc(100dvh-150px)] flex items-center justify-center px-4 py-6 sm:px-6 sm:py-10 lg:px-8">
+          <motion.section initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} className="w-full max-w-3xl border border-fuchsia-400/45 bg-black/70 backdrop-blur-xl rounded-3xl p-5 sm:p-8 lg:p-10 shadow-[0_0_50px_rgba(217,70,239,0.16)]">
+            <div className="flex flex-col items-start justify-between gap-4 mb-7 sm:flex-row sm:mb-8">
               <div>
                 <p className="text-xs font-mono tracking-[0.28em] text-cyan-300">DORDOR ID</p>
                 <h1 className="text-3xl font-black text-white mt-2">{account.fullName}</h1>
-                <p className="text-white/50 text-sm mt-1">{account.email}</p>
+                <p className="break-all text-white/50 text-sm mt-1">{account.email}</p>
               </div>
               <span className="px-3 py-1 rounded-full border border-fuchsia-300/60 text-fuchsia-200 text-xs font-bold uppercase">{account.role}</span>
             </div>
 
-            <div className="grid gap-3 text-sm mb-6">
+            <div className="grid gap-3 text-sm mb-6 sm:grid-cols-2">
               <div className="rounded-xl border border-white/10 bg-white/5 p-4"><span className="text-white/45">Phone</span><p className="text-white mt-1">{account.phone}</p></div>
               {account.role === "host" && <div className="rounded-xl border border-cyan-300/25 bg-cyan-300/5 p-4"><span className="text-white/45">Hosting access</span><p className="text-cyan-200 text-xl font-black mt-1">{account.activeSessionEndsAt && new Date(account.activeSessionEndsAt).getTime() > Date.now() ? `Session ends at ${formatEndTime(account.activeSessionEndsAt)}` : `${account.remainingMinutes} purchased minutes available`}</p></div>}
             </div>
 
-            <div className="grid sm:grid-cols-2 gap-3">
+            <div className="grid gap-3 sm:grid-cols-2 sm:gap-4">
               {account.role === "host" && <button onClick={() => setLocation("/host/dashboard")} className="rounded-xl bg-fuchsia-500 text-white font-bold py-3 px-4 hover:bg-fuchsia-400">HOST DASHBOARD</button>}
               <button onClick={() => setEditingProfile((value) => !value)} className="rounded-xl border border-cyan-300/50 text-cyan-200 font-bold py-3 px-4 hover:bg-cyan-300/10">EDIT PROFILE</button>
               <button onClick={() => setChangingPassword((value) => !value)} className="rounded-xl border border-white/20 text-white font-bold py-3 px-4 hover:bg-white/10">CHANGE PASSWORD</button>
@@ -214,9 +214,9 @@ export function AccountPortal({ initialRole }: { initialRole: Role }) {
   }
 
   return (
-    <Layout>
-      <div className="min-h-[70vh] flex items-center justify-center py-8">
-        <motion.section initial={{ opacity: 0, scale: 0.97 }} animate={{ opacity: 1, scale: 1 }} className="w-full max-w-md border border-fuchsia-400/45 bg-black/70 backdrop-blur-xl rounded-3xl p-6 sm:p-8 shadow-[0_0_55px_rgba(217,70,239,0.18)]">
+    <Layout wide>
+      <div className="min-h-[calc(100dvh-150px)] flex items-center justify-center px-4 py-6 sm:px-6 sm:py-10">
+        <motion.section initial={{ opacity: 0, scale: 0.97 }} animate={{ opacity: 1, scale: 1 }} className="w-full max-w-lg border border-fuchsia-400/45 bg-black/70 backdrop-blur-xl rounded-3xl p-5 sm:p-8 shadow-[0_0_55px_rgba(217,70,239,0.18)]">
           <div className="text-center mb-7">
             <p className="text-xs font-mono tracking-[0.3em] text-cyan-300">ONE ACCOUNT · EVERY GAME</p>
             <h1 className="text-3xl font-black text-white mt-3">{mode === "login" ? "Welcome back" : "Create your Dordor ID"}</h1>

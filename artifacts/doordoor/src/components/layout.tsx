@@ -6,17 +6,17 @@ interface LayoutProps {
   children: ReactNode;
   showHeader?: boolean;
   headerTitle?: string;
+  wide?: boolean;
 }
 
-export function Layout({ children, showHeader = true, headerTitle }: LayoutProps) {
+export function Layout({ children, showHeader = true, headerTitle, wide = false }: LayoutProps) {
   const [location] = useLocation();
   const isHome = location === "/";
 
   return (
     <div
       style={{
-        minHeight: "100%",
-        height: "100%",
+        minHeight: "100dvh",
         background: "#080808",
         display: "flex",
         justifyContent: "center",
@@ -26,8 +26,8 @@ export function Layout({ children, showHeader = true, headerTitle }: LayoutProps
       <div
         style={{
           width: "100%",
-          maxWidth: "430px",
-          height: "100%",
+          maxWidth: wide ? "1040px" : "430px",
+          minHeight: "100dvh",
           display: "flex",
           flexDirection: "column",
           position: "relative",
@@ -86,7 +86,7 @@ export function Layout({ children, showHeader = true, headerTitle }: LayoutProps
         <main
           style={{
             flex: 1,
-            overflowY: "auto",
+            overflowY: wide ? "visible" : "auto",
             overflowX: "hidden",
             paddingBottom: "100px",
             WebkitOverflowScrolling: "touch",

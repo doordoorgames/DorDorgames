@@ -166,8 +166,9 @@
   function shuffle(ids) { const a=[...ids]; for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];} return a; }
   function spyCount(n){if(n>=17)return Math.random()<.5?3:4;if(n>=13)return Math.random()<.5?2:3;if(n>=9)return 2;if(n>=6)return Math.random()<.5?1:2;return 1;}
   async function startRound(code,requester,words,preserveScores=true) {
-    await window.DordorRequireActiveHostSession();
-    await roomRef(code).once("value");
+    const current=(await roomRef(code).once("value")).val();
+    const continuing=!!current && current.status==="playing" && Number(current.round||0)>0;
+    if(!continuing)await window.DordorRequireActiveHostSession();
     const result=await roomRef(code).transaction(room=>{
       if(!room||room.hostId!==requester)return;
       if(!["lobby","setup","results","ended"].includes(room.phase) && room.status!=="waiting" && room.status!=="ended")return;

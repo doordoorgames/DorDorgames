@@ -217,9 +217,37 @@ function closeRoomCodeModal() {
 }
 
 async function submitNewGame() {
-  const account = await window.DordorAccountReady;
+  let account = await window.DordorAccountReady;
+  try {
+    let response = await fetch("https://dordorgames-production.up.railway.app/api/auth/me", { credentials: "include", headers: { Accept: "application/json" } });
+    if (response.status === 401) {
+      const refreshed = await fetch("https://dordorgames-production.up.railway.app/api/auth/refresh", { method: "POST", credentials: "include" });
+      if (refreshed.ok) response = await fetch("https://dordorgames-production.up.railway.app/api/auth/me", { credentials: "include", headers: { Accept: "application/json" } });
+    }
+    if (!response.ok) throw new Error("ACCOUNT_CHECK_FAILED");
+    account = await response.json();
+  } catch (_) {
+    window.beautifulAlert.error(currentLanguage() === "ar" ? "تعذر التحقق من وقت الاستضافة. حاول مرة أخرى." : "Unable to verify hosting time. Please try again.");
+    return;
+  }
   if (account?.role !== "host") {
-    window.beautifulAlert.error("A host account is required to create a room.");
+    const isArabic = currentLanguage() === "ar";
+    const message = isArabic
+      ? "إنشاء لعبة يتطلب باقة استضافة مدفوعة. هل تريد عرض الباقات؟"
+      : "Creating a game requires a paid hosting pass. View plans now?";
+    const wantsPass = window.beautifulAlert?.confirm
+      ? await window.beautifulAlert.confirm(message, isArabic ? "باقة استضافة مطلوبة" : "Hosting pass required")
+      : window.confirm(message);
+    if (wantsPass) window.location.href = "https://www.dordor.games/pricing?game=tfadhloon";
+    return;
+  }
+  const active = account.activeSessionEndsAt && new Date(account.activeSessionEndsAt).getTime() > Date.now();
+  if (!active && Number(account.remainingMinutes || 0) <= 0) {
+    const isArabic = currentLanguage() === "ar";
+    const wantsTime = window.beautifulAlert?.confirm
+      ? await window.beautifulAlert.confirm(isArabic ? "انتهى وقت الاستضافة. هل تريد شراء وقت إضافي؟" : "Your hosting time has ended. Buy more time?", isArabic ? "انتهى وقت الاستضافة" : "Hosting time ended")
+      : window.confirm(isArabic ? "انتهى وقت الاستضافة. هل تريد شراء وقت إضافي؟" : "Your hosting time has ended. Buy more time?");
+    if (wantsTime) window.location.href = "https://www.dordor.games/pricing?game=tfadhloon";
     return;
   }
   const name = validHomeName();
@@ -249,7 +277,13 @@ async function submitNewGame() {
     window.tfadhloonUi?.hideBusy();
     newGameBtn.disabled = false;
     console.error("Error creating game:", error);
-    window.beautifulAlert.error(t("createGameError") || "Failed to create game.");
+    if (error?.status === 403) {
+      const isArabic = currentLanguage() === "ar";
+      const wantsTime = await window.beautifulAlert.confirm(isArabic ? "انتهى وقت الاستضافة. هل تريد شراء وقت إضافي؟" : "Your hosting time has ended. Buy more time?", isArabic ? "انتهى وقت الاستضافة" : "Hosting time ended");
+      if (wantsTime) window.location.href = "https://www.dordor.games/pricing?game=tfadhloon";
+    } else {
+      window.beautifulAlert.error(t("createGameError") || "Failed to create game.");
+    }
   }
 }
 

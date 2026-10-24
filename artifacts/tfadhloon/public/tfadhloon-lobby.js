@@ -561,7 +561,14 @@
       window.location.href = `tfadhloon-gameplay.html?code=${code}`;
     } catch (error) {
       window.tfadhloonUi?.hideBusy();
-      alertBox(localizedError(error, "تعذر بدء اللعبة", "Unable to start game"));
+      if (error?.status === 403) {
+        const wantsTime = window.beautifulAlert?.confirm
+          ? await window.beautifulAlert.confirm(text("انتهى وقت الاستضافة. هل تريد شراء وقت إضافي؟", "Your hosting time has ended. Buy more time?"), text("انتهى وقت الاستضافة", "Hosting time ended"))
+          : window.confirm(text("انتهى وقت الاستضافة. هل تريد شراء وقت إضافي؟", "Your hosting time has ended. Buy more time?"));
+        if (wantsTime) window.location.href = "https://www.dordor.games/pricing?game=tfadhloon";
+      } else {
+        alertBox(localizedError(error, "تعذر بدء اللعبة", "Unable to start game"));
+      }
     } finally {
       startRequestInFlight = false;
       if (game?.status !== "playing") updateControls();
