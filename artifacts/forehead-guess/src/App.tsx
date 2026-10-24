@@ -19,9 +19,25 @@ setBaseUrl(apiBaseUrl);
 const queryClient = new QueryClient();
 
 interface DordorAccount {
+  fullName: string;
   role: "host" | "participant";
   remainingMinutes: number;
   activeSessionEndsAt: string | null;
+}
+
+function AccountChip({ account }: { account: DordorAccount }) {
+  return (
+    <a
+      href="https://www.dordor.games/account"
+      aria-label="Open account profile"
+      className="fixed right-3 bottom-3 z-[101] flex max-w-[72vw] items-center gap-2 rounded-full border border-white/50 bg-black/90 px-3 py-2 text-sm font-extrabold text-white shadow-xl backdrop-blur-md"
+    >
+      <span className="grid h-7 w-7 shrink-0 place-items-center rounded-full bg-yellow-300 text-xs font-black text-black">
+        {account.fullName?.trim().charAt(0).toUpperCase() || "?"}
+      </span>
+      <span className="truncate">{account.fullName || "Account"}</span>
+    </a>
+  );
 }
 
 function SessionStatus({ account }: { account: DordorAccount | null }) {
@@ -84,7 +100,7 @@ function AccountGate({ children }: { children: ReactNode }) {
 
   if (status === "loading") return <div className="min-h-screen grid place-items-center text-white">Verifying account...</div>;
   if (status === "error") return <div className="min-h-screen grid place-items-center text-white text-center p-6"><div><p>Unable to verify your account.</p><button className="mt-4 underline" onClick={() => setStatus("loading")}>Try again</button></div></div>;
-  return <><SessionStatus account={account} />{children}</>;
+  return <><SessionStatus account={account} />{account && <AccountChip account={account} />}{children}</>;
 }
 
 const hostedModePaths: Record<string, string> = {

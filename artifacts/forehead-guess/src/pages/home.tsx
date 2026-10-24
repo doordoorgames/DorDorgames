@@ -192,18 +192,6 @@ export default function Home({ mode }: { mode: 'forehead' | 'character' | 'chara
         display: 'flex', alignItems: 'center', gap: 8,
       }}
     >
-      <a
-        href="https://www.dordor.games/account"
-        style={{
-          minHeight: 42, padding: '8px 12px', display: 'inline-flex', alignItems: 'center',
-          color: '#fff', background: 'rgba(8, 8, 18, 0.78)', textDecoration: 'none',
-          border: '1px solid rgba(255,255,255,0.45)', borderRadius: 10,
-          fontSize: 14, fontWeight: 800, boxSizing: 'border-box',
-          boxShadow: '0 4px 16px rgba(0,0,0,0.28)', backdropFilter: 'blur(8px)',
-        }}
-      >
-        {lang === 'ar' ? 'الحساب' : 'Account'}
-      </a>
       <button
         type="button"
         onClick={() => setLang(lang === 'ar' ? 'en' : 'ar')}

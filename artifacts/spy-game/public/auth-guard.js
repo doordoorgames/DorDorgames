@@ -66,11 +66,33 @@
     else document.addEventListener("DOMContentLoaded", render, { once: true });
   }
 
+  function showAccountChip(account) {
+    const render = function () {
+      const chip = document.getElementById("dordor-account-chip") || document.querySelector('a[href^="https://www.dordor.games/account"]') || document.createElement("a");
+      chip.id = "dordor-account-chip";
+      chip.href = "https://www.dordor.games/account";
+      chip.setAttribute("aria-label", "Open account profile");
+      chip.style.cssText = "position:fixed;right:14px;bottom:max(14px,env(safe-area-inset-bottom));z-index:10001;display:flex;align-items:center;gap:8px;max-width:min(72vw,260px);padding:9px 12px;border:1px solid rgba(255,255,255,.5);border-radius:999px;background:rgba(12,8,24,.92);color:#fff;text-decoration:none;font:800 13px/1.2 system-ui,sans-serif;box-shadow:0 5px 20px rgba(0,0,0,.4);backdrop-filter:blur(8px)";
+      chip.replaceChildren();
+      const avatar = document.createElement("span");
+      avatar.textContent = (account.fullName || "?").trim().charAt(0).toUpperCase();
+      avatar.style.cssText = "display:grid;place-items:center;flex:0 0 26px;width:26px;height:26px;border-radius:50%;background:#ffe100;color:#111;font-weight:900";
+      const name = document.createElement("span");
+      name.textContent = account.fullName || "Account";
+      name.style.cssText = "overflow:hidden;text-overflow:ellipsis;white-space:nowrap";
+      chip.append(avatar, name);
+      if (!chip.isConnected) document.body.appendChild(chip);
+    };
+    if (document.body) render();
+    else document.addEventListener("DOMContentLoaded", render, { once: true });
+  }
+
   window.DordorAccountReady = loadAccount()
     .then(function (account) {
       window.DordorAccount = account;
       document.documentElement.style.visibility = "visible";
       showSessionStatus(account);
+      showAccountChip(account);
       window.dispatchEvent(
         new CustomEvent("dordor-account-ready", { detail: account }),
       );

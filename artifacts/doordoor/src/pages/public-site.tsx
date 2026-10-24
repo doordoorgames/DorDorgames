@@ -19,6 +19,7 @@ import {
 import { useLiveGames } from "@/hooks/use-live-games";
 import { getGameById } from "@/games-config";
 import { UpdateBanner } from "@/components/update-banner";
+import { getGetAuthMeQueryKey, useGetAuthMe } from "@workspace/api-client-react";
 import {
   HOSTING_PACKAGES,
   HOURS_PER_BLOCK,
@@ -31,6 +32,9 @@ function PublicLayout({ children }: { children: (ar: boolean) => ReactNode }) {
     () => localStorage.getItem("dordor-language") === "ar",
   );
   const [open, setOpen] = useState(false);
+  const account = useGetAuthMe({
+    query: { queryKey: getGetAuthMeQueryKey(), retry: false, refetchOnWindowFocus: false },
+  });
   useEffect(() => {
     if (!window.location.hash) window.scrollTo(0, 0);
   }, []);
@@ -54,7 +58,12 @@ function PublicLayout({ children }: { children: (ar: boolean) => ReactNode }) {
           <a href="/#games">{t("Games", "الألعاب")}</a>
           <a href="/#how-it-works">{t("How It Works", "كيف تلعب")}</a>
           <Link href="/pricing">{t("Pricing", "الأسعار")}</Link>
-          <Link href="/account">{t("Account", "الحساب")}</Link>
+          <Link href="/account" className="dd-account-link">
+            <span aria-hidden="true" className="dd-account-avatar">
+              {account.data?.fullName?.trim().charAt(0).toUpperCase() || "?"}
+            </span>
+            <span>{account.data?.fullName || t("Log in", "تسجيل الدخول")}</span>
+          </Link>
         </nav>
         <button
           className="dd-language"
@@ -420,7 +429,14 @@ function Faq({ ar }: { ar: boolean }) {
 
 export function PublicHome() {
   const { games, updateAvailable } = useLiveGames();
+  const account = useGetAuthMe({
+    query: { queryKey: getGetAuthMeQueryKey(), retry: false, refetchOnWindowFocus: false },
+  });
   const ids = ["spy", "tfadhloon", "forehead", "guessthecharacter", "charades"];
+  const gameHref = (externalUrl: string) =>
+    account.data
+      ? externalUrl
+      : `/account?returnTo=${encodeURIComponent(externalUrl)}`;
   return (
     <PublicLayout>
       {(ar) => {
@@ -548,7 +564,7 @@ export function PublicHome() {
                   return (
                     <article className="dd-game" key={id}>
                       <a
-                        href={g.externalUrl}
+                        href={gameHref(g.externalUrl)}
                         aria-label={t(
                           `Play ${g.title}`,
                           `العب ${arabicNames[id]}`,
@@ -563,7 +579,7 @@ export function PublicHome() {
                       <h3>{ar ? arabicNames[id] : g.title}</h3>
                       <p>{ar ? g.descriptionAr : g.description}</p>
                       <div>
-                        <a href={g.externalUrl}>
+                        <a href={gameHref(g.externalUrl)}>
                           {t("Play Game", "العب الآن")}
                           <ArrowUpRight size={16} />
                         </a>
