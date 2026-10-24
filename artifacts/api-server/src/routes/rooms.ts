@@ -9,7 +9,8 @@ import {
 } from "@workspace/api-zod";
 import { z } from "zod";
 import { store } from "../lib/store.js";
-import { requireAccount, requireHost, requireHostIdentity } from "../lib/auth.js";
+import { requireAccount, requireHostIdentity } from "../lib/auth.js";
+import { ensureHostSession } from "../lib/host-access.js";
 
 const router: IRouter = Router();
 
@@ -31,7 +32,7 @@ router.get("/rooms", requireHostIdentity, (req, res) => {
   res.json(rooms);
 });
 
-router.post("/rooms", requireHost, async (req, res) => {
+router.post("/rooms", requireHostIdentity, async (req, res) => {
   const bodyResult = CreateRoomBody.safeParse(req.body);
   if (!bodyResult.success) {
     res.status(400).json({ error: "gameId is required" });
@@ -40,23 +41,19 @@ router.post("/rooms", requireHost, async (req, res) => {
   const { gameId } = bodyResult.data;
   const host = req.hostAccount!;
 
-  if (host.remainingMinutes <= 0) {
-    res.status(403).json({
-      error: "No hosting time remaining. Please purchase more time.",
-    });
-    return;
-  }
-
   const game = store.games.get(gameId);
   if (!game) {
     res.status(404).json({ error: "Game not found" });
     return;
   }
 
-  const roomMinutes = Math.min(host.remainingMinutes, 180);
-  await store.hosts.deductTime(host.id, roomMinutes);
+  const activeHost = await ensureHostSession(host);
+  if (!activeHost?.activeSessionEndsAt) {
+    res.status(403).json({ error: "No hosting time remaining. Please purchase more time." });
+    return;
+  }
 
-  const room = store.rooms.create(host.phone, gameId, roomMinutes);
+  const room = store.rooms.create(host.phone, gameId, activeHost.activeSessionEndsAt);
   res.status(201).json(roomWithGame(room));
 });
 

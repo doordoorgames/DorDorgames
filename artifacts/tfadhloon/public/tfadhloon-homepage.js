@@ -240,6 +240,10 @@ async function submitNewGame() {
     });
     if (!window.tfadhloonApi?.createGame) throw new Error("Game service is unavailable.");
     await window.tfadhloonApi.createGame(name, hostLang, gameCode);
+    fetch("https://dordorgames-production.up.railway.app/api/auth/me", { credentials: "include", headers: { Accept: "application/json" } })
+      .then((response) => response.ok ? response.json() : null)
+      .then((account) => account && window.dispatchEvent(new CustomEvent("dordor-account-updated", { detail: account })))
+      .catch((error) => console.debug("[Account] Session status refresh failed.", error));
     window.location.href = `tfadhloon-lobby.html?code=${gameCode}`;
   } catch (error) {
     window.tfadhloonUi?.hideBusy();

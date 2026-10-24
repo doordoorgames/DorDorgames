@@ -26,6 +26,11 @@ function errorMessage(error: any, fallback: string) {
   return error?.data?.details?.[0] || error?.data?.error || error?.message || fallback;
 }
 
+function formatEndTime(value: string | null | undefined): string | null {
+  if (!value) return null;
+  return new Intl.DateTimeFormat(undefined, { hour: "numeric", minute: "2-digit" }).format(new Date(value));
+}
+
 function requestedReturnTo(): string | null {
   const value = new URLSearchParams(window.location.search).get("returnTo");
   if (!value) return null;
@@ -126,7 +131,13 @@ export function AccountPortal({ initialRole }: { initialRole: Role }) {
       {
         onSuccess: async ({ account }) => {
           await refreshProfile();
-          toast({ title: "ACCOUNT READY", description: account.role === "host" ? "Your 60-minute host trial is active." : "Your player profile is ready." });
+          const endTime = formatEndTime(account.activeSessionEndsAt);
+          toast({
+            title: "ACCOUNT READY",
+            description: account.role === "host"
+              ? `Your free 30-minute session is active${endTime ? ` until ${endTime}` : ""}.`
+              : "Your player profile is ready.",
+          });
           continueAfterAuth(account.role);
         },
         onError: (error) => toast({ title: "INVALID CODE", description: errorMessage(error, "Try the latest verification code"), variant: "destructive" }),
@@ -166,7 +177,7 @@ export function AccountPortal({ initialRole }: { initialRole: Role }) {
 
             <div className="grid gap-3 text-sm mb-6">
               <div className="rounded-xl border border-white/10 bg-white/5 p-4"><span className="text-white/45">Phone</span><p className="text-white mt-1">{account.phone}</p></div>
-              {account.role === "host" && <div className="rounded-xl border border-cyan-300/25 bg-cyan-300/5 p-4"><span className="text-white/45">Hosting time</span><p className="text-cyan-200 text-xl font-black mt-1">{account.remainingMinutes} minutes</p></div>}
+              {account.role === "host" && <div className="rounded-xl border border-cyan-300/25 bg-cyan-300/5 p-4"><span className="text-white/45">Hosting access</span><p className="text-cyan-200 text-xl font-black mt-1">{account.activeSessionEndsAt && new Date(account.activeSessionEndsAt).getTime() > Date.now() ? `Session ends at ${formatEndTime(account.activeSessionEndsAt)}` : `${account.remainingMinutes} purchased minutes available`}</p></div>}
             </div>
 
             <div className="grid sm:grid-cols-2 gap-3">
@@ -228,6 +239,7 @@ export function AccountPortal({ initialRole }: { initialRole: Role }) {
           ) : otpStep ? (
             <form onSubmit={submitOtp} className="space-y-4">
               <p className="text-center text-sm text-white/55">Enter the six-digit code sent to <span className="text-cyan-200">{phone}</span></p>
+              {role === "host" && <p className="rounded-xl border border-yellow-300/40 bg-yellow-300/10 p-3 text-center text-sm font-semibold text-yellow-100">Your free 30-minute session starts immediately when you verify this code.<br /><span lang="ar" dir="rtl">تبدأ جلستك المجانية لمدة 30 دقيقة فور تأكيد الرمز.</span></p>}
               <input className={`${inputClass} text-center text-3xl tracking-[0.35em]`} inputMode="numeric" placeholder="000000" value={otp} onChange={(event) => setOtp(event.target.value.replace(/\D/g, "").slice(0, 6))} autoComplete="one-time-code" />
               <button className="w-full rounded-xl bg-cyan-300 text-black font-black py-3.5 disabled:opacity-50" disabled={verifyOtp.isPending || otp.length !== 6}>{verifyOtp.isPending ? "VERIFYING..." : "VERIFY & CONTINUE"}</button>
               <button type="button" onClick={() => setOtpStep(false)} className="w-full text-sm text-white/45">Change details</button>

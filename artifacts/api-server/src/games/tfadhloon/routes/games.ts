@@ -1,10 +1,7 @@
 import { Router, type IRouter, type Request, type Response } from "express";
 import { getSupabaseClient } from "../lib/supabase.js";
-import { requireAccount, requireHostIdentity } from "../../../lib/auth.js";
-import {
-  canUseTrialCategory,
-  TFADHLOON_TRIAL_CATEGORIES,
-} from "../../../lib/category-access.js";
+import { requireAccount, requireActiveHostSession, requireHostIdentity } from "../../../lib/auth.js";
+import { ensureHostSession } from "../../../lib/host-access.js";
 
 const router: IRouter = Router();
 
@@ -70,6 +67,12 @@ router.post("/games", requireHostIdentity, async (req: Request, res: Response) =
     return;
   }
 
+  const activeHost = await ensureHostSession(req.hostAccount!);
+  if (!activeHost?.activeSessionEndsAt) {
+    sendError(res, 403, "No hosting time remaining. Please purchase more time.");
+    return;
+  }
+
   const db = getSupabaseClient();
   // Use the client-provided code so Firebase and Supabase always share the same room key.
   const code = clientCode?.trim() || generateGameCode();
@@ -99,7 +102,7 @@ router.post("/games", requireHostIdentity, async (req: Request, res: Response) =
     sendError(res, 500, playerErr.message);
     return;
   }
-  res.status(201).json({ code });
+  res.status(201).json({ code, sessionEndsAt: activeHost.activeSessionEndsAt });
 });
 
 // ─── GET GAME ────────────────────────────────────────────────────────────────
@@ -205,7 +208,7 @@ router.use(requireAccount);
 
 // ─── UPDATE GAME SETTINGS (host only) ────────────────────────────────────────
 
-router.patch("/games/:code", requireHostIdentity, async (req: Request, res: Response) => {
+router.patch("/games/:code", requireActiveHostSession, async (req: Request, res: Response) => {
   const { code } = req.params;
   const updates = req.body as Record<string, unknown>;
   const db = getSupabaseClient();
@@ -218,14 +221,6 @@ router.patch("/games/:code", requireHostIdentity, async (req: Request, res: Resp
   const filtered: Record<string, unknown> = {};
   for (const k of allowed) {
     if (k in updates) filtered[k] = updates[k];
-  }
-
-  if (
-    typeof filtered.selected_category === "string" &&
-    !canUseTrialCategory(req.account, filtered.selected_category, TFADHLOON_TRIAL_CATEGORIES)
-  ) {
-    sendError(res, 403, "This category requires full access");
-    return;
   }
 
   if (Object.keys(filtered).length === 0) {
@@ -243,7 +238,7 @@ router.patch("/games/:code", requireHostIdentity, async (req: Request, res: Resp
 
 // ─── START GAME (host only) ──────────────────────────────────────────────────
 
-router.post("/games/:code/start", requireHostIdentity, async (req: Request, res: Response) => {
+router.post("/games/:code/start", requireActiveHostSession, async (req: Request, res: Response) => {
   const { code } = req.params;
   const db = getSupabaseClient();
 
@@ -293,11 +288,6 @@ router.post("/games/:code/start", requireHostIdentity, async (req: Request, res:
     sendError(res, 400, "A category must be selected before starting");
     return;
   }
-  if (!canUseTrialCategory(req.account, game.selected_category, TFADHLOON_TRIAL_CATEGORIES)) {
-    sendError(res, 403, "This category requires full access");
-    return;
-  }
-
   let question: PlayableQuestion | null;
   try {
     question = await loadOnePlayableQuestion(
@@ -399,7 +389,7 @@ router.get("/games/:code/round", async (req: Request, res: Response) => {
   res.json(data);
 });
 
-router.post("/games/:code/next", async (req: Request, res: Response) => {
+router.post("/games/:code/next", requireActiveHostSession, async (req: Request, res: Response) => {
   const { code } = req.params;
   const db = getSupabaseClient();
   const { data, error } = await db.rpc("advance_tfadhloon_turn", { p_game_code: code });

@@ -149,6 +149,9 @@ export async function ensureDatabaseSchema(): Promise<void> {
         trial_used BOOLEAN NOT NULL DEFAULT FALSE,
         remaining_minutes INTEGER NOT NULL DEFAULT 0,
         full_access BOOLEAN NOT NULL DEFAULT FALSE,
+        trial_started_at TIMESTAMPTZ,
+        trial_ends_at TIMESTAMPTZ,
+        active_session_ends_at TIMESTAMPTZ,
         created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
         updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
       );
@@ -192,8 +195,16 @@ export async function ensureDatabaseSchema(): Promise<void> {
       ALTER TABLE public.hosts
         ADD COLUMN IF NOT EXISTS full_access BOOLEAN NOT NULL DEFAULT FALSE;
 
+      ALTER TABLE public.hosts
+        ADD COLUMN IF NOT EXISTS trial_started_at TIMESTAMPTZ,
+        ADD COLUMN IF NOT EXISTS trial_ends_at TIMESTAMPTZ,
+        ADD COLUMN IF NOT EXISTS active_session_ends_at TIMESTAMPTZ;
+
       ALTER TABLE forehead.rooms
         ADD COLUMN IF NOT EXISTS full_access BOOLEAN NOT NULL DEFAULT FALSE;
+
+      ALTER TABLE forehead.rooms
+        ADD COLUMN IF NOT EXISTS access_ends_at TIMESTAMPTZ;
     `);
     await client.query("COMMIT");
   } catch (error) {

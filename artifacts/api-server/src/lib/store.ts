@@ -87,6 +87,9 @@ export interface Host {
   trialUsed: boolean;
   remainingMinutes: number;
   fullAccess: boolean;
+  trialStartedAt: string | null;
+  trialEndsAt: string | null;
+  activeSessionEndsAt: string | null;
   createdAt: string;
   updatedAt: string;
 }
@@ -112,6 +115,9 @@ interface HostRow {
   trial_used: boolean;
   remaining_minutes: number;
   full_access: boolean;
+  trial_started_at: string | null;
+  trial_ends_at: string | null;
+  active_session_ends_at: string | null;
   created_at: string;
   updated_at: string;
 }
@@ -127,6 +133,9 @@ function rowToHost(row: HostRow): Host {
     trialUsed: row.trial_used,
     remainingMinutes: row.remaining_minutes,
     fullAccess: row.full_access,
+    trialStartedAt: row.trial_started_at,
+    trialEndsAt: row.trial_ends_at,
+    activeSessionEndsAt: row.active_session_ends_at,
     createdAt: row.created_at,
     updatedAt: row.updated_at,
   };
@@ -170,8 +179,9 @@ const hostsStore = {
   ): Promise<Host> {
     const result = await pool.query<HostRow>(
       `INSERT INTO public.hosts
-        (full_name, email, phone, password_hash, phone_verified, trial_used, remaining_minutes, full_access)
-       VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
+        (full_name, email, phone, password_hash, phone_verified, trial_used, remaining_minutes, full_access,
+         trial_started_at, trial_ends_at, active_session_ends_at)
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)
        RETURNING *`,
       [
         input.fullName,
@@ -182,6 +192,9 @@ const hostsStore = {
         input.trialUsed,
         input.remainingMinutes,
         input.fullAccess,
+        input.trialStartedAt,
+        input.trialEndsAt,
+        input.activeSessionEndsAt,
       ],
     );
     return rowToHost(result.rows[0]);
@@ -197,7 +210,8 @@ const hostsStore = {
       `UPDATE public.hosts SET
         full_name = $2, email = $3, phone = $4, password_hash = $5,
         phone_verified = $6, trial_used = $7, remaining_minutes = $8,
-        full_access = $9, updated_at = NOW()
+        full_access = $9, trial_started_at = $10, trial_ends_at = $11,
+        active_session_ends_at = $12, updated_at = NOW()
        WHERE id = $1 RETURNING *`,
       [
         id,
@@ -209,16 +223,12 @@ const hostsStore = {
         next.trialUsed,
         next.remainingMinutes,
         next.fullAccess,
+        next.trialStartedAt,
+        next.trialEndsAt,
+        next.activeSessionEndsAt,
       ],
     );
     return result.rows[0] ? rowToHost(result.rows[0]) : undefined;
-  },
-  async deductTime(id: string, minutes: number): Promise<Host | undefined> {
-    const current = await this.get(id);
-    if (!current) return undefined;
-    return this.update(id, {
-      remainingMinutes: Math.max(0, current.remainingMinutes - minutes),
-    });
   },
   async addTime(id: string, minutes: number): Promise<Host | undefined> {
     const current = await this.get(id);
@@ -227,6 +237,21 @@ const hostsStore = {
       remainingMinutes: current.remainingMinutes + minutes,
       fullAccess: true,
     });
+  },
+  async activatePaidSession(id: string, maximumMinutes = 180): Promise<Host | undefined> {
+    const result = await pool.query<HostRow>(
+      `UPDATE public.hosts
+       SET remaining_minutes = remaining_minutes - LEAST(remaining_minutes, $2),
+           active_session_ends_at = NOW() + (LEAST(remaining_minutes, $2) * INTERVAL '1 minute'),
+           full_access = TRUE,
+           updated_at = NOW()
+       WHERE id = $1
+         AND remaining_minutes > 0
+         AND (active_session_ends_at IS NULL OR active_session_ends_at <= NOW())
+       RETURNING *`,
+      [id, maximumMinutes],
+    );
+    return result.rows[0] ? rowToHost(result.rows[0]) : this.get(id);
   },
 };
 
@@ -305,15 +330,10 @@ export const store = {
       }
       return count;
     },
-    create(
-      hostPhone: string,
-      gameId: string,
-      durationMinutes: number = 180,
-    ): Room {
+    create(hostPhone: string, gameId: string, expiresAt: string): Room {
       const rooms = readJson<Room[]>("rooms.json", []);
       const code = generateRoomCode();
       const now = new Date();
-      const expiresAt = new Date(now.getTime() + durationMinutes * 60 * 1000);
       const room: Room = {
         id: generateId(),
         code,
@@ -321,7 +341,7 @@ export const store = {
         activeGameId: gameId,
         guests: [],
         createdAt: now.toISOString(),
-        expiresAt: expiresAt.toISOString(),
+        expiresAt,
         open: true,
       };
       rooms.push(room);

@@ -44,10 +44,37 @@
     else document.addEventListener("DOMContentLoaded", render, { once: true });
   }
 
+  function showSessionStatus(account) {
+    if (account.role !== "host") return;
+    const render = function () {
+      const active = account.activeSessionEndsAt && new Date(account.activeSessionEndsAt).getTime() > Date.now();
+      const status = document.getElementById("dordor-session-status") || document.createElement("div");
+      status.id = "dordor-session-status";
+      status.setAttribute("role", "status");
+      status.style.cssText = "position:fixed;top:14px;left:50%;transform:translateX(-50%);z-index:10000;padding:9px 14px;border:1px solid rgba(255,255,255,.45);border-radius:999px;background:rgba(12,8,24,.9);color:#fff;font:700 13px/1.2 system-ui,sans-serif;box-shadow:0 5px 20px rgba(0,0,0,.35);white-space:nowrap";
+      if (active) {
+        const end = new Intl.DateTimeFormat(undefined, { hour: "numeric", minute: "2-digit" }).format(new Date(account.activeSessionEndsAt));
+        status.textContent = "Session ends at " + end;
+      } else if ((account.remainingMinutes || 0) > 0) {
+        status.textContent = account.remainingMinutes + " purchased minutes available";
+      } else {
+        status.innerHTML = 'Session ended · <a href="https://www.dordor.games/pricing" style="color:#ffe100">Buy a plan</a>';
+      }
+      if (!status.isConnected) document.body.appendChild(status);
+    };
+    if (document.body) render();
+    else document.addEventListener("DOMContentLoaded", render, { once: true });
+  }
+
+  window.addEventListener("dordor-account-updated", function (event) {
+    if (event.detail) showSessionStatus(event.detail);
+  });
+
   window.DordorAccountReady = loadAccount()
     .then(function (account) {
       window.DordorAccount = account;
       document.documentElement.style.visibility = "visible";
+      showSessionStatus(account);
       window.dispatchEvent(
         new CustomEvent("dordor-account-ready", { detail: account }),
       );

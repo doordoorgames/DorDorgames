@@ -5,7 +5,7 @@ import { fetchForeheadCategories, ForeheadCategory, ForeheadCategoriesResult } f
 import { useGameSocket, RoomState, RoundInfo, RevealInfo } from '@/hooks/useGameSocket';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
-import { Loader2, Copy, Check, Users, CheckCircle2, Lock } from 'lucide-react';
+import { Loader2, Copy, Check, Users, CheckCircle2 } from 'lucide-react';
 import { useLang } from '@/context/LanguageContext';
 import CharacterRoom from './character-room';
 import CharadesRoom from './charades-room';
@@ -178,11 +178,6 @@ function LobbyView({ roomCode, playerId, roomState, setCategory, startGame }: {
   const [catLoading, setCatLoading] = useState(true);
   const [catDebug, setCatDebug] = useState({ totalRows: 0, totalCategories: 0 });
   const { t, lang } = useLang();
-  const account = (window as typeof window & {
-    DordorAccount?: { role?: string; fullAccess?: boolean };
-  }).DordorAccount;
-  const hasFullAccess = account?.role === 'host' && account.fullAccess === true;
-
   useEffect(() => {
     setCatError(null);
     setCatLoading(true);
@@ -258,27 +253,17 @@ function LobbyView({ roomCode, playerId, roomState, setCategory, startGame }: {
             ) : (
               <>
                 <div className="grid grid-cols-2 gap-2">
-                  {categories.map((c, index) => {
+                  {categories.map((c) => {
                     const selected = selectedCategoryName === c.name;
-                    const locked = !hasFullAccess && index >= 3;
                     return (
                       <button
                         key={c.id}
                         type="button"
-                        onClick={() => {
-                          if (locked) {
-                            window.location.href = 'https://www.dordor.games/pricing?game=forehead';
-                            return;
-                          }
-                          setCategory(c.name, c.id);
-                        }}
-                        aria-label={locked
-                          ? `${c.name}: ${lang === 'ar' ? 'يتطلب الوصول الكامل' : 'Requires full access'}`
-                          : c.name}
+                        onClick={() => setCategory(c.name, c.id)}
+                        aria-label={c.name}
                         className="relative flex flex-col items-center justify-center text-center px-3 py-4 font-bold text-white transition-all active:scale-95"
                         style={{
-                          background: locked ? '#27202d' : selected ? '#5b21b6' : '#3b0764',
-                          opacity: locked ? 0.72 : 1,
+                          background: selected ? '#5b21b6' : '#3b0764',
                           boxShadow: selected
                             ? '0 0 0 3px #a855f7, 0 4px 16px rgba(168,85,247,0.4)'
                             : '0 2px 8px rgba(0,0,0,0.4)',
@@ -288,12 +273,6 @@ function LobbyView({ roomCode, playerId, roomState, setCategory, startGame }: {
                         <span className="text-xs font-medium mt-1 opacity-70">
                           {lang === 'ar' ? `${c.wordCount} كلمة` : `${c.wordCount} ${t.words}`}
                         </span>
-                        {locked && (
-                          <span className="mt-1 flex items-center gap-1 text-[11px] text-purple-200">
-                            <Lock className="w-3 h-3" />
-                            {lang === 'ar' ? 'وصول كامل' : 'Full access'}
-                          </span>
-                        )}
                         {selected && (
                           <CheckCircle2 className="absolute top-2 right-2 w-4 h-4 text-purple-300" />
                         )}

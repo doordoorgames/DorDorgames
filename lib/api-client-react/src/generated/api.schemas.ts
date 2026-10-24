@@ -122,6 +122,10 @@ export interface AccountProfile {
   phoneVerified: boolean;
   trialUsed: boolean;
   remainingMinutes: number;
+  fullAccess: boolean;
+  trialStartedAt: string | null;
+  trialEndsAt: string | null;
+  activeSessionEndsAt: string | null;
   createdAt: string;
   updatedAt: string;
 }

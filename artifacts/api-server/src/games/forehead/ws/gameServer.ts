@@ -10,7 +10,6 @@ import {
 import { eq, and } from "drizzle-orm";
 import { logger } from "../../../lib/logger";
 import { fetchForeheadCategoryNames, fetchForeheadWordsByFlatCategory, fetchCharactersFromSupabase, fetchCharadesFromSupabase, SupabaseCharacterEntry } from "../lib/supabase-forehead";
-import { TRIAL_CATEGORY_LIMIT } from "../../../lib/category-access.js";
 type CharacterEntry = SupabaseCharacterEntry;
 
 // ── CLIENT REGISTRY ──────────────────────────────────────────────────────────
@@ -103,6 +102,15 @@ function sendTo(ws: WebSocket, message: object) {
   if (ws.readyState === WebSocket.OPEN) {
     ws.send(JSON.stringify(message));
   }
+}
+
+function rejectExpiredSession(ws: WebSocket, room: { accessEndsAt: Date | null }): boolean {
+  if (room.accessEndsAt && room.accessEndsAt.getTime() > Date.now()) return false;
+  sendTo(ws, {
+    type: "error",
+    payload: { message: "Your hosting session has ended. Buy a plan to continue." },
+  });
+  return true;
 }
 
 function clearRoomTimer(code: string) {
@@ -515,19 +523,6 @@ async function handleMessage(ws: WebSocket, client: WsClient, raw: string) {
     });
     if (host?.id !== client.playerId) return;
     if (kkCategoryId != null && supabaseCategory) {
-      if (!room.fullAccess) {
-        try {
-          const trialCategories = (await fetchForeheadCategoryNames(room.lang)).slice(0, TRIAL_CATEGORY_LIMIT);
-          if (!trialCategories.includes(supabaseCategory)) {
-            sendTo(ws, { type: "error", payload: { message: "This category requires full access" } });
-            return;
-          }
-        } catch (error) {
-          logger.error({ error, roomCode }, "Could not validate trial category");
-          sendTo(ws, { type: "error", payload: { message: "Could not validate category access" } });
-          return;
-        }
-      }
       roomSupabaseCategory.set(roomCode, { kkCategoryId, categoryName: supabaseCategory });
       await db.update(roomsTable).set({ categoryId: null }).where(eq(roomsTable.code, roomCode));
     } else {
@@ -546,23 +541,10 @@ async function handleMessage(ws: WebSocket, client: WsClient, raw: string) {
       where: and(eq(playersTable.roomId, room.id), eq(playersTable.isHost, true)),
     });
     if (host?.id !== client.playerId) return;
+    if (rejectExpiredSession(ws, room)) return;
     if (!room.categoryId && !roomSupabaseCategory.has(roomCode)) {
       sendTo(ws, { type: "error", payload: { message: "Please select a category first" } });
       return;
-    }
-    const selectedSupabaseCategory = roomSupabaseCategory.get(roomCode)?.categoryName;
-    if (!room.fullAccess && selectedSupabaseCategory) {
-      try {
-        const trialCategories = (await fetchForeheadCategoryNames(room.lang)).slice(0, TRIAL_CATEGORY_LIMIT);
-        if (!trialCategories.includes(selectedSupabaseCategory)) {
-          sendTo(ws, { type: "error", payload: { message: "This category requires full access" } });
-          return;
-        }
-      } catch (error) {
-        logger.error({ error, roomCode }, "Could not validate trial category before start");
-        sendTo(ws, { type: "error", payload: { message: "Could not validate category access" } });
-        return;
-      }
     }
     const players = await db.select().from(playersTable).where(eq(playersTable.roomId, room.id));
     const connected = players.filter((p) => p.connected);
@@ -706,6 +688,7 @@ async function handleMessage(ws: WebSocket, client: WsClient, raw: string) {
     const { roomCode } = payload as { roomCode: string };
     const room = await db.query.roomsTable.findFirst({ where: eq(roomsTable.code, roomCode) });
     if (!room || room.status !== "reveal") return;
+    if (rejectExpiredSession(ws, room)) return;
     const host = await db.query.playersTable.findFirst({
       where: and(eq(playersTable.roomId, room.id), eq(playersTable.isHost, true)),
     });
@@ -748,6 +731,7 @@ async function handleMessage(ws: WebSocket, client: WsClient, raw: string) {
     const { roomCode } = payload as { roomCode: string };
     const room = await db.query.roomsTable.findFirst({ where: eq(roomsTable.code, roomCode) });
     if (!room) return;
+    if (rejectExpiredSession(ws, room)) return;
     const host = await db.query.playersTable.findFirst({
       where: and(eq(playersTable.roomId, room.id), eq(playersTable.isHost, true)),
     });
@@ -765,6 +749,7 @@ async function handleMessage(ws: WebSocket, client: WsClient, raw: string) {
     const { roomCode } = payload as { roomCode: string };
     const room = await db.query.roomsTable.findFirst({ where: eq(roomsTable.code, roomCode) });
     if (!room || room.status !== "waiting" || room.mode !== "character") return;
+    if (rejectExpiredSession(ws, room)) return;
 
     const host = await db.query.playersTable.findFirst({
       where: and(eq(playersTable.roomId, room.id), eq(playersTable.isHost, true)),
@@ -826,6 +811,8 @@ async function handleMessage(ws: WebSocket, client: WsClient, raw: string) {
     const { roomCode } = payload as { roomCode: string };
     const cs = roomCharacterState.get(roomCode);
     if (!cs || cs.adminId !== client.playerId) return;
+    const room = await db.query.roomsTable.findFirst({ where: eq(roomsTable.code, roomCode) });
+    if (!room || rejectExpiredSession(ws, room)) return;
 
     const picked = await pickNextCharacter(cs.lang, cs);
     if (!picked) {
@@ -965,6 +952,7 @@ async function handleMessage(ws: WebSocket, client: WsClient, raw: string) {
     const { roomCode } = payload as { roomCode: string };
     const room = await db.query.roomsTable.findFirst({ where: eq(roomsTable.code, roomCode) });
     if (!room || room.status !== "waiting" || room.mode !== "charades") return;
+    if (rejectExpiredSession(ws, room)) return;
 
     const host = await db.query.playersTable.findFirst({
       where: and(eq(playersTable.roomId, room.id), eq(playersTable.isHost, true)),
@@ -1012,6 +1000,8 @@ async function handleMessage(ws: WebSocket, client: WsClient, raw: string) {
     const { roomCode } = payload as { roomCode: string };
     const cs = roomCharadesState.get(roomCode);
     if (!cs || cs.hostId !== client.playerId) return;
+    const room = await db.query.roomsTable.findFirst({ where: eq(roomsTable.code, roomCode) });
+    if (!room || rejectExpiredSession(ws, room)) return;
 
     cs.currentPerformerIdx = (cs.currentPerformerIdx + 1) % cs.playerQueue.length;
 

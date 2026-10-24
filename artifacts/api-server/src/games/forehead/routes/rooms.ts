@@ -9,6 +9,7 @@ import {
   JoinRoomBody,
 } from "@workspace/forehead-api-zod";
 import { requireAccount, requireHostIdentity } from "../../../lib/auth.js";
+import { ensureHostSession } from "../../../lib/host-access.js";
 
 const router = Router();
 
@@ -36,6 +37,7 @@ async function getRoomWithPlayers(roomId: number) {
     categoryName,
     turnDuration: room.turnDuration,
     roundCount: room.roundCount,
+    accessEndsAt: room.accessEndsAt?.toISOString() ?? null,
     players: players.map((p) => ({
       id: p.id,
       name: p.name,
@@ -55,6 +57,12 @@ router.post("/rooms", requireHostIdentity, async (req, res) => {
     return;
   }
 
+  const activeHost = await ensureHostSession(req.hostAccount!);
+  if (!activeHost?.activeSessionEndsAt) {
+    res.status(403).json({ error: "No hosting time remaining. Please purchase more time." });
+    return;
+  }
+
   let code = generateRoomCode();
   // Ensure unique code
   let existing = await db.query.roomsTable.findFirst({ where: eq(roomsTable.code, code) });
@@ -70,7 +78,8 @@ router.post("/rooms", requireHostIdentity, async (req, res) => {
     mode,
     lang,
     categoryId: body.data.categoryId ?? null,
-    fullAccess: req.hostAccount!.fullAccess,
+    fullAccess: true,
+    accessEndsAt: new Date(activeHost.activeSessionEndsAt),
     turnDuration: body.data.turnDuration ?? 60,
     roundCount: body.data.roundCount ?? 1,
   }).returning();

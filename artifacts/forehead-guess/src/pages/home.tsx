@@ -119,6 +119,12 @@ export default function Home({ mode }: { mode: 'forehead' | 'character' | 'chara
           } catch (storageErr) {
             console.warn('[CreateRoom] sessionStorage failed (non-fatal):', storageErr);
           }
+          void fetch('https://dordorgames-production.up.railway.app/api/auth/me', {
+            credentials: 'include',
+            headers: { Accept: 'application/json' },
+          }).then((response) => response.ok ? response.json() : null)
+            .then((account) => account && window.dispatchEvent(new CustomEvent('dordor-account-updated', { detail: account })))
+            .catch((error: unknown) => console.debug('[Account] Session status refresh failed.', error));
           setLocation(`/room/${data.code}`);
         },
         onError: (err) => {

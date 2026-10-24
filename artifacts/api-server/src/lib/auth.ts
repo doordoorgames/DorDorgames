@@ -9,12 +9,14 @@ import {
   type SessionGrant,
 } from "./accounts.js";
 import { isMockVerification } from "./twilio.js";
+import { ensureHostSession, hasActiveSession } from "./host-access.js";
 
 declare global {
   namespace Express {
     interface Request {
       account?: Account;
       hostAccount?: Extract<Account, { role: "host" }>;
+      hostSessionEndsAt?: string;
       authSessionId?: string;
     }
   }
@@ -167,17 +169,43 @@ export const requireHost: RequestHandler = async (req, res, next) => {
     res.status(403).json({ error: "Host account required" });
     return;
   }
-  if (account.remainingMinutes <= 0) {
+  const activeHost = await ensureHostSession(account);
+  if (!activeHost?.activeSessionEndsAt) {
     res.status(403).json({ error: "No hosting time remaining. Please purchase more time." });
     return;
   }
+  req.hostAccount = { ...activeHost, role: "host" };
+  req.hostSessionEndsAt = activeHost.activeSessionEndsAt;
+  next();
+};
+
+export const requireActiveHostSession: RequestHandler = async (req, res, next) => {
+  const account = await resolveAccount(req, res);
+  if (!account) return;
+  if (account.role !== "host") {
+    res.status(403).json({ error: "Host account required" });
+    return;
+  }
+  if (!hasActiveSession(account) || !account.activeSessionEndsAt) {
+    res.status(403).json({ error: "Your hosting session has ended. Please activate a new block." });
+    return;
+  }
   req.hostAccount = account;
+  req.hostSessionEndsAt = account.activeSessionEndsAt;
   next();
 };
 
 export function safeAccount(account: Account) {
   const { passwordHash: _, ...safe } = account;
   return account.role === "participant"
-    ? { ...safe, trialUsed: false, remainingMinutes: 0, fullAccess: false }
+    ? {
+        ...safe,
+        trialUsed: false,
+        remainingMinutes: 0,
+        fullAccess: false,
+        trialStartedAt: null,
+        trialEndsAt: null,
+        activeSessionEndsAt: null,
+      }
     : safe;
 }

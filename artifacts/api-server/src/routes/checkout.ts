@@ -30,7 +30,6 @@ router.post("/checkout/validate-promo", (req, res) => {
 
 router.post("/checkout/pay", requireHostIdentity, async (req, res) => {
   const body = ProcessPaymentBody.parse(req.body);
-  const expiresAt = new Date(Date.now() + 3 * 60 * 60 * 1000).toISOString();
   const MINUTES_PER_PASS = 180;
 
   const hostId = req.hostAccount!.id;
@@ -55,8 +54,7 @@ router.post("/checkout/pay", requireHostIdentity, async (req, res) => {
       res.json({
         success: true,
         free: true,
-        message: "Promo code accepted. 3-hour host pass activated. No charge.",
-        expiresAt,
+        message: "Promo code accepted. 180 hosting minutes were added and will start when you create your next room.",
         ...(remainingMinutes !== undefined ? { remainingMinutes } : {}),
       });
       return;

@@ -18,10 +18,34 @@ setBaseUrl(apiBaseUrl);
 
 const queryClient = new QueryClient();
 
+interface DordorAccount {
+  role: "host" | "participant";
+  remainingMinutes: number;
+  activeSessionEndsAt: string | null;
+}
+
+function SessionStatus({ account }: { account: DordorAccount | null }) {
+  if (account?.role !== "host") return null;
+  const active = !!account.activeSessionEndsAt && new Date(account.activeSessionEndsAt).getTime() > Date.now();
+  const label = active
+    ? `Session ends at ${new Intl.DateTimeFormat(undefined, { hour: "numeric", minute: "2-digit" }).format(new Date(account.activeSessionEndsAt!))}`
+    : account.remainingMinutes > 0
+      ? `${account.remainingMinutes} purchased minutes available`
+      : "Session ended";
+  return <div role="status" className="fixed top-3 left-1/2 -translate-x-1/2 z-[100] rounded-full border border-white/40 bg-black/85 px-4 py-2 text-sm font-bold text-white shadow-xl whitespace-nowrap">{label}{!active && account.remainingMinutes <= 0 && <> · <a className="text-yellow-300 underline" href="https://www.dordor.games/pricing">Buy a plan</a></>}</div>;
+}
+
 function AccountGate({ children }: { children: ReactNode }) {
   const [status, setStatus] = useState<"loading" | "ready" | "error">(
     window.location.pathname.startsWith("/admin") ? "ready" : "loading",
   );
+  const [account, setAccount] = useState<DordorAccount | null>(null);
+
+  useEffect(() => {
+    const update = (event: Event) => setAccount((event as CustomEvent<DordorAccount>).detail);
+    window.addEventListener("dordor-account-updated", update);
+    return () => window.removeEventListener("dordor-account-updated", update);
+  }, []);
 
   useEffect(() => {
     if (status === "ready") return undefined;
@@ -47,7 +71,9 @@ function AccountGate({ children }: { children: ReactNode }) {
           return;
         }
         if (!response.ok) throw new Error(`Account verification returned ${response.status}`);
-        (window as typeof window & { DordorAccount?: unknown }).DordorAccount = await response.json();
+        const verifiedAccount = await response.json() as DordorAccount;
+        (window as typeof window & { DordorAccount?: DordorAccount }).DordorAccount = verifiedAccount;
+        setAccount(verifiedAccount);
         setStatus("ready");
       } catch (error) {
         if (!(error instanceof DOMException && error.name === "AbortError")) setStatus("error");
@@ -58,7 +84,7 @@ function AccountGate({ children }: { children: ReactNode }) {
 
   if (status === "loading") return <div className="min-h-screen grid place-items-center text-white">Verifying account...</div>;
   if (status === "error") return <div className="min-h-screen grid place-items-center text-white text-center p-6"><div><p>Unable to verify your account.</p><button className="mt-4 underline" onClick={() => setStatus("loading")}>Try again</button></div></div>;
-  return children;
+  return <><SessionStatus account={account} />{children}</>;
 }
 
 const hostedModePaths: Record<string, string> = {

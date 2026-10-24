@@ -467,8 +467,8 @@ export function PublicHome() {
                   </div>
                   <small>
                     {t(
-                      "Only hosts pay. Everyone else joins free.",
-                      "المضيف فقط يدفع. الجميع ينضم مجاناً.",
+                      "Create a host account and get 30 minutes free. Your time starts after OTP verification.",
+                      "أنشئ حساب مضيف واحصل على 30 دقيقة مجاناً. يبدأ الوقت بعد تأكيد رمز التحقق.",
                     )}
                   </small>
                 </div>
@@ -550,8 +550,8 @@ export function PublicHome() {
                       <a
                         href={g.externalUrl}
                         aria-label={t(
-                          `Start a free trial of ${g.title}`,
-                          `ابدأ التجربة المجانية للعبة ${arabicNames[id]}`,
+                          `Play ${g.title}`,
+                          `العب ${arabicNames[id]}`,
                         )}
                       >
                         <img
@@ -564,7 +564,7 @@ export function PublicHome() {
                       <p>{ar ? g.descriptionAr : g.description}</p>
                       <div>
                         <a href={g.externalUrl}>
-                          {t("Free Trial", "تجربة مجانية")}
+                          {t("Play Game", "العب الآن")}
                           <ArrowUpRight size={16} />
                         </a>
                       </div>

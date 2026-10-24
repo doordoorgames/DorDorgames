@@ -1,6 +1,7 @@
 import { Router, type IRouter, type Request, type Response } from "express";
 import { z } from "zod";
 import { store } from "../lib/store.js";
+import { FREE_TRIAL_MINUTES, hasActiveSession } from "../lib/host-access.js";
 import {
   accountExists,
   consumeRateLimit,
@@ -24,6 +25,8 @@ import {
   hashPassword,
   passwordNeedsRehash,
   requireAccount,
+  requireHost,
+  requireHostIdentity,
   safeAccount,
   setSessionCookies,
 } from "../lib/auth.js";
@@ -171,6 +174,8 @@ router.post("/auth/signup/verify-otp", async (req, res) => {
 
   try {
     const phoneVerified = !isMockVerification(phone);
+    const trialStartedAt = new Date();
+    const trialEndsAt = new Date(trialStartedAt.getTime() + FREE_TRIAL_MINUTES * 60 * 1000);
     const account = pending.role === "host"
       ? { ...await store.hosts.create({
           fullName: pending.fullName,
@@ -179,8 +184,11 @@ router.post("/auth/signup/verify-otp", async (req, res) => {
           passwordHash: pending.passwordHash,
           phoneVerified,
           trialUsed: true,
-          remainingMinutes: 60,
-          fullAccess: false,
+          remainingMinutes: 0,
+          fullAccess: true,
+          trialStartedAt: trialStartedAt.toISOString(),
+          trialEndsAt: trialEndsAt.toISOString(),
+          activeSessionEndsAt: trialEndsAt.toISOString(),
         }), role: "host" as const }
       : { ...await participants.create({
           fullName: pending.fullName,
@@ -256,6 +264,15 @@ router.post("/auth/refresh", async (req, res) => {
 
 router.get("/auth/me", requireAccount, (req, res) => {
   res.json(safeAccount(req.account!));
+});
+
+router.post("/auth/host-session/activate", requireHost, (req, res) => {
+  res.json({ active: true, sessionEndsAt: req.hostSessionEndsAt });
+});
+
+router.get("/auth/host-session", requireHostIdentity, (req, res) => {
+  const host = req.hostAccount!;
+  res.json({ active: hasActiveSession(host), sessionEndsAt: host.activeSessionEndsAt });
 });
 
 router.patch("/auth/profile", requireAccount, async (req, res) => {

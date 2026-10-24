@@ -175,6 +175,10 @@ function formatCountdown(minutes: number): string {
   return `${minutes}m`;
 }
 
+function formatSessionEnd(value: string): string {
+  return new Intl.DateTimeFormat(undefined, { hour: "numeric", minute: "2-digit" }).format(new Date(value));
+}
+
 export default function HostDashboard() {
   const [, setLocation] = useLocation();
   const { toast } = useToast();
@@ -224,10 +228,12 @@ export default function HostDashboard() {
   // While a room is active, remaining time is the room's real expiry (wall-clock
   // truth). A host's credit balance is fully spent the moment a room is created
   // (see POST /rooms), so it must never be used to gate access to an active room.
-  const roomMinutesLeft = activeRoom
-    ? Math.max(0, Math.ceil((new Date(activeRoom.expiresAt).getTime() - now) / 60000))
+  const sessionEndsAt = activeRoom?.expiresAt ?? host?.activeSessionEndsAt ?? null;
+  const sessionIsActive = !!sessionEndsAt && new Date(sessionEndsAt).getTime() > now;
+  const roomMinutesLeft = sessionIsActive
+    ? Math.max(0, Math.ceil((new Date(sessionEndsAt!).getTime() - now) / 60000))
     : null;
-  const displayMinutes = activeRoom ? (roomMinutesLeft ?? 0) : (host?.remainingMinutes ?? 0);
+  const displayMinutes = sessionIsActive ? (roomMinutesLeft ?? 0) : (host?.remainingMinutes ?? 0);
 
   useEffect(() => {
     if (activeRoom && displayMinutes <= 0 && !autoOpenedRef.current) {
@@ -393,7 +399,9 @@ export default function HostDashboard() {
                       : "border-yellow-500 text-yellow-500"
               }`}
             >
-              ⏱ {minutesDisplay} left
+              {sessionIsActive && sessionEndsAt
+                ? `SESSION ENDS AT ${formatSessionEnd(sessionEndsAt)}`
+                : `⏱ ${minutesDisplay} AVAILABLE`}
             </motion.div>
             <button
               onClick={() => setBuyTimeOpen((v) => !v)}

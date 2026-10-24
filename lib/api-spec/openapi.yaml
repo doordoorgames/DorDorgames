@@ -687,7 +687,7 @@ components:
 
     AccountProfile:
       type: object
-      required: [id, role, fullName, email, phone, phoneVerified, trialUsed, remainingMinutes, createdAt, updatedAt]
+      required: [id, role, fullName, email, phone, phoneVerified, trialUsed, remainingMinutes, fullAccess, trialStartedAt, trialEndsAt, activeSessionEndsAt, createdAt, updatedAt]
       properties:
         id:
           type: string
@@ -706,6 +706,17 @@ components:
           type: boolean
         remainingMinutes:
           type: integer
+        fullAccess:
+          type: boolean
+        trialStartedAt:
+          type: string
+          nullable: true
+        trialEndsAt:
+          type: string
+          nullable: true
+        activeSessionEndsAt:
+          type: string
+          nullable: true
         createdAt:
           type: string
         updatedAt:
