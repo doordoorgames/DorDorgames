@@ -219,9 +219,14 @@ function closeRoomCodeModal() {
 async function promptHostLogin() {
   const isArabic = currentLanguage() === "ar";
   const message = isArabic
-    ? "لإنشاء لعبة، سجّل الدخول أو أنشئ حساب مضيف. أول 30 دقيقة مجانية وتبدأ فور تأكيد رمز التحقق. بعد ذلك يمكنك شراء وقت استضافة إضافي. يمكن للضيوف الانضمام مجاناً برمز الغرفة.\n\nهل تريد تسجيل الدخول أو إنشاء حساب الآن؟"
-    : "To create a game, log in or create a host account. Your first 30 minutes are free and start immediately after OTP verification. After that, you can buy more hosting time. Guests join free with the room code.\n\nLog in or create an account now?";
-  const wantsLogin = await window.beautifulAlert.confirm(message, isArabic ? "حساب المضيف" : "Host account required");
+    ? "ابدأ لعبة. احصل على 30 دقيقة مجاناً. ادعُ أصدقاءك.\n\nينضم أصدقاؤك مجاناً باستخدام رمز الغرفة."
+    : "Start a game. Get 30 minutes free. Invite your friends.\n\nYour friends join for free using your room code.";
+  const wantsLogin = await window.beautifulAlert.confirm(
+    message,
+    isArabic ? "أول 30 دقيقة مجاناً!" : "Your First 30 Minutes Are FREE!",
+    isArabic ? "أنشئ حساباً مجانياً / سجّل الدخول" : "Create Free Account / Log In",
+    isArabic ? "ربما لاحقاً" : "Maybe Later",
+  );
   if (wantsLogin) {
     window.location.href = "https://www.dordor.games/account?returnTo=" + encodeURIComponent(window.location.href);
   }
@@ -242,7 +247,7 @@ async function submitNewGame() {
     if (!response.ok) throw new Error("ACCOUNT_CHECK_FAILED");
     account = await response.json();
   } catch (_) {
-    window.beautifulAlert.error(currentLanguage() === "ar" ? "تعذر التحقق من وقت الاستضافة. حاول مرة أخرى." : "Unable to verify hosting time. Please try again.");
+    window.beautifulAlert.error(currentLanguage() === "ar" ? "تعذر التحقق من وقت اللعب. حاول مرة أخرى." : "Unable to verify game time. Please try again.");
     return;
   }
   if (account?.role !== "host") {
@@ -252,7 +257,12 @@ async function submitNewGame() {
   const active = account.activeSessionEndsAt && new Date(account.activeSessionEndsAt).getTime() > Date.now();
   if (!active && Number(account.remainingMinutes || 0) <= 0) {
     const isArabic = currentLanguage() === "ar";
-    const wantsTime = await window.beautifulAlert.confirm(isArabic ? "انتهى وقت الاستضافة. هل تريد شراء وقت إضافي؟" : "Your hosting time has ended. Buy more time?", isArabic ? "انتهى وقت الاستضافة" : "Hosting time ended");
+    const wantsTime = await window.beautifulAlert.confirm(
+      isArabic ? "احصل على وقت لعب إضافي لبدء لعبة جديدة." : "Get more game time to start a new game.",
+      isArabic ? "انتهى وقت اللعب" : "Game time ended",
+      isArabic ? "احصل على وقت لعب" : "Get More Game Time",
+      isArabic ? "ربما لاحقاً" : "Maybe Later",
+    );
     if (wantsTime) window.location.href = "https://www.dordor.games/pricing?game=tfadhloon";
     return;
   }
@@ -285,7 +295,12 @@ async function submitNewGame() {
     console.error("Error creating game:", error);
     if (error?.status === 403) {
       const isArabic = currentLanguage() === "ar";
-      const wantsTime = await window.beautifulAlert.confirm(isArabic ? "انتهى وقت الاستضافة. هل تريد شراء وقت إضافي؟" : "Your hosting time has ended. Buy more time?", isArabic ? "انتهى وقت الاستضافة" : "Hosting time ended");
+      const wantsTime = await window.beautifulAlert.confirm(
+        isArabic ? "احصل على وقت لعب إضافي لبدء لعبة جديدة." : "Get more game time to start a new game.",
+        isArabic ? "انتهى وقت اللعب" : "Game time ended",
+        isArabic ? "احصل على وقت لعب" : "Get More Game Time",
+        isArabic ? "ربما لاحقاً" : "Maybe Later",
+      );
       if (wantsTime) window.location.href = "https://www.dordor.games/pricing?game=tfadhloon";
     } else {
       window.beautifulAlert.error(t("createGameError") || "Failed to create game.");
@@ -730,14 +745,14 @@ function updateLocalizedUI() {
           return this.show({ title, message, type: "info", autoClose: 3000 });
         }
 
-        confirm(message, title = "Confirm") {
+        confirm(message, title = "Confirm", confirmText = "Yes", cancelText = "No") {
           return this.show({
             title,
             message,
             type: "question",
             showCancel: true,
-            confirmText: "Yes",
-            cancelText: "No",
+            confirmText,
+            cancelText,
           });
         }
 
