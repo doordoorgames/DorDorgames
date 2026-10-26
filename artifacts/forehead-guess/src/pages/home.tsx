@@ -138,7 +138,7 @@ export default function Home({ mode }: { mode: 'forehead' | 'character' | 'chara
         if (await askForAccess({
           title: lang === 'ar' ? 'أول 30 دقيقة مجاناً!' : 'Your First 30 Minutes Are FREE!',
           message,
-          confirmText: lang === 'ar' ? 'أنشئ حساباً مجانياً / سجّل الدخول' : 'Create Free Account / Log In',
+          confirmText: lang === 'ar' ? 'أنشئ حساباً / سجّل الدخول' : 'Create Account / Log In',
           cancelText: lang === 'ar' ? 'ربما لاحقاً' : 'Maybe Later',
         })) {
           window.location.assign(`https://www.dordor.games/account?returnTo=${encodeURIComponent(window.location.href)}`);
@@ -162,7 +162,7 @@ export default function Home({ mode }: { mode: 'forehead' | 'character' | 'chara
       if (await askForAccess({
         title: lang === 'ar' ? 'أول 30 دقيقة مجاناً!' : 'Your First 30 Minutes Are FREE!',
         message,
-        confirmText: lang === 'ar' ? 'أنشئ حساباً مجانياً / سجّل الدخول' : 'Create Free Account / Log In',
+        confirmText: lang === 'ar' ? 'أنشئ حساباً / سجّل الدخول' : 'Create Account / Log In',
         cancelText: lang === 'ar' ? 'ربما لاحقاً' : 'Maybe Later',
       })) {
         window.location.assign(`https://www.dordor.games/account?returnTo=${encodeURIComponent(window.location.href)}`);
@@ -1270,3 +1270,4 @@ export default function Home({ mode }: { mode: 'forehead' | 'character' | 'chara
     </div>
   );
 }
+
