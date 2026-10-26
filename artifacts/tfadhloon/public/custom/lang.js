@@ -2,7 +2,7 @@ const translations = {
   en: {
     gameTitle: "Tfadhloon Guessing Game",
     selectCategory: "Choose Category",
-    startGame: "Start Game",
+    startGame: "Start a Game",
     nicknameStart: "Start",
     joinGame: "Join Game",
     clearName: "Clear Name",
