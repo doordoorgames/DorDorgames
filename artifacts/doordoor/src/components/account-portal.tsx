@@ -44,11 +44,11 @@ function requestedReturnTo(): string | null {
   }
 }
 
-export function AccountPortal({ initialRole }: { initialRole: Role }) {
+export function AccountPortal({ redirectHostToDashboard = false }: { redirectHostToDashboard?: boolean }) {
   const [, setLocation] = useLocation();
   const queryClient = useQueryClient();
   const { toast } = useToast();
-  const [role, setRole] = useState<Role>(initialRole);
+  const role: Role = "host";
   const [mode, setMode] = useState<Mode>("login");
   const [otpStep, setOtpStep] = useState(false);
   const [fullName, setFullName] = useState("");
@@ -89,10 +89,10 @@ export function AccountPortal({ initialRole }: { initialRole: Role }) {
     if (me.data) setProfileName(me.data.fullName);
     if (me.data && returnTo) {
       continueAfterAuth(me.data.role);
-    } else if (initialRole === "host" && me.data?.role === "host") {
+    } else if (redirectHostToDashboard && me.data?.role === "host") {
       setLocation("/host/dashboard");
     }
-  }, [initialRole, me.data, returnTo, setLocation]);
+  }, [me.data, redirectHostToDashboard, returnTo, setLocation]);
 
   const refreshProfile = async () => {
     await queryClient.invalidateQueries({ queryKey: getGetAuthMeQueryKey() });
@@ -218,14 +218,11 @@ export function AccountPortal({ initialRole }: { initialRole: Role }) {
       <div className="min-h-[calc(100dvh-150px)] flex items-center justify-center px-4 py-6 sm:px-6 sm:py-10">
         <motion.section initial={{ opacity: 0, scale: 0.97 }} animate={{ opacity: 1, scale: 1 }} className="w-full max-w-lg border border-fuchsia-400/45 bg-black/70 backdrop-blur-xl rounded-3xl p-5 sm:p-8 shadow-[0_0_55px_rgba(217,70,239,0.18)]">
           <div className="text-center mb-7">
-            <p className="text-xs font-mono tracking-[0.3em] text-cyan-300">ONE ACCOUNT · EVERY GAME</p>
+            <p className="text-xs font-mono tracking-[0.3em] text-cyan-300">HOST ACCOUNT · EVERY GAME</p>
             <h1 className="text-3xl font-black text-white mt-3">{mode === "login" ? "Welcome back" : "Create your Dordor ID"}</h1>
-            <p className="text-white/45 text-sm mt-2">{role === "host" ? "Host rooms and manage your play time" : "Sign in to enter and play every game"}</p>
+            <p className="text-white/45 text-sm mt-2">Host rooms and manage your play time. Guests join with a room code.</p>
           </div>
 
-          <div className="grid grid-cols-2 gap-2 p-1 bg-white/5 rounded-2xl mb-4">
-            {(["participant", "host"] as Role[]).map((value) => <button key={value} type="button" onClick={() => { setRole(value); setOtpStep(false); }} className={`rounded-xl py-2.5 text-sm font-bold transition ${role === value ? "bg-fuchsia-500 text-white" : "text-white/50 hover:text-white"}`}>{value === "participant" ? "PLAYER / لاعب" : "HOST / مضيف"}</button>)}
-          </div>
           <div className="grid grid-cols-2 border-b border-white/10 mb-6">
             {(["login", "signup"] as Mode[]).map((value) => <button key={value} type="button" onClick={() => { setMode(value); setOtpStep(false); }} className={`py-3 text-sm font-bold uppercase border-b-2 transition ${mode === value ? "border-cyan-300 text-cyan-200" : "border-transparent text-white/40"}`}>{value}</button>)}
           </div>
@@ -239,7 +236,7 @@ export function AccountPortal({ initialRole }: { initialRole: Role }) {
           ) : otpStep ? (
             <form onSubmit={submitOtp} className="space-y-4">
               <p className="text-center text-sm text-white/55">Enter the six-digit code sent to <span className="text-cyan-200">{phone}</span></p>
-              {role === "host" && <p className="rounded-xl border border-yellow-300/40 bg-yellow-300/10 p-3 text-center text-sm font-semibold text-yellow-100">Your free 30-minute session starts immediately when you verify this code.<br /><span lang="ar" dir="rtl">تبدأ جلستك المجانية لمدة 30 دقيقة فور تأكيد الرمز.</span></p>}
+              <p className="rounded-xl border border-yellow-300/40 bg-yellow-300/10 p-3 text-center text-sm font-semibold text-yellow-100">Your first 30 minutes are free and start immediately when you verify this code.<br /><span lang="ar" dir="rtl">أول 30 دقيقة مجانية وتبدأ فور تأكيد الرمز.</span></p>
               <input className={`${inputClass} text-center text-3xl tracking-[0.35em]`} inputMode="numeric" placeholder="000000" value={otp} onChange={(event) => setOtp(event.target.value.replace(/\D/g, "").slice(0, 6))} autoComplete="one-time-code" />
               <button className="w-full rounded-xl bg-cyan-300 text-black font-black py-3.5 disabled:opacity-50" disabled={verifyOtp.isPending || otp.length !== 6}>{verifyOtp.isPending ? "VERIFYING..." : "VERIFY & CONTINUE"}</button>
               <button type="button" onClick={() => setOtpStep(false)} className="w-full text-sm text-white/45">Change details</button>
@@ -259,3 +256,4 @@ export function AccountPortal({ initialRole }: { initialRole: Role }) {
     </Layout>
   );
 }
+

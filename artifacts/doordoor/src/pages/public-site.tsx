@@ -429,14 +429,8 @@ function Faq({ ar }: { ar: boolean }) {
 
 export function PublicHome() {
   const { games, updateAvailable } = useLiveGames();
-  const account = useGetAuthMe({
-    query: { queryKey: getGetAuthMeQueryKey(), retry: false, refetchOnWindowFocus: false },
-  });
   const ids = ["spy", "tfadhloon", "forehead", "guessthecharacter", "charades"];
-  const gameHref = (externalUrl: string) =>
-    account.data
-      ? externalUrl
-      : `/account?returnTo=${encodeURIComponent(externalUrl)}`;
+  const gameHref = (externalUrl: string) => externalUrl;
   return (
     <PublicLayout>
       {(ar) => {
@@ -890,3 +884,4 @@ export function Purchase() {
     </PublicLayout>
   );
 }
+

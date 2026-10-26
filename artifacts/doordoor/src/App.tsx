@@ -1,14 +1,9 @@
 import { Switch, Route, Router as WouterRouter } from "wouter";
-import { useEffect } from "react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { AnimatePresence } from "framer-motion";
-import {
-  getGetAuthMeQueryKey,
-  setBaseUrl,
-  useGetAuthMe,
-} from "@workspace/api-client-react";
+import { setBaseUrl } from "@workspace/api-client-react";
 import NotFound from "@/pages/not-found";
 import { PublicHome as Home, Pricing, Purchase } from "@/pages/public-site";
 import Join from "@/pages/join";
@@ -27,27 +22,6 @@ setBaseUrl(
 
 const queryClient = new QueryClient();
 
-function AuthenticatedRoom() {
-  const account = useGetAuthMe({
-    query: { queryKey: getGetAuthMeQueryKey(), retry: false },
-  });
-  useEffect(() => {
-    if (account.error) {
-      window.location.replace(
-        `/account?returnTo=${encodeURIComponent(window.location.pathname)}`,
-      );
-    }
-  }, [account.error]);
-  if (account.isLoading || !account.data) {
-    return (
-      <div className="min-h-screen grid place-items-center font-mono text-secondary">
-        VERIFYING ACCOUNT...
-      </div>
-    );
-  }
-  return <RoomView />;
-}
-
 function Router() {
   return (
     <AnimatePresence mode="wait">
@@ -62,7 +36,7 @@ function Router() {
         <Route path="/account" component={Account} />
         <Route path="/host" component={Host} />
         <Route path="/host/dashboard" component={HostDashboard} />
-        <Route path="/room/:code" component={AuthenticatedRoom} />
+        <Route path="/room/:code" component={RoomView} />
         <Route path="/admin" component={AdminLogin} />
         <Route path="/admin/dashboard" component={AdminDashboard} />
         <Route path="/shelved" component={ShelvedGames} />
@@ -101,3 +75,4 @@ function App() {
 }
 
 export default App;
+

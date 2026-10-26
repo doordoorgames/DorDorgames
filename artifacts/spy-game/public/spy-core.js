@@ -82,7 +82,6 @@
   }
 
   async function joinRoom(code,nickname) {
-    await window.DordorAccountReady;
     code=cleanCode(code); nickname=cleanName(nickname); if (!nickname) throw new Error("NAME_REQUIRED");
     const snapshot=await roomRef(code).once("value"); if(!snapshot.exists())throw new Error("MISSING");
     const room=snapshot.val(), prior=getIdentity(code);
@@ -231,3 +230,4 @@
 
   window.SpyCore={db,GRACE_MS,MAX_PLAYERS,now,cleanCode,cleanName,isTest99,roomRef,getIdentity,requireIdentity,createRoom,inspectRoom,joinRoom,ensureTestBots,driveTestBots,startPresence,leaveRoom,claimHost,removePlayer,getWordPair,startRound,submitVote,submitSpyGuess,advanceExpiredPhase,endMatch,resetToLobby,activePlayers,eligiblePlayers,orderedIds,isOnline,playerName,message};
 })();
+

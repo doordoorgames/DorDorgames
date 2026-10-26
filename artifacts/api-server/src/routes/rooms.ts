@@ -9,7 +9,7 @@ import {
 } from "@workspace/api-zod";
 import { z } from "zod";
 import { store } from "../lib/store.js";
-import { requireAccount, requireHostIdentity } from "../lib/auth.js";
+import { requireHostIdentity } from "../lib/auth.js";
 import { ensureHostSession } from "../lib/host-access.js";
 
 const router: IRouter = Router();
@@ -57,7 +57,7 @@ router.post("/rooms", requireHostIdentity, async (req, res) => {
   res.status(201).json(roomWithGame(room));
 });
 
-router.get("/rooms/:code", requireAccount, (req, res) => {
+router.get("/rooms/:code", (req, res) => {
   const { code } = GetRoomParams.parse(req.params);
   const room = store.rooms.get(code);
   if (!room) {
@@ -103,7 +103,7 @@ router.patch("/rooms/:code/game", requireHostIdentity, (req, res) => {
   res.json(roomWithGame(updated));
 });
 
-router.post("/rooms/:code/join", requireAccount, (req, res) => {
+router.post("/rooms/:code/join", (req, res) => {
   const { code } = JoinRoomParams.parse(req.params);
   const body = JoinRoomBody.parse(req.body);
   const room = store.rooms.addGuest(code, body.nickname);
@@ -115,3 +115,4 @@ router.post("/rooms/:code/join", requireAccount, (req, res) => {
 });
 
 export default router;
+

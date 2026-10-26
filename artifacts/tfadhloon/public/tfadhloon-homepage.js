@@ -216,6 +216,19 @@ function closeRoomCodeModal() {
   setTimeout(() => joinGameBtn?.focus({ preventScroll: true }), 0);
 }
 
+async function promptHostLogin() {
+  const isArabic = currentLanguage() === "ar";
+  const message = isArabic
+    ? "لإنشاء لعبة، سجّل الدخول أو أنشئ حساب مضيف. أول 30 دقيقة مجانية وتبدأ فور تأكيد رمز التحقق. بعد ذلك يمكنك شراء وقت استضافة إضافي. يمكن للضيوف الانضمام مجاناً برمز الغرفة.\n\nهل تريد تسجيل الدخول أو إنشاء حساب الآن؟"
+    : "To create a game, log in or create a host account. Your first 30 minutes are free and start immediately after OTP verification. After that, you can buy more hosting time. Guests join free with the room code.\n\nLog in or create an account now?";
+  const wantsLogin = window.beautifulAlert?.confirm
+    ? await window.beautifulAlert.confirm(message, isArabic ? "حساب المضيف" : "Host account required")
+    : window.confirm(message);
+  if (wantsLogin) {
+    window.location.href = "https://www.dordor.games/account?returnTo=" + encodeURIComponent(window.location.href);
+  }
+}
+
 async function submitNewGame() {
   let account = await window.DordorAccountReady;
   try {
@@ -224,6 +237,10 @@ async function submitNewGame() {
       const refreshed = await fetch("https://dordorgames-production.up.railway.app/api/auth/refresh", { method: "POST", credentials: "include" });
       if (refreshed.ok) response = await fetch("https://dordorgames-production.up.railway.app/api/auth/me", { credentials: "include", headers: { Accept: "application/json" } });
     }
+    if (response.status === 401 || response.status === 403) {
+      await promptHostLogin();
+      return;
+    }
     if (!response.ok) throw new Error("ACCOUNT_CHECK_FAILED");
     account = await response.json();
   } catch (_) {
@@ -231,14 +248,7 @@ async function submitNewGame() {
     return;
   }
   if (account?.role !== "host") {
-    const isArabic = currentLanguage() === "ar";
-    const message = isArabic
-      ? "إنشاء لعبة يتطلب باقة استضافة مدفوعة. هل تريد عرض الباقات؟"
-      : "Creating a game requires a paid hosting pass. View plans now?";
-    const wantsPass = window.beautifulAlert?.confirm
-      ? await window.beautifulAlert.confirm(message, isArabic ? "باقة استضافة مطلوبة" : "Hosting pass required")
-      : window.confirm(message);
-    if (wantsPass) window.location.href = "https://www.dordor.games/pricing?game=tfadhloon";
+    await promptHostLogin();
     return;
   }
   const active = account.activeSessionEndsAt && new Date(account.activeSessionEndsAt).getTime() > Date.now();
@@ -928,3 +938,4 @@ function updateLocalizedUI() {
     requestAnimationFrame(() => requestAnimationFrame(schedule));
   });
 })();
+

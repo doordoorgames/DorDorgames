@@ -80,9 +80,7 @@
     }
     if (!res.ok) {
       const body = await res.json().catch(() => ({}));
-      const error = new Error(body.error || "API error " + res.status);
-      error.status = res.status;
-      throw error;
+      throw new Error(body.error || "API error " + res.status);
     }
     return res.json();
   }

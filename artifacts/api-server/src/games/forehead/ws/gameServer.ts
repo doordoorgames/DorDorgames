@@ -688,6 +688,7 @@ async function handleMessage(ws: WebSocket, client: WsClient, raw: string) {
     const { roomCode } = payload as { roomCode: string };
     const room = await db.query.roomsTable.findFirst({ where: eq(roomsTable.code, roomCode) });
     if (!room || room.status !== "reveal") return;
+    if (rejectExpiredSession(ws, room)) return;
     const host = await db.query.playersTable.findFirst({
       where: and(eq(playersTable.roomId, room.id), eq(playersTable.isHost, true)),
     });
@@ -810,6 +811,9 @@ async function handleMessage(ws: WebSocket, client: WsClient, raw: string) {
     const { roomCode } = payload as { roomCode: string };
     const cs = roomCharacterState.get(roomCode);
     if (!cs || cs.adminId !== client.playerId) return;
+    const room = await db.query.roomsTable.findFirst({ where: eq(roomsTable.code, roomCode) });
+    if (!room || rejectExpiredSession(ws, room)) return;
+
     const picked = await pickNextCharacter(cs.lang, cs);
     if (!picked) {
       sendTo(ws, { type: "error", payload: { message: "No characters found for this language." } });
@@ -996,6 +1000,9 @@ async function handleMessage(ws: WebSocket, client: WsClient, raw: string) {
     const { roomCode } = payload as { roomCode: string };
     const cs = roomCharadesState.get(roomCode);
     if (!cs || cs.hostId !== client.playerId) return;
+    const room = await db.query.roomsTable.findFirst({ where: eq(roomsTable.code, roomCode) });
+    if (!room || rejectExpiredSession(ws, room)) return;
+
     cs.currentPerformerIdx = (cs.currentPerformerIdx + 1) % cs.playerQueue.length;
 
     let available = cs.words.filter((w) => !cs.usedWordIds.includes(w.id));

@@ -51,7 +51,6 @@
   let optionStructureKey = "";
   let refreshPromise = null;
   let refreshAgain = false;
-  let allowPageExit = false;
 
   const TEST_BOT = "TestBot";
   const language = () => game?.game_language === "en"
@@ -784,8 +783,6 @@
 
   els.next.addEventListener("click", nextAction);
   els.back.addEventListener("click", () => {
-    if (game?.status === "playing" && !window.confirm(text("هل تريد مغادرة اللعبة الجارية؟", "Leave the active game?"))) return;
-    allowPageExit = true;
     window.location.href = "tfadhloon-homepage.html";
   });
   function setDashboardOpen(isOpen) {
@@ -804,13 +801,9 @@
     if (document.visibilityState === "visible") queueRefresh();
   });
   window.addEventListener("focus", queueRefresh);
-  window.addEventListener("beforeunload", (event) => {
+  window.addEventListener("beforeunload", () => {
     if (botTimer) window.clearTimeout(botTimer);
     if (unsubscribe) unsubscribe();
-    if (game?.status === "playing" && !allowPageExit) {
-      event.preventDefault();
-      event.returnValue = "";
-    }
   });
 
   init();

@@ -111,6 +111,15 @@ export default function Home({ mode }: { mode: 'forehead' | 'character' | 'chara
         const refreshed = await fetch(`${authOrigin}/api/auth/refresh`, { method: 'POST', credentials: 'include' });
         if (refreshed.ok) response = await fetch(`${authOrigin}/api/auth/me`, { credentials: 'include', headers: { Accept: 'application/json' } });
       }
+      if (response.status === 401 || response.status === 403) {
+        const message = lang === 'ar'
+          ? 'لإنشاء لعبة، سجّل الدخول أو أنشئ حساب مضيف. أول 30 دقيقة مجانية وتبدأ فور تأكيد رمز التحقق. بعد ذلك يمكنك شراء وقت استضافة إضافي. يمكن للضيوف الانضمام مجاناً برمز الغرفة.\n\nهل تريد تسجيل الدخول أو إنشاء حساب الآن؟'
+          : 'To create a game, log in or create a host account. Your first 30 minutes are free and start immediately after OTP verification. After that, you can buy more hosting time. Guests join free with the room code.\n\nLog in or create an account now?';
+        if (window.confirm(message)) {
+          window.location.assign(`https://www.dordor.games/account?returnTo=${encodeURIComponent(window.location.href)}`);
+        }
+        return false;
+      }
       if (!response.ok) throw new Error('Account verification failed');
       account = await response.json() as AccountAccess;
       (window as typeof window & { DordorAccount?: AccountAccess }).DordorAccount = account;
@@ -121,6 +130,15 @@ export default function Home({ mode }: { mode: 'forehead' | 'character' | 'chara
 
     const active = !!account?.activeSessionEndsAt && new Date(account.activeSessionEndsAt).getTime() > Date.now();
     if (account?.role === 'host' && (active || (account.remainingMinutes ?? 0) > 0)) return true;
+    if (account?.role !== 'host') {
+      const message = lang === 'ar'
+        ? 'إنشاء الألعاب متاح بحساب مضيف. سجّل الدخول أو أنشئ حساباً جديداً، وستحصل على أول 30 دقيقة مجاناً فور تأكيد رمز التحقق.\n\nهل تريد المتابعة؟'
+        : 'Creating games requires a host account. Log in or create one and your first 30 minutes are free immediately after OTP verification.\n\nContinue to login?';
+      if (window.confirm(message)) {
+        window.location.assign(`https://www.dordor.games/account?returnTo=${encodeURIComponent(window.location.href)}`);
+      }
+      return false;
+    }
     const message = lang === 'ar'
       ? 'انتهى وقت الاستضافة. اشترِ وقتًا إضافيًا لإنشاء لعبة جديدة؟'
       : 'Your hosting time has ended. Buy more time to create a new game?';
@@ -1194,3 +1212,4 @@ export default function Home({ mode }: { mode: 'forehead' | 'character' | 'chara
     </div>
   );
 }
+

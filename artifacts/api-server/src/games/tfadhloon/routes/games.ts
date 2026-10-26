@@ -1,6 +1,6 @@
 import { Router, type IRouter, type Request, type Response } from "express";
 import { getSupabaseClient } from "../lib/supabase.js";
-import { requireAccount, requireActiveHostSession, requireHostIdentity } from "../../../lib/auth.js";
+import { requireActiveHostSession, requireHostIdentity } from "../../../lib/auth.js";
 import { ensureHostSession } from "../../../lib/host-access.js";
 
 const router: IRouter = Router();
@@ -107,7 +107,7 @@ router.post("/games", requireHostIdentity, async (req: Request, res: Response) =
 
 // ─── GET GAME ────────────────────────────────────────────────────────────────
 
-router.get("/games/:code", requireAccount, async (req: Request, res: Response) => {
+router.get("/games/:code", async (req: Request, res: Response) => {
   const { code } = req.params;
   const db = getSupabaseClient();
 
@@ -138,7 +138,7 @@ router.get("/games/:code", requireAccount, async (req: Request, res: Response) =
 
 // ─── JOIN GAME ───────────────────────────────────────────────────────────────
 
-router.post("/games/:code/join", requireAccount, async (req: Request, res: Response) => {
+router.post("/games/:code/join", async (req: Request, res: Response) => {
   const { code } = req.params;
   const { playerName } = req.body as { playerName?: string };
 
@@ -203,8 +203,6 @@ router.post("/games/:code/join", requireAccount, async (req: Request, res: Respo
   await db.from("games").update({ player_order: newOrder }).eq("code", code);
   res.json({ joined: true, code });
 });
-
-router.use(requireAccount);
 
 // ─── UPDATE GAME SETTINGS (host only) ────────────────────────────────────────
 
@@ -433,7 +431,7 @@ router.post("/games/:code/submit", async (req: Request, res: Response) => {
 
 // ─── AWARD POINTS (host triggers after all submit) ────────────────────────────
 
-router.post("/games/:code/award-points", async (req: Request, res: Response) => {
+router.post("/games/:code/award-points", requireHostIdentity, async (req: Request, res: Response) => {
   const { code } = req.params;
   const db = getSupabaseClient();
   const { data, error } = await db.rpc("award_tfadhloon_points", { p_game_code: code });
@@ -446,7 +444,7 @@ router.post("/games/:code/award-points", async (req: Request, res: Response) => 
 
 // ─── END GAME ────────────────────────────────────────────────────────────────
 
-router.post("/games/:code/end", async (req: Request, res: Response) => {
+router.post("/games/:code/end", requireHostIdentity, async (req: Request, res: Response) => {
   const { code } = req.params;
   const db = getSupabaseClient();
 
@@ -478,7 +476,7 @@ router.post("/games/:code/end", async (req: Request, res: Response) => {
 
 // ─── REMOVE PLAYER (host only) ───────────────────────────────────────────────
 
-router.delete("/games/:code/players/:playerName", async (req: Request, res: Response) => {
+router.delete("/games/:code/players/:playerName", requireHostIdentity, async (req: Request, res: Response) => {
   const { code, playerName } = req.params;
   const db = getSupabaseClient();
 
@@ -521,3 +519,4 @@ router.post("/games/:code/suggest", async (req: Request, res: Response) => {
 });
 
 export default router;
+

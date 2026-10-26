@@ -82,8 +82,8 @@ function AccountGate({ children }: { children: ReactNode }) {
           if (refresh.ok) response = await request("/api/auth/me");
         }
         if (response.status === 401 || response.status === 403) {
-          const accountUrl = `https://www.dordor.games/account?returnTo=${encodeURIComponent(window.location.href)}`;
-          window.location.replace(accountUrl);
+          setAccount(null);
+          setStatus("ready");
           return;
         }
         if (!response.ok) throw new Error(`Account verification returned ${response.status}`);
@@ -174,3 +174,4 @@ function App() {
 }
 
 export default App;
+

@@ -42,7 +42,7 @@ const PasswordSchema = z
   .regex(/\d/, "Password must contain a number");
 
 const SignupRequestOtpSchema = z.object({
-  role: RoleSchema,
+  role: z.literal("host"),
   fullName: z.string().trim().min(2).max(80),
   email: z.string().trim().email().max(254),
   phone: z.string().transform(normalizePhone).pipe(z.string().regex(/^\+[1-9]\d{7,14}$/, "Use international format, for example +96550000000")),
@@ -327,3 +327,4 @@ router.post("/auth/logout-all", requireAccount, async (req, res) => {
 });
 
 export default router;
+
