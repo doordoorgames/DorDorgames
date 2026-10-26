@@ -596,7 +596,15 @@ function updateLocalizedUI() {
             ${progressBar}
           `;
 
-          overlay.appendChild(alert);
+          const dialogShell = document.createElement("div");
+          dialogShell.className = "alert-dialog-shell";
+
+          const closeButton = alert.querySelector(".alert-close");
+          if (closeButton) {
+            dialogShell.appendChild(closeButton);
+          }
+          dialogShell.appendChild(alert);
+          overlay.appendChild(dialogShell);
           document.body.appendChild(overlay);
 
           // Store the resolve function for later use
