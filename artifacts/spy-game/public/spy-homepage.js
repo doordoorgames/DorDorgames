@@ -32,7 +32,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const message=lang()==="ar"
       ? "ابدأ لعبة. احصل على 30 دقيقة مجاناً. ادعُ أصدقاءك.\n\nينضم أصدقاؤك مجاناً باستخدام رمز الغرفة."
       : "Start a game. Get 30 minutes free. Invite your friends.\n\nYour friends join for free using your room code.";
-    const wantsLogin=await showDecisionModal({title:lang()==="ar"?"أول 30 دقيقة مجاناً!":"Your First 30 Minutes Are FREE!",message,confirmText:lang()==="ar"?"أنشئ حساباً مجانياً / سجّل الدخول":"Create Free Account / Log In",cancelText:lang()==="ar"?"ربما لاحقاً":"Maybe Later"});
+    const wantsLogin=await showDecisionModal({title:lang()==="ar"?"أول 30 دقيقة مجاناً!":"Your First 30 Minutes Are FREE!",message,confirmText:lang()==="ar"?"أنشئ حساباً / سجّل الدخول":"Create Account / Log In",cancelText:lang()==="ar"?"ربما لاحقاً":"Maybe Later"});
     if(wantsLogin)location.href="https://www.dordor.games/account?returnTo="+encodeURIComponent(location.href);
   }
   async function doJoin(code,nickname,statusEl) {
@@ -95,3 +95,4 @@ document.addEventListener("DOMContentLoaded", () => {
   };
   $("clearNameBtn").onclick=()=>{Object.keys(localStorage).filter(k=>k.startsWith("spyIdentity:")).forEach(k=>localStorage.removeItem(k));$("clearNameBtn").classList.add("d-none");};
 });
+
