@@ -572,7 +572,7 @@ function updateLocalizedUI() {
           alert.innerHTML = `
             ${
               config.showCloseButton
-                ? `<button class="alert-close small-button icon shape-4">&times;</button>`
+                ? `<button type="button" class="alert-close" aria-label="Close">&times;</button>`
                 : ""
             }
             <div class="alert-header">
@@ -584,14 +584,14 @@ function updateLocalizedUI() {
               ${inputField}
             </div>
             <div class="alert-footer">
+              <button class="alert-btn alert-btn-primary confirm-btn menu-button compact shape-1">${
+                config.confirmText
+              }</button>
               ${
                 config.showCancel
                   ? `<button class="alert-btn alert-btn-secondary cancel-btn menu-button compact shape-4">${config.cancelText}</button>`
                   : ""
               }
-              <button class="alert-btn alert-btn-primary confirm-btn menu-button compact shape-1">${
-                config.confirmText
-              }</button>
             </div>
             ${progressBar}
           `;
