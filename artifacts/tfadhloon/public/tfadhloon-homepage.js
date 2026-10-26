@@ -584,12 +584,12 @@ function updateLocalizedUI() {
               ${inputField}
             </div>
             <div class="alert-footer">
-              <button class="alert-btn alert-btn-primary confirm-btn menu-button compact shape-1">${
+              <button class="alert-btn alert-btn-primary confirm-btn">${
                 config.confirmText
               }</button>
               ${
                 config.showCancel
-                  ? `<button class="alert-btn alert-btn-secondary cancel-btn menu-button compact shape-4">${config.cancelText}</button>`
+                  ? `<button class="alert-btn alert-btn-secondary cancel-btn">${config.cancelText}</button>`
                   : ""
               }
             </div>
