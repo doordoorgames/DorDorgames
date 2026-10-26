@@ -157,7 +157,7 @@ function Packages({ ar, game }: { ar: boolean; game?: string | null }) {
                 <Gamepad2 />
               )}
             </span>
-            <span>{ar ? "باقة استضافة" : "HOSTING PASS"}</span>
+            <span>{ar ? "باقة لعب" : "GAME PASS"}</span>
           </div>
           <div className="dd-package-label">
             {p.id === "game-night"
@@ -172,7 +172,7 @@ function Packages({ ar, game }: { ar: boolean; game?: string | null }) {
           </p>
           <p className="dd-hours">
             {(p.paid + p.bonus) * HOURS_PER_BLOCK}{" "}
-            <span>{t("hours of hosting", "ساعات استضافة")}</span>
+            <span>{t("hours of gameplay", "ساعات لعب")}</span>
           </p>
           <BlockVisual paid={p.paid} bonus={p.bonus} ar={ar} />
           {p.bonus > 0 && (
@@ -185,8 +185,8 @@ function Packages({ ar, game }: { ar: boolean; game?: string | null }) {
             <li>
               <Check />
               {t(
-                `${p.paid} paid hosting ${p.paid === 1 ? "block" : "blocks"}`,
-                `${p.paid} بلوك استضافة مدفوع`,
+                `${p.paid} paid game pass ${p.paid === 1 ? "block" : "blocks"}`,
+                `${p.paid} بلوك لعب مدفوع`,
               )}
             </li>
             {p.bonus > 0 && (
