@@ -704,6 +704,9 @@ ALERT SYSTEM — full match with lobby CSS improvements
 }
 
 .alert-btn {
+  width: 100%;
+  max-width: 340px;
+  min-height: 52px;
   padding: 14px 32px;
   border: 2px solid white;
   font-weight: 700;
