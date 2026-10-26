@@ -6,7 +6,7 @@ document.addEventListener("DOMContentLoaded", () => {
   localStorage.setItem("selectedGameType", "spy");
   const $ = id => document.getElementById(id);
   const lang = () => localStorage.getItem("lang") === "en" ? "en" : "ar";
-  const copy={en:{subtitle:"Find the hidden spy among you!",create:"Create New Game",join:"Join Game",name:"Enter your nickname",code:"Enter five-digit room code",joining:"Joining room",joinRoom:"Join Room",how:"How to Play"},ar:{subtitle:"اكتشف الجاسوس المختبئ بينكم!",create:"إنشاء لعبة جديدة",join:"انضم إلى لعبة",name:"أدخل اسمك",code:"أدخل رمز الغرفة المكوّن من 5 أرقام",joining:"الانضمام إلى الغرفة",joinRoom:"انضم إلى الغرفة",how:"طريقة اللعب"}};
+  const copy={en:{subtitle:"Find the hidden spy among you!",create:"Start a Game",join:"Join Game",name:"Enter your nickname",code:"Enter five-digit room code",joining:"Joining room",joinRoom:"Join Room",how:"How to Play"},ar:{subtitle:"اكتشف الجاسوس المختبئ بينكم!",create:"ابدأ لعبة",join:"انضم إلى لعبة",name:"أدخل اسمك",code:"أدخل رمز الغرفة المكوّن من 5 أرقام",joining:"الانضمام إلى الغرفة",joinRoom:"انضم إلى الغرفة",how:"طريقة اللعب"}};
   const say = (text, error) => { const target = $("inviteStatus"); if (target) { target.textContent=text; target.style.color=error?"#ffb3b3":""; } else alert(text); };
   function navigate(code){ location.href=`spy-lobby.html?code=${code}`; }
   function showDecisionModal({title,message,confirmText,cancelText}){
