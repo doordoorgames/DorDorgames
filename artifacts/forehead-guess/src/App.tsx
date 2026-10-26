@@ -100,7 +100,7 @@ function AccountGate({ children }: { children: ReactNode }) {
 
   if (status === "loading") return <div className="min-h-screen grid place-items-center text-white">Verifying account...</div>;
   if (status === "error") return <div className="min-h-screen grid place-items-center text-white text-center p-6"><div><p>Unable to verify your account.</p><button className="mt-4 underline" onClick={() => setStatus("loading")}>Try again</button></div></div>;
-  return <><SessionStatus account={account} />{account && <AccountChip account={account} />}{children}</>;
+  return <><SessionStatus account={account} />{account?.role === "host" && <AccountChip account={account} />}{children}</>;
 }
 
 const hostedModePaths: Record<string, string> = {
@@ -174,4 +174,3 @@ function App() {
 }
 
 export default App;
-
