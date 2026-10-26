@@ -30,9 +30,9 @@ document.addEventListener("DOMContentLoaded", () => {
   }
   async function promptHostLogin(){
     const message=lang()==="ar"
-      ? "لإنشاء لعبة، سجّل الدخول أو أنشئ حساب مضيف. أول 30 دقيقة مجانية وتبدأ فور تأكيد رمز التحقق. بعد ذلك يمكنك شراء وقت استضافة إضافي. يمكن للضيوف الانضمام مجاناً برمز الغرفة.\n\nهل تريد تسجيل الدخول أو إنشاء حساب الآن؟"
-      : "To create a game, log in or create a host account. Your first 30 minutes are free and start immediately after OTP verification. After that, you can buy more hosting time. Guests join free with the room code.\n\nLog in or create an account now?";
-    const wantsLogin=await showDecisionModal({title:lang()==="ar"?"يلزم حساب مضيف":"Host account required",message,confirmText:lang()==="ar"?"تسجيل الدخول أو إنشاء حساب":"Log in or sign up",cancelText:lang()==="ar"?"ليس الآن":"Not now"});
+      ? "ابدأ لعبة. احصل على 30 دقيقة مجاناً. ادعُ أصدقاءك.\n\nينضم أصدقاؤك مجاناً باستخدام رمز الغرفة."
+      : "Start a game. Get 30 minutes free. Invite your friends.\n\nYour friends join for free using your room code.";
+    const wantsLogin=await showDecisionModal({title:lang()==="ar"?"أول 30 دقيقة مجاناً!":"Your First 30 Minutes Are FREE!",message,confirmText:lang()==="ar"?"أنشئ حساباً مجانياً / سجّل الدخول":"Create Free Account / Log In",cancelText:lang()==="ar"?"ربما لاحقاً":"Maybe Later"});
     if(wantsLogin)location.href="https://www.dordor.games/account?returnTo="+encodeURIComponent(location.href);
   }
   async function doJoin(code,nickname,statusEl) {
@@ -73,16 +73,16 @@ document.addEventListener("DOMContentLoaded", () => {
   let creating=false;
   $("newGameBtn").onclick=async()=>{
     let account=await window.DordorAccountReady;
-    try{let response=await fetch("https://dordorgames-production.up.railway.app/api/auth/me",{credentials:"include",headers:{Accept:"application/json"}});if(response.status===401){const refreshed=await fetch("https://dordorgames-production.up.railway.app/api/auth/refresh",{method:"POST",credentials:"include"});if(refreshed.ok)response=await fetch("https://dordorgames-production.up.railway.app/api/auth/me",{credentials:"include",headers:{Accept:"application/json"}});}if(response.status===401||response.status===403){await promptHostLogin();return;}if(!response.ok)throw new Error("ACCOUNT_CHECK_FAILED");account=await response.json();}catch(_){alert(lang()==="ar"?"تعذر التحقق من وقت الاستضافة. حاول مرة أخرى.":"Unable to verify hosting time. Please try again.");return;}
+    try{let response=await fetch("https://dordorgames-production.up.railway.app/api/auth/me",{credentials:"include",headers:{Accept:"application/json"}});if(response.status===401){const refreshed=await fetch("https://dordorgames-production.up.railway.app/api/auth/refresh",{method:"POST",credentials:"include"});if(refreshed.ok)response=await fetch("https://dordorgames-production.up.railway.app/api/auth/me",{credentials:"include",headers:{Accept:"application/json"}});}if(response.status===401||response.status===403){await promptHostLogin();return;}if(!response.ok)throw new Error("ACCOUNT_CHECK_FAILED");account=await response.json();}catch(_){alert(lang()==="ar"?"تعذر التحقق من وقت اللعب. حاول مرة أخرى.":"Unable to verify game time. Please try again.");return;}
     if(account?.role!=="host"){
       await promptHostLogin();
       return;
     }
     const active=account.activeSessionEndsAt&&new Date(account.activeSessionEndsAt).getTime()>Date.now();
-    if(!active&&Number(account.remainingMinutes||0)<=0){const wantsTime=await showDecisionModal({title:lang()==="ar"?"انتهى وقت الاستضافة":"Hosting time ended",message:lang()==="ar"?"انتهى وقت الاستضافة. اشترِ وقتاً إضافياً لإنشاء لعبة جديدة.":"Your hosting time has ended. Buy more time to create a new game.",confirmText:lang()==="ar"?"شراء الوقت":"Buy time",cancelText:lang()==="ar"?"ليس الآن":"Not now"});if(wantsTime)location.href="https://www.dordor.games/pricing?game=spy";return;}
+    if(!active&&Number(account.remainingMinutes||0)<=0){const wantsTime=await showDecisionModal({title:lang()==="ar"?"انتهى وقت اللعب":"Game time ended",message:lang()==="ar"?"احصل على وقت لعب إضافي لبدء لعبة جديدة.":"Get more game time to start a new game.",confirmText:lang()==="ar"?"احصل على وقت لعب":"Get More Game Time",cancelText:lang()==="ar"?"ربما لاحقاً":"Maybe Later"});if(wantsTime)location.href="https://www.dordor.games/pricing?game=spy";return;}
     if($("newGameInput").classList.contains("d-none")){$("newGameInput").classList.remove("d-none");$("joinGameSection").classList.add("d-none");$("newGameInput").focus();return;}
     if(creating)return;creating=true;
-    try{const created=await C.createRoom($("newGameInput").value,lang());navigate(created.code);}catch(e){if(String(e?.message)==="HOSTING_TIME_REQUIRED"){const wantsTime=await showDecisionModal({title:lang()==="ar"?"انتهى وقت الاستضافة":"Hosting time ended",message:lang()==="ar"?"انتهى وقت الاستضافة. اشترِ وقتاً إضافياً لإنشاء لعبة جديدة.":"Your hosting time has ended. Buy more time to create a new game.",confirmText:lang()==="ar"?"شراء الوقت":"Buy time",cancelText:lang()==="ar"?"ليس الآن":"Not now"});if(wantsTime)location.href="https://www.dordor.games/pricing?game=spy";}else alert(C.message(e));creating=false;}
+    try{const created=await C.createRoom($("newGameInput").value,lang());navigate(created.code);}catch(e){if(String(e?.message)==="HOSTING_TIME_REQUIRED"){const wantsTime=await showDecisionModal({title:lang()==="ar"?"انتهى وقت اللعب":"Game time ended",message:lang()==="ar"?"احصل على وقت لعب إضافي لبدء لعبة جديدة.":"Get more game time to start a new game.",confirmText:lang()==="ar"?"احصل على وقت لعب":"Get More Game Time",cancelText:lang()==="ar"?"ربما لاحقاً":"Maybe Later"});if(wantsTime)location.href="https://www.dordor.games/pricing?game=spy";}else alert(C.message(e));creating=false;}
   };
 
   let joining=false;
