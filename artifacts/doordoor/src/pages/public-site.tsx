@@ -465,22 +465,35 @@ export function PublicHome() {
                       "العبوا معاً. اضحكوا معاً. واصنعوا ذكريات.",
                     )}
                   </p>
+                  <div className="dd-free-offer">
+                    <span className="dd-free-offer-icon" aria-hidden="true">
+                      <Sparkles size={22} />
+                    </span>
+                    <span>
+                      <strong>
+                        {t(
+                          "YOUR FIRST 30 MINUTES ARE FREE!",
+                          "أول 30 دقيقة مجاناً!",
+                        )}
+                      </strong>
+                      <small>
+                        {t(
+                          "Start a game and invite your friends.",
+                          "ابدأ لعبة وادعُ أصدقاءك.",
+                        )}
+                      </small>
+                    </span>
+                  </div>
                   <div className="dd-actions">
                     <Link className="dd-button" href="/host">
                       <Gamepad2 size={20} />
-                      {t("HOST A GAME", "استضف لعبة")}
+                      {t("START A GAME", "ابدأ لعبة")}
                     </Link>
                     <Link className="dd-button dd-secondary" href="/join">
                       <Users size={20} />
                       {t("JOIN A GAME", "انضم للعبة")}
                     </Link>
                   </div>
-                  <small>
-                    {t(
-                      "Create a host account and get 30 minutes free. Your time starts after OTP verification.",
-                      "أنشئ حساب مضيف واحصل على 30 دقيقة مجاناً. يبدأ الوقت بعد تأكيد رمز التحقق.",
-                    )}
-                  </small>
                 </div>
                 <div className="dd-hero-art">
                   <img
