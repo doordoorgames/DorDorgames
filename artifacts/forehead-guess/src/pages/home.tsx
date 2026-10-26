@@ -133,13 +133,13 @@ export default function Home({ mode }: { mode: 'forehead' | 'character' | 'chara
       }
       if (response.status === 401 || response.status === 403) {
         const message = lang === 'ar'
-          ? 'لإنشاء لعبة، سجّل الدخول أو أنشئ حساب مضيف. أول 30 دقيقة مجانية وتبدأ فور تأكيد رمز التحقق. بعد ذلك يمكنك شراء وقت استضافة إضافي. يمكن للضيوف الانضمام مجاناً برمز الغرفة.\n\nهل تريد تسجيل الدخول أو إنشاء حساب الآن؟'
-          : 'To create a game, log in or create a host account. Your first 30 minutes are free and start immediately after OTP verification. After that, you can buy more hosting time. Guests join free with the room code.\n\nLog in or create an account now?';
+          ? 'ابدأ لعبة. احصل على 30 دقيقة مجاناً. ادعُ أصدقاءك.\n\nينضم أصدقاؤك مجاناً باستخدام رمز الغرفة.'
+          : 'Start a game. Get 30 minutes free. Invite your friends.\n\nYour friends join for free using your room code.';
         if (await askForAccess({
-          title: lang === 'ar' ? 'يلزم حساب مضيف' : 'Host account required',
+          title: lang === 'ar' ? 'أول 30 دقيقة مجاناً!' : 'Your First 30 Minutes Are FREE!',
           message,
-          confirmText: lang === 'ar' ? 'تسجيل الدخول أو إنشاء حساب' : 'Log in or sign up',
-          cancelText: lang === 'ar' ? 'ليس الآن' : 'Not now',
+          confirmText: lang === 'ar' ? 'أنشئ حساباً مجانياً / سجّل الدخول' : 'Create Free Account / Log In',
+          cancelText: lang === 'ar' ? 'ربما لاحقاً' : 'Maybe Later',
         })) {
           window.location.assign(`https://www.dordor.games/account?returnTo=${encodeURIComponent(window.location.href)}`);
         }
@@ -149,7 +149,7 @@ export default function Home({ mode }: { mode: 'forehead' | 'character' | 'chara
       account = await response.json() as AccountAccess;
       (window as typeof window & { DordorAccount?: AccountAccess }).DordorAccount = account;
     } catch {
-      toast({ title: t.errorTitle, description: 'Unable to verify hosting time. Please try again.', variant: 'destructive' });
+      toast({ title: t.errorTitle, description: 'Unable to verify game time. Please try again.', variant: 'destructive' });
       return false;
     }
 
@@ -157,26 +157,26 @@ export default function Home({ mode }: { mode: 'forehead' | 'character' | 'chara
     if (account?.role === 'host' && (active || (account.remainingMinutes ?? 0) > 0)) return true;
     if (account?.role !== 'host') {
       const message = lang === 'ar'
-        ? 'إنشاء الألعاب متاح بحساب مضيف. سجّل الدخول أو أنشئ حساباً جديداً، وستحصل على أول 30 دقيقة مجاناً فور تأكيد رمز التحقق.\n\nهل تريد المتابعة؟'
-        : 'Creating games requires a host account. Log in or create one and your first 30 minutes are free immediately after OTP verification.\n\nContinue to login?';
+        ? 'ابدأ لعبة. احصل على 30 دقيقة مجاناً. ادعُ أصدقاءك.\n\nينضم أصدقاؤك مجاناً باستخدام رمز الغرفة.'
+        : 'Start a game. Get 30 minutes free. Invite your friends.\n\nYour friends join for free using your room code.';
       if (await askForAccess({
-        title: lang === 'ar' ? 'يلزم حساب مضيف' : 'Host account required',
+        title: lang === 'ar' ? 'أول 30 دقيقة مجاناً!' : 'Your First 30 Minutes Are FREE!',
         message,
-        confirmText: lang === 'ar' ? 'تسجيل الدخول أو إنشاء حساب' : 'Log in or sign up',
-        cancelText: lang === 'ar' ? 'ليس الآن' : 'Not now',
+        confirmText: lang === 'ar' ? 'أنشئ حساباً مجانياً / سجّل الدخول' : 'Create Free Account / Log In',
+        cancelText: lang === 'ar' ? 'ربما لاحقاً' : 'Maybe Later',
       })) {
         window.location.assign(`https://www.dordor.games/account?returnTo=${encodeURIComponent(window.location.href)}`);
       }
       return false;
     }
     const message = lang === 'ar'
-      ? 'انتهى وقت الاستضافة. اشترِ وقتًا إضافيًا لإنشاء لعبة جديدة؟'
-      : 'Your hosting time has ended. Buy more time to create a new game?';
+      ? 'احصل على وقت لعب إضافي لبدء لعبة جديدة.'
+      : 'Get more game time to start a new game.';
     if (await askForAccess({
-      title: lang === 'ar' ? 'انتهى وقت الاستضافة' : 'Hosting time ended',
+      title: lang === 'ar' ? 'انتهى وقت اللعب' : 'Game time ended',
       message,
-      confirmText: lang === 'ar' ? 'شراء الوقت' : 'Buy time',
-      cancelText: lang === 'ar' ? 'ليس الآن' : 'Not now',
+      confirmText: lang === 'ar' ? 'احصل على وقت لعب' : 'Get More Game Time',
+      cancelText: lang === 'ar' ? 'ربما لاحقاً' : 'Maybe Later',
     })) {
       const gameId = mode === 'character' ? 'guessthecharacter' : mode;
       window.location.assign(`https://www.dordor.games/pricing?game=${encodeURIComponent(gameId)}`);
@@ -217,12 +217,12 @@ export default function Home({ mode }: { mode: 'forehead' | 'character' | 'chara
         onError: async (err) => {
           console.error('[CreateRoom] error', err);
           if ((err as { status?: number }).status === 403) {
-            const message = lang === 'ar' ? 'انتهى وقت الاستضافة. هل تريد شراء وقت إضافي؟' : 'Your hosting time has ended. Buy more time?';
+            const message = lang === 'ar' ? 'احصل على وقت لعب إضافي لبدء لعبة جديدة.' : 'Get more game time to start a new game.';
             if (await askForAccess({
-              title: lang === 'ar' ? 'انتهى وقت الاستضافة' : 'Hosting time ended',
+              title: lang === 'ar' ? 'انتهى وقت اللعب' : 'Game time ended',
               message,
-              confirmText: lang === 'ar' ? 'شراء الوقت' : 'Buy time',
-              cancelText: lang === 'ar' ? 'ليس الآن' : 'Not now',
+              confirmText: lang === 'ar' ? 'احصل على وقت لعب' : 'Get More Game Time',
+              cancelText: lang === 'ar' ? 'ربما لاحقاً' : 'Maybe Later',
             })) window.location.assign('https://www.dordor.games/pricing');
             return;
           }
