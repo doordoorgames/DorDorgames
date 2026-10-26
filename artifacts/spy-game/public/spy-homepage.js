@@ -17,7 +17,8 @@ document.addEventListener("DOMContentLoaded", () => {
       const dialog=document.createElement("section");
       dialog.setAttribute("role","alertdialog");dialog.setAttribute("aria-modal","true");dialog.setAttribute("aria-labelledby","host-access-title");dialog.setAttribute("aria-describedby","host-access-message");
       dialog.style.cssText="width:min(100%,520px);padding:clamp(22px,5vw,34px);border:2px solid #a855f7;border-radius:20px;background:linear-gradient(145deg,#170929,#090611);color:#fff;box-shadow:0 22px 70px rgba(0,0,0,.62),0 0 28px rgba(168,85,247,.28);font-family:system-ui,sans-serif";
-      dialog.innerHTML=`<h2 id="host-access-title" style="margin:0 0 14px;color:#ffe100;font-size:clamp(22px,5vw,30px);line-height:1.15">${title}</h2><p id="host-access-message" style="margin:0;white-space:pre-line;color:#f4efff;font-size:16px;line-height:1.65">${message}</p><div style="display:flex;flex-wrap:wrap;gap:12px;margin-top:26px"><button type="button" data-action="confirm" style="flex:1 1 210px;min-height:50px;border:2px solid #fff;border-radius:10px;background:#7c3aed;color:#fff;font:900 16px system-ui;cursor:pointer">${confirmText}</button><button type="button" data-action="cancel" style="flex:1 1 120px;min-height:50px;border:1px solid rgba(255,255,255,.5);border-radius:10px;background:transparent;color:#fff;font:800 16px system-ui;cursor:pointer">${cancelText}</button></div>`;
+      dialog.style.position="relative";
+      dialog.innerHTML=`<button type="button" data-action="close" aria-label="Close" style="position:absolute;top:12px;right:12px;z-index:1;width:44px;height:44px;border:2px solid #fff;border-radius:50%;background:#251437;color:#fff;font:900 24px/1 system-ui;cursor:pointer;touch-action:manipulation">&times;</button><h2 id="host-access-title" style="margin:0 52px 14px 0;color:#ffe100;font-size:clamp(22px,5vw,30px);line-height:1.15">${title}</h2><p id="host-access-message" style="margin:0;white-space:pre-line;color:#f4efff;font-size:16px;line-height:1.65">${message}</p><div style="display:grid;gap:12px;margin-top:26px"><button type="button" data-action="confirm" style="width:100%;min-height:52px;border:2px solid #fff;border-radius:10px;background:#7c3aed;color:#fff;font:900 16px system-ui;cursor:pointer">${confirmText}</button><button type="button" data-action="cancel" style="width:100%;min-height:48px;border:1px solid rgba(255,255,255,.5);border-radius:10px;background:transparent;color:#fff;font:800 16px system-ui;cursor:pointer">${cancelText}</button></div>`;
       overlay.appendChild(dialog);document.body.appendChild(overlay);
       const finish=value=>{document.removeEventListener("keydown",onKey);overlay.remove();resolve(value);};
       const onKey=event=>{if(event.key==="Escape")finish(false);};
@@ -25,6 +26,7 @@ document.addEventListener("DOMContentLoaded", () => {
       overlay.addEventListener("click",event=>{if(event.target===overlay)finish(false);});
       dialog.querySelector('[data-action="confirm"]').onclick=()=>finish(true);
       dialog.querySelector('[data-action="cancel"]').onclick=()=>finish(false);
+      dialog.querySelector('[data-action="close"]').onclick=()=>finish(false);
       dialog.querySelector('[data-action="confirm"]').focus();
     });
   }
