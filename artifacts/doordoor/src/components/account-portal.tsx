@@ -177,7 +177,7 @@ export function AccountPortal({ redirectHostToDashboard = false }: { redirectHos
 
             <div className="grid gap-3 text-sm mb-6 sm:grid-cols-2">
               <div className="rounded-xl border border-white/10 bg-white/5 p-4"><span className="text-white/45">Phone</span><p className="text-white mt-1">{account.phone}</p></div>
-              {account.role === "host" && <div className="rounded-xl border border-cyan-300/25 bg-cyan-300/5 p-4"><span className="text-white/45">Hosting access</span><p className="text-cyan-200 text-xl font-black mt-1">{account.activeSessionEndsAt && new Date(account.activeSessionEndsAt).getTime() > Date.now() ? `Session ends at ${formatEndTime(account.activeSessionEndsAt)}` : `${account.remainingMinutes} purchased minutes available`}</p></div>}
+              {account.role === "host" && <div className="rounded-xl border border-cyan-300/25 bg-cyan-300/5 p-4"><span className="text-white/45">Game time</span><p className="text-cyan-200 text-xl font-black mt-1">{account.activeSessionEndsAt && new Date(account.activeSessionEndsAt).getTime() > Date.now() ? `Session ends at ${formatEndTime(account.activeSessionEndsAt)}` : `${account.remainingMinutes} purchased minutes available`}</p></div>}
             </div>
 
             <div className="grid gap-3 sm:grid-cols-2 sm:gap-4">
@@ -218,9 +218,9 @@ export function AccountPortal({ redirectHostToDashboard = false }: { redirectHos
       <div className="min-h-[calc(100dvh-150px)] flex items-center justify-center px-4 py-6 sm:px-6 sm:py-10">
         <motion.section initial={{ opacity: 0, scale: 0.97 }} animate={{ opacity: 1, scale: 1 }} className="w-full max-w-lg border border-fuchsia-400/45 bg-black/70 backdrop-blur-xl rounded-3xl p-5 sm:p-8 shadow-[0_0_55px_rgba(217,70,239,0.18)]">
           <div className="text-center mb-7">
-            <p className="text-xs font-mono tracking-[0.3em] text-cyan-300">HOST ACCOUNT · EVERY GAME</p>
+            <p className="text-xs font-mono tracking-[0.3em] text-cyan-300">ONE ACCOUNT · EVERY GAME</p>
             <h1 className="text-3xl font-black text-white mt-3">{mode === "login" ? "Welcome back" : "Create your Dordor ID"}</h1>
-            <p className="text-white/45 text-sm mt-2">Host rooms and manage your play time. Guests join with a room code.</p>
+            <p className="text-white/45 text-sm mt-2">Start games and manage your game time. Your friends join for free with a room code.</p>
           </div>
 
           <div className="grid grid-cols-2 border-b border-white/10 mb-6">
