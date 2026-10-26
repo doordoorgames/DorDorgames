@@ -642,6 +642,12 @@ ALERT SYSTEM — full match with lobby CSS improvements
   position: relative;
 }
 
+.alert-dialog-shell {
+  position: relative;
+  width: min(100%, 640px);
+  margin-inline: auto;
+}
+
 .alert-header {
   background: rgba(255, 255, 255, 0.1);
   padding: 25px 30px 15px;
@@ -765,8 +771,8 @@ ALERT SYSTEM — full match with lobby CSS improvements
 
 .alert-close {
   position: absolute;
-  top: 12px; right: 12px;
-  z-index: 2;
+  top: 14px; right: 14px;
+  z-index: 3;
   background: rgba(31, 10, 45, 0.88);
   border: 2px solid white;
   border-radius: 50%;
@@ -838,7 +844,7 @@ ALERT SYSTEM — full match with lobby CSS improvements
   .alert-message { font-size: 15px; }
   .alert-footer { padding: 20px; gap: 10px; }
   .alert-btn { padding: 12px 24px; min-width: 100px; font-size: 14px; }
-  .alert-close { top: 10px; right: 10px; width: 44px; height: 44px; font-size: 24px; }
+  .alert-close { top: 12px; right: 12px; width: 44px; height: 44px; font-size: 24px; }
   .alert-input { padding: 10px 14px; font-size: 15px; }
 }
 
