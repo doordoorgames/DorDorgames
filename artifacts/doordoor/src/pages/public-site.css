@@ -183,15 +183,52 @@
   color: #ffca36;
   margin-bottom: 18px;
 }
+.dd-free-offer {
+  width: fit-content;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-top: 24px;
+  padding: 13px 18px;
+  color: #fff;
+  background: linear-gradient(
+    105deg,
+    rgba(255, 202, 54, 0.2),
+    rgba(237, 31, 194, 0.16)
+  );
+  border: 1px solid rgba(255, 202, 54, 0.72);
+  border-radius: 10px;
+  box-shadow: 0 0 30px rgba(255, 202, 54, 0.12);
+}
+.dd-free-offer-icon {
+  display: grid;
+  flex: 0 0 42px;
+  width: 42px;
+  height: 42px;
+  place-items: center;
+  color: #090812;
+  background: #ffca36;
+  border-radius: 50%;
+}
+.dd-free-offer strong,
+.dd-free-offer small {
+  display: block;
+}
+.dd-free-offer strong {
+  color: #ffdf6f;
+  font-size: 17px;
+  line-height: 1.2;
+}
+.dd-free-offer small {
+  margin-top: 4px;
+  color: #f3eff8;
+  font-size: 13px;
+}
 .dd-actions {
   display: flex;
   flex-wrap: wrap;
   gap: 14px;
-  margin: 30px 0 18px;
-}
-.dd-hero small {
-  color: #dad5e5;
-  font-size: 14px;
+  margin: 22px 0 0;
 }
 .dd-benefits {
   display: grid;
@@ -261,21 +298,6 @@
   color: #9f99b2;
   font-size: 12px;
   line-height: 1.5;
-}
-.dd-game > div {
-  display: flex;
-  justify-content: space-between;
-  gap: 12px;
-  font-size: 14px;
-  color: #c8c2d9;
-}
-.dd-game > div a {
-  display: inline-flex;
-  gap: 5px;
-  align-items: center;
-}
-.dd-game > div a:last-child {
-  color: #ffca36;
 }
 .dd-how {
   background: linear-gradient(120deg, #161020, #11101d 65%, #1d1620);
@@ -1079,7 +1101,14 @@
     font-size: 12px;
     padding: 12px 8px;
   }
-  .dd-hero small {
+  .dd-free-offer {
+    align-items: flex-start;
+    padding: 12px 14px;
+  }
+  .dd-free-offer strong {
+    font-size: 14px;
+  }
+  .dd-free-offer small {
     font-size: 12px;
   }
   .dd-section {
@@ -1295,4 +1324,5 @@
     scroll-behavior: auto !important;
   }
 }
+
 
