@@ -81,7 +81,7 @@ export function AccountPortal({ redirectHostToDashboard = false }: { redirectHos
 
   const continueAfterAuth = (accountRole: Role) => {
     const destination = returnTo ?? (accountRole === "host" ? "/host/dashboard" : "/account");
-    if (/^https:\/\//.test(destination)) window.location.assign(destination);
+    if (/^https:\/\//.test(destination)) window.location.replace(destination);
     else setLocation(destination);
   };
 
@@ -256,4 +256,3 @@ export function AccountPortal({ redirectHostToDashboard = false }: { redirectHos
     </Layout>
   );
 }
-
