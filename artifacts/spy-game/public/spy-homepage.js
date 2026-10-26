@@ -9,11 +9,31 @@ document.addEventListener("DOMContentLoaded", () => {
   const copy={en:{subtitle:"Find the hidden spy among you!",create:"Create New Game",join:"Join Game",name:"Enter your nickname",code:"Enter five-digit room code",joining:"Joining room",joinRoom:"Join Room",how:"How to Play"},ar:{subtitle:"اكتشف الجاسوس المختبئ بينكم!",create:"إنشاء لعبة جديدة",join:"انضم إلى لعبة",name:"أدخل اسمك",code:"أدخل رمز الغرفة المكوّن من 5 أرقام",joining:"الانضمام إلى الغرفة",joinRoom:"انضم إلى الغرفة",how:"طريقة اللعب"}};
   const say = (text, error) => { const target = $("inviteStatus"); if (target) { target.textContent=text; target.style.color=error?"#ffb3b3":""; } else alert(text); };
   function navigate(code){ location.href=`spy-lobby.html?code=${code}`; }
-  function promptHostLogin(){
+  function showDecisionModal({title,message,confirmText,cancelText}){
+    return new Promise(resolve=>{
+      const overlay=document.createElement("div");
+      overlay.setAttribute("role","presentation");
+      overlay.style.cssText="position:fixed;inset:0;z-index:20000;display:grid;place-items:center;padding:18px;background:rgba(3,2,12,.86);backdrop-filter:blur(8px)";
+      const dialog=document.createElement("section");
+      dialog.setAttribute("role","alertdialog");dialog.setAttribute("aria-modal","true");dialog.setAttribute("aria-labelledby","host-access-title");dialog.setAttribute("aria-describedby","host-access-message");
+      dialog.style.cssText="width:min(100%,520px);padding:clamp(22px,5vw,34px);border:2px solid #a855f7;border-radius:20px;background:linear-gradient(145deg,#170929,#090611);color:#fff;box-shadow:0 22px 70px rgba(0,0,0,.62),0 0 28px rgba(168,85,247,.28);font-family:system-ui,sans-serif";
+      dialog.innerHTML=`<h2 id="host-access-title" style="margin:0 0 14px;color:#ffe100;font-size:clamp(22px,5vw,30px);line-height:1.15">${title}</h2><p id="host-access-message" style="margin:0;white-space:pre-line;color:#f4efff;font-size:16px;line-height:1.65">${message}</p><div style="display:flex;flex-wrap:wrap;gap:12px;margin-top:26px"><button type="button" data-action="confirm" style="flex:1 1 210px;min-height:50px;border:2px solid #fff;border-radius:10px;background:#7c3aed;color:#fff;font:900 16px system-ui;cursor:pointer">${confirmText}</button><button type="button" data-action="cancel" style="flex:1 1 120px;min-height:50px;border:1px solid rgba(255,255,255,.5);border-radius:10px;background:transparent;color:#fff;font:800 16px system-ui;cursor:pointer">${cancelText}</button></div>`;
+      overlay.appendChild(dialog);document.body.appendChild(overlay);
+      const finish=value=>{document.removeEventListener("keydown",onKey);overlay.remove();resolve(value);};
+      const onKey=event=>{if(event.key==="Escape")finish(false);};
+      document.addEventListener("keydown",onKey);
+      overlay.addEventListener("click",event=>{if(event.target===overlay)finish(false);});
+      dialog.querySelector('[data-action="confirm"]').onclick=()=>finish(true);
+      dialog.querySelector('[data-action="cancel"]').onclick=()=>finish(false);
+      dialog.querySelector('[data-action="confirm"]').focus();
+    });
+  }
+  async function promptHostLogin(){
     const message=lang()==="ar"
       ? "لإنشاء لعبة، سجّل الدخول أو أنشئ حساب مضيف. أول 30 دقيقة مجانية وتبدأ فور تأكيد رمز التحقق. بعد ذلك يمكنك شراء وقت استضافة إضافي. يمكن للضيوف الانضمام مجاناً برمز الغرفة.\n\nهل تريد تسجيل الدخول أو إنشاء حساب الآن؟"
       : "To create a game, log in or create a host account. Your first 30 minutes are free and start immediately after OTP verification. After that, you can buy more hosting time. Guests join free with the room code.\n\nLog in or create an account now?";
-    if(confirm(message))location.href="https://www.dordor.games/account?returnTo="+encodeURIComponent(location.href);
+    const wantsLogin=await showDecisionModal({title:lang()==="ar"?"يلزم حساب مضيف":"Host account required",message,confirmText:lang()==="ar"?"تسجيل الدخول أو إنشاء حساب":"Log in or sign up",cancelText:lang()==="ar"?"ليس الآن":"Not now"});
+    if(wantsLogin)location.href="https://www.dordor.games/account?returnTo="+encodeURIComponent(location.href);
   }
   async function doJoin(code,nickname,statusEl) {
     try { if(statusEl)statusEl.textContent="Joining…"; await C.joinRoom(code,nickname); navigate(code); }
@@ -53,16 +73,16 @@ document.addEventListener("DOMContentLoaded", () => {
   let creating=false;
   $("newGameBtn").onclick=async()=>{
     let account=await window.DordorAccountReady;
-    try{let response=await fetch("https://dordorgames-production.up.railway.app/api/auth/me",{credentials:"include",headers:{Accept:"application/json"}});if(response.status===401){const refreshed=await fetch("https://dordorgames-production.up.railway.app/api/auth/refresh",{method:"POST",credentials:"include"});if(refreshed.ok)response=await fetch("https://dordorgames-production.up.railway.app/api/auth/me",{credentials:"include",headers:{Accept:"application/json"}});}if(response.status===401||response.status===403){promptHostLogin();return;}if(!response.ok)throw new Error("ACCOUNT_CHECK_FAILED");account=await response.json();}catch(_){alert(lang()==="ar"?"تعذر التحقق من وقت الاستضافة. حاول مرة أخرى.":"Unable to verify hosting time. Please try again.");return;}
+    try{let response=await fetch("https://dordorgames-production.up.railway.app/api/auth/me",{credentials:"include",headers:{Accept:"application/json"}});if(response.status===401){const refreshed=await fetch("https://dordorgames-production.up.railway.app/api/auth/refresh",{method:"POST",credentials:"include"});if(refreshed.ok)response=await fetch("https://dordorgames-production.up.railway.app/api/auth/me",{credentials:"include",headers:{Accept:"application/json"}});}if(response.status===401||response.status===403){await promptHostLogin();return;}if(!response.ok)throw new Error("ACCOUNT_CHECK_FAILED");account=await response.json();}catch(_){alert(lang()==="ar"?"تعذر التحقق من وقت الاستضافة. حاول مرة أخرى.":"Unable to verify hosting time. Please try again.");return;}
     if(account?.role!=="host"){
-      promptHostLogin();
+      await promptHostLogin();
       return;
     }
     const active=account.activeSessionEndsAt&&new Date(account.activeSessionEndsAt).getTime()>Date.now();
-    if(!active&&Number(account.remainingMinutes||0)<=0){const wantsTime=confirm(lang()==="ar"?"انتهى وقت الاستضافة. هل تريد شراء وقت إضافي؟":"Your hosting time has ended. Buy more time?");if(wantsTime)location.href="https://www.dordor.games/pricing?game=spy";return;}
+    if(!active&&Number(account.remainingMinutes||0)<=0){const wantsTime=await showDecisionModal({title:lang()==="ar"?"انتهى وقت الاستضافة":"Hosting time ended",message:lang()==="ar"?"انتهى وقت الاستضافة. اشترِ وقتاً إضافياً لإنشاء لعبة جديدة.":"Your hosting time has ended. Buy more time to create a new game.",confirmText:lang()==="ar"?"شراء الوقت":"Buy time",cancelText:lang()==="ar"?"ليس الآن":"Not now"});if(wantsTime)location.href="https://www.dordor.games/pricing?game=spy";return;}
     if($("newGameInput").classList.contains("d-none")){$("newGameInput").classList.remove("d-none");$("joinGameSection").classList.add("d-none");$("newGameInput").focus();return;}
     if(creating)return;creating=true;
-    try{const created=await C.createRoom($("newGameInput").value,lang());navigate(created.code);}catch(e){if(String(e?.message)==="HOSTING_TIME_REQUIRED"&&confirm(lang()==="ar"?"انتهى وقت الاستضافة. هل تريد شراء وقت إضافي؟":"Your hosting time has ended. Buy more time?"))location.href="https://www.dordor.games/pricing?game=spy";else if(String(e?.message)!=="HOSTING_TIME_REQUIRED")alert(C.message(e));creating=false;}
+    try{const created=await C.createRoom($("newGameInput").value,lang());navigate(created.code);}catch(e){if(String(e?.message)==="HOSTING_TIME_REQUIRED"){const wantsTime=await showDecisionModal({title:lang()==="ar"?"انتهى وقت الاستضافة":"Hosting time ended",message:lang()==="ar"?"انتهى وقت الاستضافة. اشترِ وقتاً إضافياً لإنشاء لعبة جديدة.":"Your hosting time has ended. Buy more time to create a new game.",confirmText:lang()==="ar"?"شراء الوقت":"Buy time",cancelText:lang()==="ar"?"ليس الآن":"Not now"});if(wantsTime)location.href="https://www.dordor.games/pricing?game=spy";}else alert(C.message(e));creating=false;}
   };
 
   let joining=false;
@@ -75,4 +95,3 @@ document.addEventListener("DOMContentLoaded", () => {
   };
   $("clearNameBtn").onclick=()=>{Object.keys(localStorage).filter(k=>k.startsWith("spyIdentity:")).forEach(k=>localStorage.removeItem(k));$("clearNameBtn").classList.add("d-none");};
 });
-
