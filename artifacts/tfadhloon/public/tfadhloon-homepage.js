@@ -224,7 +224,7 @@ async function promptHostLogin() {
   const wantsLogin = await window.beautifulAlert.confirm(
     message,
     isArabic ? "أول 30 دقيقة مجاناً!" : "Your First 30 Minutes Are FREE!",
-    isArabic ? "أنشئ حساباً مجانياً / سجّل الدخول" : "Create Free Account / Log In",
+    isArabic ? "أنشئ حساباً / سجّل الدخول" : "Create Account / Log In",
     isArabic ? "ربما لاحقاً" : "Maybe Later",
   );
   if (wantsLogin) {
@@ -949,3 +949,4 @@ function updateLocalizedUI() {
     requestAnimationFrame(() => requestAnimationFrame(schedule));
   });
 })();
+
