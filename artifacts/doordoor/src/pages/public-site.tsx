@@ -472,14 +472,14 @@ export function PublicHome() {
                     <span>
                       <strong>
                         {t(
-                          "YOUR FIRST 30 MINUTES ARE FREE!",
-                          "أول 30 دقيقة مجاناً!",
+                          "START YOUR FIRST GAME WITH 30 FREE MINUTES",
+                          "ابدأ لعبتك الأولى مع 30 دقيقة مجانية",
                         )}
                       </strong>
                       <small>
                         {t(
-                          "Start a game and invite your friends.",
-                          "ابدأ لعبة وادعُ أصدقاءك.",
+                          "Your friends always join free using the room code.",
+                          "أصدقاؤك ينضمون دائماً مجاناً باستخدام رمز الغرفة.",
                         )}
                       </small>
                     </span>
