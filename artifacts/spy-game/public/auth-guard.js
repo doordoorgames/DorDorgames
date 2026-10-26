@@ -49,6 +49,10 @@
   }
 
   function showAccountChip(account) {
+    if (account.role !== "host") {
+      document.getElementById("dordor-account-chip")?.remove();
+      return;
+    }
     const render = function () {
       const chip = document.getElementById("dordor-account-chip") || document.querySelector('a[href^="https://www.dordor.games/account"]') || document.createElement("a");
       chip.id = "dordor-account-chip";
@@ -74,7 +78,7 @@
       window.DordorAccount = account;
       if (!account) return null;
       showSessionStatus(account);
-      showAccountChip(account);
+      if (account.role === "host") showAccountChip(account);
       window.dispatchEvent(
         new CustomEvent("dordor-account-ready", { detail: account }),
       );
@@ -102,4 +106,3 @@
     return result;
   };
 })();
-
