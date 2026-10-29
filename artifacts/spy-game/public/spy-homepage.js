@@ -32,9 +32,9 @@ document.addEventListener("DOMContentLoaded", () => {
   }
   async function promptHostLogin(){
     const message=lang()==="ar"
-      ? "ابدأ لعبة. احصل على 30 دقيقة مجاناً. ادعُ أصدقاءك.\n\nينضم أصدقاؤك مجاناً باستخدام رمز الغرفة."
-      : "Start a game. Get 30 minutes free. Invite your friends.\n\nYour friends join for free using your room code.";
-    const wantsLogin=await showDecisionModal({title:lang()==="ar"?"أول 30 دقيقة مجاناً!":"Your First 30 Minutes Are FREE!",message,confirmText:lang()==="ar"?"أنشئ حساباً / سجّل الدخول":"Create Account / Log In",cancelText:lang()==="ar"?"ربما لاحقاً":"Maybe Later"});
+      ? "أول 30 دقيقة علينا.\n\nينضم أصدقاؤك مجاناً باستخدام رمز الغرفة."
+      : "Get your first 30 minutes on us.\n\nYour friends join for free using your room code.";
+    const wantsLogin=await showDecisionModal({title:lang()==="ar"?"أنشئ حساباً لفتح جميع الألعاب":"Create an Account to Unlock All Games",message,confirmText:lang()==="ar"?"أنشئ حساباً / سجّل الدخول":"Create Account / Log In",cancelText:lang()==="ar"?"ربما لاحقاً":"Maybe Later"});
     if(wantsLogin)location.href="https://www.dordor.games/account?returnTo="+encodeURIComponent(location.href);
   }
   async function doJoin(code,nickname,statusEl) {
