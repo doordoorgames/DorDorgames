@@ -471,27 +471,17 @@ export function PublicHome() {
                     <span>
                       <strong>
                         {t(
-                          "START YOUR FIRST GAME WITH 30 FREE MINUTES",
-                          "ابدأ لعبتك الأولى مع 30 دقيقة مجانية",
+                          "ONE HOST PAYS. EVERYONE PLAYS FREE.",
+                          "مضيف واحد يدفع. والجميع يلعب مجاناً.",
                         )}
                       </strong>
                       <small>
                         {t(
-                          "Your friends always join free using the room code.",
-                          "أصدقاؤك ينضمون دائماً مجاناً باستخدام رمز الغرفة.",
+                          "Start a room, share the code, and have fun together.",
+                          "افتح غرفة وشارك الرمز واستمتعوا معاً.",
                         )}
                       </small>
                     </span>
-                  </div>
-                  <div className="dd-actions">
-                    <Link className="dd-button" href="/host">
-                      <Gamepad2 size={20} />
-                      {t("START A GAME", "ابدأ لعبة")}
-                    </Link>
-                    <Link className="dd-button dd-secondary" href="/join">
-                      <Users size={20} />
-                      {t("JOIN A GAME", "انضم للعبة")}
-                    </Link>
                   </div>
                 </div>
                 <div className="dd-hero-art">
@@ -509,54 +499,6 @@ export function PublicHome() {
                   </span>
                 </div>
               </div>
-            </section>
-            <section
-              className="dd-benefits dd-container"
-              aria-label={t("Benefits", "المميزات")}
-            >
-              {[
-                [
-                  Gamepad2,
-                  t("Multiplayer Party Games", "ألعاب جماعية"),
-                  t(
-                    "Made for groups, gatherings, and game nights.",
-                    "مصممة للقروبات والجمعات وليالي اللعب.",
-                  ),
-                ],
-                [
-                  Clock3,
-                  t("Flexible Hosting Time", "وقت استضافة مرن"),
-                  t(
-                    "Use your hosting blocks when your group is ready.",
-                    "استخدم بلوكات الاستضافة عندما تكون جمعتكم جاهزة.",
-                  ),
-                ],
-                [
-                  Users,
-                  t("Friends Join Free", "الأصدقاء ينضمون مجاناً"),
-                  t(
-                    "Only the host pays. Everyone else joins free.",
-                    "المضيف فقط يدفع، والبقية ينضمون مجاناً.",
-                  ),
-                ],
-                [
-                  ShieldCheck,
-                  t("Instant Game Access", "وصول فوري للألعاب"),
-                  t(
-                    "Choose a game, open a room, and start the fun.",
-                    "اختر لعبة وافتح غرفة وابدأ الوناسة.",
-                  ),
-                ],
-              ].map(([Icon, label, detail], i) => {
-                const BenefitIcon = Icon as typeof Gamepad2;
-                return (
-                  <div key={i}>
-                    <BenefitIcon size={24} />
-                    <strong>{label as string}</strong>
-                    <span>{detail as string}</span>
-                  </div>
-                );
-              })}
             </section>
             <section id="games" className="dd-section dd-container">
               <p className="dd-eyebrow">
