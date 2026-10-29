@@ -18,7 +18,6 @@ import {
 } from "lucide-react";
 import { useLiveGames } from "@/hooks/use-live-games";
 import { getGameById } from "@/games-config";
-import { UpdateBanner } from "@/components/update-banner";
 import { getGetAuthMeQueryKey, useGetAuthMe } from "@workspace/api-client-react";
 import {
   HOSTING_PACKAGES,
@@ -360,8 +359,8 @@ function HowItWorks({ ar }: { ar: boolean }) {
               "مضيف واحد يدفع. والقروب كله يلعب.",
             )}
           </p>
-          <Link className="dd-text-link" href="/pricing">
-            {t("Find your hosting pass", "اختر باقة استضافتك")}
+          <Link className="dd-button" href="/pricing">
+            {t("Find Your Game Pass", "اختر باقة لعبك")}
             <ArrowUpRight size={18} />
           </Link>
         </div>
@@ -428,7 +427,7 @@ function Faq({ ar }: { ar: boolean }) {
 }
 
 export function PublicHome() {
-  const { games, updateAvailable } = useLiveGames();
+  const { games } = useLiveGames();
   const ids = ["spy", "tfadhloon", "forehead", "guessthecharacter", "charades"];
   const gameHref = (externalUrl: string) => externalUrl;
   return (
@@ -591,24 +590,6 @@ export function PublicHome() {
               </div>
             </section>
             <HowItWorks ar={ar} />
-            <section className="dd-section dd-container">
-              <p className="dd-eyebrow">
-                {t("MORE NIGHTS. MORE MEMORIES.", "ليالٍ أكثر. ذكريات أكثر.")}
-              </p>
-              <h2>{t("HOST MORE. PAY LESS.", "استضف أكثر. وادفع أقل.")}</h2>
-              <p>
-                {t(
-                  "Purchase blocks of hosting time and enjoy your favorite games with friends.",
-                  "اشترِ بلوكات وقت الاستضافة واستمتع بألعابك المفضلة مع أصدقائك.",
-                )}
-              </p>
-              <Packages ar={ar} />
-              <Link className="dd-text-link" href="/pricing">
-                {t("VIEW HOSTING PACKAGES", "عرض باقات الاستضافة")}
-                <ArrowUpRight size={18} />
-              </Link>
-            </section>
-            <UpdateBanner visible={updateAvailable} />
           </>
         );
       }}
