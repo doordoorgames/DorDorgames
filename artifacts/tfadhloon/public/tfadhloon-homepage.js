@@ -219,11 +219,11 @@ function closeRoomCodeModal() {
 async function promptHostLogin() {
   const isArabic = currentLanguage() === "ar";
   const message = isArabic
-    ? "ابدأ لعبة. احصل على 30 دقيقة مجاناً. ادعُ أصدقاءك.\n\nينضم أصدقاؤك مجاناً باستخدام رمز الغرفة."
-    : "Start a game. Get 30 minutes free. Invite your friends.\n\nYour friends join for free using your room code.";
+    ? "أول 30 دقيقة علينا.\n\nينضم أصدقاؤك مجاناً باستخدام رمز الغرفة."
+    : "Get your first 30 minutes on us.\n\nYour friends join for free using your room code.";
   const wantsLogin = await window.beautifulAlert.confirm(
     message,
-    isArabic ? "أول 30 دقيقة مجاناً!" : "Your First 30 Minutes Are FREE!",
+    isArabic ? "أنشئ حساباً لفتح جميع الألعاب" : "Create an Account to Unlock All Games",
     isArabic ? "أنشئ حساباً / سجّل الدخول" : "Create Account / Log In",
     isArabic ? "ربما لاحقاً" : "Maybe Later",
   );
