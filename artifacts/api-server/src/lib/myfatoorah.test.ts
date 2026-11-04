@@ -2,10 +2,77 @@ import assert from "node:assert/strict";
 import { createHmac } from "node:crypto";
 import test from "node:test";
 import {
+  createMyFatoorahPayment,
   kwdToFils,
   myFatoorahWebhook,
   verifyMyFatoorahWebhookSignature,
 } from "./myfatoorah.js";
+
+test("creates a hosted card payment using the V3 request contract", async () => {
+  const previousFetch = globalThis.fetch;
+  const previousEnvironment = {
+    token: process.env.MYFATOORAH_API_TOKEN,
+    baseUrl: process.env.MYFATOORAH_API_BASE_URL,
+    appUrl: process.env.PAYMENT_APP_URL,
+    apiUrl: process.env.PAYMENT_API_URL,
+  };
+  process.env.MYFATOORAH_API_TOKEN = "test-token";
+  process.env.MYFATOORAH_API_BASE_URL = "https://apitest.myfatoorah.com";
+  process.env.PAYMENT_APP_URL = "https://www.dordor.games";
+  process.env.PAYMENT_API_URL = "https://api.example.com";
+
+  let requestBody: unknown;
+  globalThis.fetch = async (_input, init) => {
+    requestBody = JSON.parse(String(init?.body));
+    return new Response(
+      JSON.stringify({
+        IsSuccess: true,
+        Message: "",
+        Data: {
+          InvoiceId: "invoice-1",
+          PaymentURL: "https://demo.myfatoorah.com/payment-1",
+        },
+      }),
+      { status: 201, headers: { "content-type": "application/json" } },
+    );
+  };
+
+  try {
+    await createMyFatoorahPayment({
+      amountFils: 2_000,
+      customer: {
+        name: "Test Host",
+        email: "host@example.com",
+        mobile: "+96550000000",
+      },
+    });
+    assert.deepEqual(requestBody, {
+      PaymentMethod: "CARD",
+      Order: { Amount: 2 },
+      Customer: {
+        Name: "Test Host",
+        Email: "host@example.com",
+        Mobile: "+96550000000",
+      },
+      IntegrationUrls: {
+        Redirection: "https://api.example.com/api/checkout/callback",
+      },
+      Language: "EN",
+      OperationType: "PAY",
+      NotificationOption: "LINK",
+    });
+  } finally {
+    globalThis.fetch = previousFetch;
+    const restore = (name: string, value: string | undefined) => {
+      if (value === undefined) delete process.env[name];
+      else process.env[name] = value;
+    };
+    restore("MYFATOORAH_API_TOKEN", previousEnvironment.token);
+    restore("MYFATOORAH_API_BASE_URL", previousEnvironment.baseUrl);
+    restore("PAYMENT_APP_URL", previousEnvironment.appUrl);
+    restore("PAYMENT_API_URL", previousEnvironment.apiUrl);
+  }
+});
 
 test("converts KWD decimal values to integer fils", () => {
   assert.equal(kwdToFils("2"), 2_000);

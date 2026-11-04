@@ -115,6 +115,7 @@ export async function createMyFatoorahPayment(input: {
   const raw = await request("/v3/payments", {
     method: "POST",
     body: JSON.stringify({
+      PaymentMethod: "CARD",
       Order: { Amount: input.amountFils / 1_000 },
       Customer: {
         Name: input.customer.name,
