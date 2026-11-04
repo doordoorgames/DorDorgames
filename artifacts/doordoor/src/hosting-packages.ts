@@ -24,7 +24,7 @@ export const HOSTING_PACKAGES = [
     price: 10,
     paid: 5,
     bonus: 3,
-    provisional: true,
+    provisional: false,
   },
 ] as const;
 

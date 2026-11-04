@@ -5,7 +5,12 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { AnimatePresence } from "framer-motion";
 import { setBaseUrl } from "@workspace/api-client-react";
 import NotFound from "@/pages/not-found";
-import { PublicHome as Home, Pricing, Purchase } from "@/pages/public-site";
+import {
+  PaymentResult,
+  PublicHome as Home,
+  Pricing,
+  Purchase,
+} from "@/pages/public-site";
 import Join from "@/pages/join";
 import Host from "@/pages/host";
 import Account from "@/pages/account";
@@ -17,7 +22,8 @@ import GameLauncher from "@/pages/game-launcher";
 import ShelvedGames from "@/pages/shelved-games";
 
 setBaseUrl(
-  import.meta.env.VITE_API_BASE_URL ?? "https://dordorgames-production.up.railway.app",
+  import.meta.env.VITE_API_BASE_URL ??
+    "https://dordorgames-production.up.railway.app",
 );
 
 const queryClient = new QueryClient();
@@ -31,6 +37,7 @@ function Router() {
         <Route path="/pricing" component={Pricing} />
         <Route path="/checkout" component={Purchase} />
         <Route path="/purchase" component={Purchase} />
+        <Route path="/payment-result" component={PaymentResult} />
         <Route path="/join" component={Join} />
         <Route path="/join/:code" component={Join} />
         <Route path="/account" component={Account} />

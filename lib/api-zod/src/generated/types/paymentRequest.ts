@@ -5,8 +5,8 @@
  * DoorDoor.games API specification
  * OpenAPI spec version: 0.1.0
  */
+import type { PaymentRequestPackageId } from "./paymentRequestPackageId";
 
 export interface PaymentRequest {
-  phone: string;
-  promoCode?: string;
+  packageId: PaymentRequestPackageId;
 }

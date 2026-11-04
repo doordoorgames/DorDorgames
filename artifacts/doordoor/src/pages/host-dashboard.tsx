@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from "react";
-import { useLocation } from "wouter";
+import { Link, useLocation } from "wouter";
 import { useQueryClient } from "@tanstack/react-query";
 import { Layout } from "@/components/layout";
 import {
@@ -13,70 +13,18 @@ import {
   useGetAuthMe,
   getGetAuthMeQueryKey,
   useAuthLogout,
-  useProcessPayment,
-  useValidatePromo,
 } from "@workspace/api-client-react";
 import { useToast } from "@/hooks/use-toast";
 import { QRCodeSVG } from "qrcode.react";
 import { motion, AnimatePresence } from "framer-motion";
 
 function BuyTimePanel({
-  onSuccess,
   open,
   onOpenChange,
-  phone,
 }: {
-  onSuccess: (remainingMinutes?: number) => void;
   open: boolean;
   onOpenChange: (v: boolean) => void;
-  phone: string;
 }) {
-  const { toast } = useToast();
-  const [promoInput, setPromoInput] = useState("");
-  const [promoValidated, setPromoValidated] = useState<{ valid: boolean; message: string } | null>(null);
-
-  const validatePromo = useValidatePromo();
-  const processPayment = useProcessPayment();
-
-  const handleValidatePromo = () => {
-    if (!promoInput.trim()) return;
-    validatePromo.mutate(
-      { data: { code: promoInput.trim() } },
-      {
-        onSuccess: (data) => {
-          setPromoValidated({ valid: data.valid, message: data.message || (data.valid ? "Valid promo!" : "Invalid promo code") });
-        },
-        onError: () => {
-          setPromoValidated({ valid: false, message: "Failed to validate promo code" });
-        },
-      },
-    );
-  };
-
-  const handlePay = (promoCode?: string) => {
-    processPayment.mutate(
-      { data: { phone: phone || "unknown", ...(promoCode ? { promoCode } : {}) } },
-      {
-        onSuccess: (data) => {
-          if (data.success) {
-            toast({
-              title: data.free ? "PROMO APPLIED!" : "PAYMENT SUCCESS",
-              description: data.message,
-            });
-            onOpenChange(false);
-            setPromoInput("");
-            setPromoValidated(null);
-            onSuccess(data.remainingMinutes);
-          }
-        },
-        onError: (err: any) => {
-          const msg = err?.data?.error || err?.message || "Payment failed";
-          toast({ title: "PAYMENT FAILED", description: msg, variant: "destructive" });
-        },
-      },
-    );
-  };
-
   return (
     <div className="border-2 border-accent/60 bg-accent/5">
       <button
@@ -98,67 +46,20 @@ function BuyTimePanel({
           >
             <div className="px-4 pb-4 space-y-4">
               <div className="text-center space-y-1 py-2 border-t border-border">
-                <p className="font-mono text-xs text-muted-foreground">3-HOUR HOSTING PASS</p>
-                <p className="font-mono text-3xl text-accent">2 KD</p>
-                <p className="arabic-text text-xs text-muted-foreground">تصفح لمدة 3 ساعات</p>
+                <p className="font-mono text-xs text-muted-foreground">
+                  CHOOSE A GAME PASS
+                </p>
+                <p className="font-mono text-lg text-accent">FROM 2 KD</p>
+                <p className="arabic-text text-xs text-muted-foreground">
+                  اختر باقة اللعب المناسبة
+                </p>
               </div>
-
-              <div className="space-y-2">
-                <p className="font-mono text-xs text-muted-foreground">PROMO CODE / كود خصم</p>
-                <div className="flex gap-2">
-                  <input
-                    type="text"
-                    value={promoInput}
-                    onChange={(e) => {
-                      setPromoInput(e.target.value.toUpperCase());
-                      setPromoValidated(null);
-                    }}
-                    placeholder="DOORDOOR"
-                    className="flex-1 bg-background border border-border font-mono text-sm px-3 py-2 text-foreground placeholder:text-muted-foreground/50 focus:outline-none focus:border-accent"
-                  />
-                  <button
-                    onClick={handleValidatePromo}
-                    disabled={!promoInput.trim() || validatePromo.isPending}
-                    className="font-mono text-xs px-3 py-2 border border-accent text-accent hover:bg-accent hover:text-black transition-colors disabled:opacity-50"
-                  >
-                    {validatePromo.isPending ? "..." : "CHECK"}
-                  </button>
-                </div>
-
-                {promoValidated && (
-                  <p className={`font-mono text-xs ${promoValidated.valid ? "text-secondary" : "text-destructive"}`}>
-                    {promoValidated.valid ? "✓ " : "✗ "}{promoValidated.message}
-                  </p>
-                )}
-
-                {promoValidated?.valid && (
-                  <button
-                    onClick={() => handlePay(promoInput.trim())}
-                    disabled={processPayment.isPending}
-                    className="w-full py-3 bg-secondary/10 border-2 border-secondary text-secondary font-mono text-sm hover:bg-secondary hover:text-black transition-colors disabled:opacity-50"
-                  >
-                    {processPayment.isPending ? "ACTIVATING..." : "APPLY PROMO — FREE / مجاناً"}
-                  </button>
-                )}
-              </div>
-
-              <div className="flex items-center gap-3">
-                <div className="flex-1 h-px bg-border" />
-                <p className="font-mono text-xs text-muted-foreground">OR / أو</p>
-                <div className="flex-1 h-px bg-border" />
-              </div>
-
-              <button
-                onClick={() => handlePay()}
-                disabled={processPayment.isPending}
+              <Link
+                href="/pricing"
                 className="w-full py-3 bg-primary/10 border-2 border-primary text-primary font-mono text-sm hover:bg-primary hover:text-primary-foreground transition-colors disabled:opacity-50 shadow-[0_0_8px_rgba(255,0,255,0.2)]"
               >
-                {processPayment.isPending ? "PROCESSING..." : "PAY 2 KD (SIMULATED) / دفع 2 KD"}
-              </button>
-
-              <p className="font-mono text-xs text-muted-foreground text-center">
-                Payment is simulated — no real charge
-              </p>
+                VIEW GAME PASSES / عرض الباقات
+              </Link>
             </div>
           </motion.div>
         )}
@@ -176,7 +77,10 @@ function formatCountdown(minutes: number): string {
 }
 
 function formatSessionEnd(value: string): string {
-  return new Intl.DateTimeFormat(undefined, { hour: "numeric", minute: "2-digit" }).format(new Date(value));
+  return new Intl.DateTimeFormat(undefined, {
+    hour: "numeric",
+    minute: "2-digit",
+  }).format(new Date(value));
 }
 
 export default function HostDashboard() {
@@ -203,9 +107,7 @@ export default function HostDashboard() {
   const switchGame = useSwitchRoomGame();
   const logout = useAuthLogout();
 
-  const activeRoom = rooms?.find(
-    (r) => r.hostPhone === host?.phone && r.open,
-  );
+  const activeRoom = rooms?.find((r) => r.hostPhone === host?.phone && r.open);
 
   const { data: roomData } = useGetRoom(activeRoom?.code || "", {
     query: {
@@ -228,12 +130,16 @@ export default function HostDashboard() {
   // While a room is active, remaining time is the room's real expiry (wall-clock
   // truth). A host's credit balance is fully spent the moment a room is created
   // (see POST /rooms), so it must never be used to gate access to an active room.
-  const sessionEndsAt = activeRoom?.expiresAt ?? host?.activeSessionEndsAt ?? null;
-  const sessionIsActive = !!sessionEndsAt && new Date(sessionEndsAt).getTime() > now;
+  const sessionEndsAt =
+    activeRoom?.expiresAt ?? host?.activeSessionEndsAt ?? null;
+  const sessionIsActive =
+    !!sessionEndsAt && new Date(sessionEndsAt).getTime() > now;
   const roomMinutesLeft = sessionIsActive
     ? Math.max(0, Math.ceil((new Date(sessionEndsAt!).getTime() - now) / 60000))
     : null;
-  const displayMinutes = sessionIsActive ? (roomMinutesLeft ?? 0) : (host?.remainingMinutes ?? 0);
+  const displayMinutes = sessionIsActive
+    ? (roomMinutesLeft ?? 0)
+    : (host?.remainingMinutes ?? 0);
 
   useEffect(() => {
     if (activeRoom && displayMinutes <= 0 && !autoOpenedRef.current) {
@@ -262,16 +168,6 @@ export default function HostDashboard() {
     }
   }, [host, hostError, setLocation]);
 
-  const handleBuyTimeSuccess = (remainingMinutes?: number) => {
-    queryClient.invalidateQueries({ queryKey: getGetAuthMeQueryKey() });
-    if (remainingMinutes !== undefined) {
-      autoOpenedRef.current = false;
-      queryClient.setQueryData(getGetAuthMeQueryKey(), (old: any) =>
-        old ? { ...old, remainingMinutes } : old,
-      );
-    }
-  };
-
   if (hostLoading) {
     return (
       <Layout>
@@ -294,19 +190,18 @@ export default function HostDashboard() {
       <Layout>
         <div className="flex flex-col items-center justify-center min-h-[60vh] space-y-6">
           <div className="border-2 border-destructive p-6 text-center space-y-3 w-full max-w-sm">
-            <p className="font-mono text-destructive text-xl">NO TIME REMAINING</p>
-            <p className="arabic-text text-muted-foreground text-sm">لا يوجد وقت استضافة</p>
+            <p className="font-mono text-destructive text-xl">
+              NO TIME REMAINING
+            </p>
+            <p className="arabic-text text-muted-foreground text-sm">
+              لا يوجد وقت استضافة
+            </p>
             <p className="font-mono text-xs text-muted-foreground">
               Your hosting time has run out. Purchase more to continue.
             </p>
           </div>
           <div className="w-full max-w-sm">
-            <BuyTimePanel
-              open={buyTimeOpen}
-              onOpenChange={setBuyTimeOpen}
-              phone={host?.phone ?? ""}
-              onSuccess={handleBuyTimeSuccess}
-            />
+            <BuyTimePanel open={buyTimeOpen} onOpenChange={setBuyTimeOpen} />
           </div>
           <button
             onClick={handleLogout}
@@ -425,14 +320,22 @@ export default function HostDashboard() {
           >
             {isNoTime && (
               <div className="border-2 border-destructive p-3 text-center mb-3">
-                <p className="font-mono text-destructive text-sm">NO HOSTING TIME REMAINING</p>
-                <p className="text-xs text-muted-foreground arabic-text">لا يوجد وقت استضافة متبقٍ</p>
+                <p className="font-mono text-destructive text-sm">
+                  NO HOSTING TIME REMAINING
+                </p>
+                <p className="text-xs text-muted-foreground arabic-text">
+                  لا يوجد وقت استضافة متبقٍ
+                </p>
               </div>
             )}
             {isCriticalTime && (
               <motion.div
                 animate={{ opacity: [1, 0.5, 1] }}
-                transition={{ duration: 1.5, repeat: Infinity, ease: "easeInOut" }}
+                transition={{
+                  duration: 1.5,
+                  repeat: Infinity,
+                  ease: "easeInOut",
+                }}
                 className="border border-destructive/70 bg-destructive/5 p-3 text-center mb-3"
               >
                 <p className="font-mono text-destructive text-xs">
@@ -450,12 +353,7 @@ export default function HostDashboard() {
           </motion.div>
         )}
 
-        <BuyTimePanel
-          open={buyTimeOpen}
-          onOpenChange={setBuyTimeOpen}
-          phone={host?.phone ?? ""}
-          onSuccess={handleBuyTimeSuccess}
-        />
+        <BuyTimePanel open={buyTimeOpen} onOpenChange={setBuyTimeOpen} />
 
         {activeRoom ? (
           <div className="space-y-8">
@@ -572,9 +470,7 @@ export default function HostDashboard() {
             <button
               onClick={handleStartRoom}
               disabled={
-                createRoom.isPending ||
-                !selectedGameId ||
-                displayMinutes <= 0
+                createRoom.isPending || !selectedGameId || displayMinutes <= 0
               }
               className="w-full bg-primary text-primary-foreground font-mono text-xl p-4 border-2 border-primary hover:bg-transparent hover:text-primary transition-all disabled:opacity-50 shadow-[0_0_10px_rgba(255,0,255,0.5)]"
             >

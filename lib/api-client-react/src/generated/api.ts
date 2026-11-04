@@ -29,6 +29,7 @@ import type {
   HealthStatus,
   LoginBody,
   PasswordChangeBody,
+  PaymentOrder,
   PaymentRequest,
   PaymentResult,
   ProfileUpdateBody,
@@ -1836,7 +1837,7 @@ export const useValidatePromo = <
 };
 
 /**
- * @summary Process payment or apply promo for 3-hour host pass
+ * @summary Create a MyFatoorah payment for a game pass
  */
 export const getProcessPaymentUrl = () => {
   return `/api/checkout/pay`;
@@ -1899,7 +1900,7 @@ export type ProcessPaymentMutationBody = BodyType<PaymentRequest>;
 export type ProcessPaymentMutationError = ErrorType<unknown>;
 
 /**
- * @summary Process payment or apply promo for 3-hour host pass
+ * @summary Create a MyFatoorah payment for a game pass
  */
 export const useProcessPayment = <
   TError = ErrorType<unknown>,
@@ -1920,6 +1921,94 @@ export const useProcessPayment = <
 > => {
   return useMutation(getProcessPaymentMutationOptions(options));
 };
+
+/**
+ * @summary Get the authenticated host's payment order
+ */
+export const getGetPaymentOrderUrl = (orderId: string) => {
+  return `/api/checkout/payments/${orderId}`;
+};
+
+export const getPaymentOrder = async (
+  orderId: string,
+  options?: RequestInit,
+): Promise<PaymentOrder> => {
+  return customFetch<PaymentOrder>(getGetPaymentOrderUrl(orderId), {
+    ...options,
+    method: "GET",
+  });
+};
+
+export const getGetPaymentOrderQueryKey = (orderId: string) => {
+  return [`/api/checkout/payments/${orderId}`] as const;
+};
+
+export const getGetPaymentOrderQueryOptions = <
+  TData = Awaited<ReturnType<typeof getPaymentOrder>>,
+  TError = ErrorType<unknown>,
+>(
+  orderId: string,
+  options?: {
+    query?: UseQueryOptions<
+      Awaited<ReturnType<typeof getPaymentOrder>>,
+      TError,
+      TData
+    >;
+    request?: SecondParameter<typeof customFetch>;
+  },
+) => {
+  const { query: queryOptions, request: requestOptions } = options ?? {};
+
+  const queryKey =
+    queryOptions?.queryKey ?? getGetPaymentOrderQueryKey(orderId);
+
+  const queryFn: QueryFunction<Awaited<ReturnType<typeof getPaymentOrder>>> = ({
+    signal,
+  }) => getPaymentOrder(orderId, { signal, ...requestOptions });
+
+  return {
+    queryKey,
+    queryFn,
+    enabled: !!orderId,
+    ...queryOptions,
+  } as UseQueryOptions<
+    Awaited<ReturnType<typeof getPaymentOrder>>,
+    TError,
+    TData
+  > & { queryKey: QueryKey };
+};
+
+export type GetPaymentOrderQueryResult = NonNullable<
+  Awaited<ReturnType<typeof getPaymentOrder>>
+>;
+export type GetPaymentOrderQueryError = ErrorType<unknown>;
+
+/**
+ * @summary Get the authenticated host's payment order
+ */
+
+export function useGetPaymentOrder<
+  TData = Awaited<ReturnType<typeof getPaymentOrder>>,
+  TError = ErrorType<unknown>,
+>(
+  orderId: string,
+  options?: {
+    query?: UseQueryOptions<
+      Awaited<ReturnType<typeof getPaymentOrder>>,
+      TError,
+      TData
+    >;
+    request?: SecondParameter<typeof customFetch>;
+  },
+): UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+  const queryOptions = getGetPaymentOrderQueryOptions(orderId, options);
+
+  const query = useQuery(queryOptions) as UseQueryResult<TData, TError> & {
+    queryKey: QueryKey;
+  };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
 
 /**
  * @summary Admin login

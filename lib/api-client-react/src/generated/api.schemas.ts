@@ -209,18 +209,53 @@ export interface PromoResult {
   message?: string;
 }
 
+export type PaymentRequestPackageId =
+  (typeof PaymentRequestPackageId)[keyof typeof PaymentRequestPackageId];
+
+export const PaymentRequestPackageId = {
+  starter: "starter",
+  "game-night": "game-night",
+  ultimate: "ultimate",
+} as const;
+
 export interface PaymentRequest {
-  phone: string;
-  promoCode?: string;
+  packageId: PaymentRequestPackageId;
 }
 
 export interface PaymentResult {
   success: boolean;
-  free: boolean;
-  message: string;
-  expiresAt?: string;
-  /** Updated remaining minutes for the host after purchase (only present when called with a valid host token) */
-  remainingMinutes?: number;
+  orderId: string;
+  paymentUrl: string;
+}
+
+export type PaymentOrderCurrency =
+  (typeof PaymentOrderCurrency)[keyof typeof PaymentOrderCurrency];
+
+export const PaymentOrderCurrency = {
+  KWD: "KWD",
+} as const;
+
+export type PaymentOrderStatus =
+  (typeof PaymentOrderStatus)[keyof typeof PaymentOrderStatus];
+
+export const PaymentOrderStatus = {
+  pending: "pending",
+  paid: "paid",
+  failed: "failed",
+  cancelled: "cancelled",
+} as const;
+
+export interface PaymentOrder {
+  id: string;
+  packageId: string;
+  amountFils: number;
+  currency: PaymentOrderCurrency;
+  minutes: number;
+  status: PaymentOrderStatus;
+  paymentMethod?: string | null;
+  failureMessage?: string | null;
+  createdAt: string;
+  paidAt?: string | null;
 }
 
 export interface AdminCredentials {

@@ -8,9 +8,6 @@
 
 export interface PaymentResult {
   success: boolean;
-  free: boolean;
-  message: string;
-  expiresAt?: string;
-  /** Updated remaining minutes for the host after purchase (only present when called with a valid host token) */
-  remainingMinutes?: number;
+  orderId: string;
+  paymentUrl: string;
 }

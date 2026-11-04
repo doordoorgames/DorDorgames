@@ -440,24 +440,30 @@ export const ValidatePromoResponse = zod.object({
 });
 
 /**
- * @summary Process payment or apply promo for 3-hour host pass
+ * @summary Create a MyFatoorah payment for a game pass
  */
 export const ProcessPaymentBody = zod.object({
-  phone: zod.string(),
-  promoCode: zod.string().optional(),
+  packageId: zod.enum(["starter", "game-night", "ultimate"]),
 });
 
-export const ProcessPaymentResponse = zod.object({
-  success: zod.boolean(),
-  free: zod.boolean(),
-  message: zod.string(),
-  expiresAt: zod.string().optional(),
-  remainingMinutes: zod
-    .number()
-    .optional()
-    .describe(
-      "Updated remaining minutes for the host after purchase (only present when called with a valid host token)",
-    ),
+/**
+ * @summary Get the authenticated host's payment order
+ */
+export const GetPaymentOrderParams = zod.object({
+  orderId: zod.coerce.string().uuid(),
+});
+
+export const GetPaymentOrderResponse = zod.object({
+  id: zod.string().uuid(),
+  packageId: zod.string(),
+  amountFils: zod.number(),
+  currency: zod.enum(["KWD"]),
+  minutes: zod.number(),
+  status: zod.enum(["pending", "paid", "failed", "cancelled"]),
+  paymentMethod: zod.string().nullish(),
+  failureMessage: zod.string().nullish(),
+  createdAt: zod.string(),
+  paidAt: zod.string().nullish(),
 });
 
 /**

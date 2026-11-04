@@ -443,7 +443,9 @@ paths:
     post:
       operationId: processPayment
       tags: [checkout]
-      summary: Process payment or apply promo for 3-hour host pass
+      summary: Create a MyFatoorah payment for a game pass
+      security:
+        - cookieAuth: []
       requestBody:
         required: true
         content:
@@ -451,12 +453,34 @@ paths:
             schema:
               $ref: "#/components/schemas/PaymentRequest"
       responses:
-        "200":
-          description: Payment result
+        "201":
+          description: Payment page created
           content:
             application/json:
               schema:
                 $ref: "#/components/schemas/PaymentResult"
+
+  /checkout/payments/{orderId}:
+    get:
+      operationId: getPaymentOrder
+      tags: [checkout]
+      summary: Get the authenticated host's payment order
+      security:
+        - cookieAuth: []
+      parameters:
+        - name: orderId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "200":
+          description: Payment order
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PaymentOrder"
 
   /admin/login:
     post:
@@ -641,7 +665,8 @@ components:
 
     Room:
       type: object
-      required: [id, code, hostPhone, activeGameId, guests, createdAt, expiresAt, open]
+      required:
+        [id, code, hostPhone, activeGameId, guests, createdAt, expiresAt, open]
       properties:
         id:
           type: string
@@ -687,7 +712,23 @@ components:
 
     AccountProfile:
       type: object
-      required: [id, role, fullName, email, phone, phoneVerified, trialUsed, remainingMinutes, fullAccess, trialStartedAt, trialEndsAt, activeSessionEndsAt, createdAt, updatedAt]
+      required:
+        [
+          id,
+          role,
+          fullName,
+          email,
+          phone,
+          phoneVerified,
+          trialUsed,
+          remainingMinutes,
+          fullAccess,
+          trialStartedAt,
+          trialEndsAt,
+          activeSessionEndsAt,
+          createdAt,
+          updatedAt,
+        ]
       properties:
         id:
           type: string
@@ -821,28 +862,55 @@ components:
 
     PaymentRequest:
       type: object
-      required: [phone]
+      required: [packageId]
       properties:
-        phone:
+        packageId:
           type: string
-        promoCode:
-          type: string
+          enum: [starter, game-night, ultimate]
 
     PaymentResult:
       type: object
-      required: [success, free, message]
+      required: [success, orderId, paymentUrl]
       properties:
         success:
           type: boolean
-        free:
-          type: boolean
-        message:
+        orderId:
           type: string
-        expiresAt:
+          format: uuid
+        paymentUrl:
           type: string
-        remainingMinutes:
+
+    PaymentOrder:
+      type: object
+      required:
+        [id, packageId, amountFils, currency, minutes, status, createdAt]
+      properties:
+        id:
+          type: string
+          format: uuid
+        packageId:
+          type: string
+        amountFils:
           type: integer
-          description: Updated remaining minutes for the host after purchase (only present when called with a valid host token)
+        currency:
+          type: string
+          enum: [KWD]
+        minutes:
+          type: integer
+        status:
+          type: string
+          enum: [pending, paid, failed, cancelled]
+        paymentMethod:
+          type: string
+          nullable: true
+        failureMessage:
+          type: string
+          nullable: true
+        createdAt:
+          type: string
+        paidAt:
+          type: string
+          nullable: true
 
     AdminCredentials:
       type: object

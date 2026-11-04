@@ -600,6 +600,23 @@
   font-size: 13px;
   margin: 16px 0 0;
 }
+
+.dd-payment-result {
+  min-height: 70vh;
+  display: grid;
+  place-items: center;
+}
+
+.dd-payment-result .dd-order {
+  width: min(100%, 620px);
+  text-align: center;
+}
+
+.dd-result-actions {
+  display: grid;
+  gap: 18px;
+  margin-top: 28px;
+}
 .dd-selected-game {
   display: flex;
   align-items: center;
@@ -1324,5 +1341,3 @@
     scroll-behavior: auto !important;
   }
 }
-
-

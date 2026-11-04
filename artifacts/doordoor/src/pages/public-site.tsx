@@ -18,7 +18,12 @@ import {
 } from "lucide-react";
 import { useLiveGames } from "@/hooks/use-live-games";
 import { getGameById } from "@/games-config";
-import { getGetAuthMeQueryKey, useGetAuthMe } from "@workspace/api-client-react";
+import {
+  getGetAuthMeQueryKey,
+  useGetAuthMe,
+  useGetPaymentOrder,
+  useProcessPayment,
+} from "@workspace/api-client-react";
 import {
   HOSTING_PACKAGES,
   HOURS_PER_BLOCK,
@@ -32,7 +37,11 @@ function PublicLayout({ children }: { children: (ar: boolean) => ReactNode }) {
   );
   const [open, setOpen] = useState(false);
   const account = useGetAuthMe({
-    query: { queryKey: getGetAuthMeQueryKey(), retry: false, refetchOnWindowFocus: false },
+    query: {
+      queryKey: getGetAuthMeQueryKey(),
+      retry: false,
+      refetchOnWindowFocus: false,
+    },
   });
   useEffect(() => {
     if (!window.location.hash) window.scrollTo(0, 0);
@@ -397,10 +406,25 @@ function Faq({ ar }: { ar: boolean }) {
         "تمنحك باقة الاستضافة وصولاً إلى الألعاب المتاحة أثناء جلسة الاستضافة النشطة.",
       ),
     ],
-    [t("When does my hosting time start?", "متى يبدأ وقت الاستضافة؟"), provisional],
-    [t("Can I use blocks on different days?", "هل يمكن استخدام البلوكات في أيام مختلفة؟"), provisional],
-    [t("What happens when my time expires?", "ماذا يحدث عند انتهاء الوقت؟"), provisional],
-    [t("Do unused blocks expire?", "هل تنتهي صلاحية البلوكات غير المستخدمة؟"), provisional],
+    [
+      t("When does my hosting time start?", "متى يبدأ وقت الاستضافة؟"),
+      provisional,
+    ],
+    [
+      t(
+        "Can I use blocks on different days?",
+        "هل يمكن استخدام البلوكات في أيام مختلفة؟",
+      ),
+      provisional,
+    ],
+    [
+      t("What happens when my time expires?", "ماذا يحدث عند انتهاء الوقت؟"),
+      provisional,
+    ],
+    [
+      t("Do unused blocks expire?", "هل تنتهي صلاحية البلوكات غير المستخدمة؟"),
+      provisional,
+    ],
     [
       t("Can I purchase more blocks?", "هل يمكنني شراء بلوكات إضافية؟"),
       t(
@@ -453,10 +477,7 @@ export function PublicHome() {
                     )}
                   </p>
                   <h1>
-                    {t(
-                      "THE GAME NIGHT STARTS HERE.",
-                      "ليلة الألعاب تبدأ هنا.",
-                    )}
+                    {t("THE GAME NIGHT STARTS HERE.", "ليلة الألعاب تبدأ هنا.")}
                   </h1>
                   <p>
                     {t(
@@ -587,6 +608,33 @@ export function Purchase() {
   const selectedGame = params.get("game");
   const game = selectedGame ? getGameById(selectedGame) : undefined;
   const selected = HOSTING_PACKAGES.find((p) => p.id === requested);
+  const account = useGetAuthMe({
+    query: {
+      queryKey: getGetAuthMeQueryKey(),
+      retry: false,
+      refetchOnWindowFocus: false,
+    },
+  });
+  const payment = useProcessPayment();
+  const [paymentError, setPaymentError] = useState<string | null>(null);
+  const returnTo = `${window.location.pathname}${window.location.search}`;
+
+  const beginPayment = () => {
+    if (!selected) return;
+    setPaymentError(null);
+    payment.mutate(
+      { data: { packageId: selected.id } },
+      {
+        onSuccess: ({ paymentUrl }) => window.location.assign(paymentUrl),
+        onError: (error) =>
+          setPaymentError(
+            error instanceof Error
+              ? error.message
+              : "Unable to open payment page.",
+          ),
+      },
+    );
+  };
   return (
     <PublicLayout>
       {(ar) => {
@@ -618,7 +666,7 @@ export function Purchase() {
                 <div className="dd-purchase-details">
                   <div className="dd-pass-label">
                     <Layers3 size={20} />
-                    {t("YOUR ALL-IN HOSTING PASS", "باقتك للوناسة")}
+                    {t("YOUR ALL-IN GAME PASS", "باقتك للوناسة")}
                   </div>
                   <p className="dd-eyebrow">
                     {t("MERCHANT: DORDOR GAMES", "التاجر: دور دور للألعاب")}
@@ -630,9 +678,7 @@ export function Purchase() {
                   </h2>
                   <p className="dd-hours">
                     {(selected.paid + selected.bonus) * HOURS_PER_BLOCK}{" "}
-                    <span>
-                      {t("hours of hosting time", "ساعات من وقت الاستضافة")}
-                    </span>
+                    <span>{t("hours of game play", "ساعات من وقت اللعب")}</span>
                   </p>
                   <BlockVisual
                     paid={selected.paid}
@@ -642,19 +688,19 @@ export function Purchase() {
                   <dl className="dd-facts dd-pass-facts">
                     {[
                       [
-                        t("Paid hosting blocks", "بلوكات الاستضافة المدفوعة"),
+                        t("Paid game pass blocks", "بلوكات اللعب المدفوعة"),
                         selected.paid,
                       ],
                       [
-                        t("Bonus hosting blocks", "بلوكات الاستضافة المجانية"),
+                        t("Bonus game pass blocks", "بلوكات اللعب الإضافية"),
                         selected.bonus,
                       ],
                       [
-                        t("Total hosting blocks", "إجمالي بلوكات الاستضافة"),
+                        t("Total game pass blocks", "إجمالي بلوكات اللعب"),
                         selected.paid + selected.bonus,
                       ],
                       [
-                        t("Total hosting hours", "إجمالي ساعات الاستضافة"),
+                        t("Total game-play hours", "إجمالي ساعات اللعب"),
                         (selected.paid + selected.bonus) * HOURS_PER_BLOCK,
                       ],
                     ].map(([label, value]) => (
@@ -666,21 +712,22 @@ export function Purchase() {
                   </dl>
                   <p>
                     {t(
-                      "One-time purchase of hosting time. Access to available games while hosting.",
-                      "شراء وقت استضافة لمرة واحدة. الوصول للألعاب المتاحة أثناء الاستضافة.",
+                      "One-time purchase of game time with access to all available games.",
+                      "شراء وقت لعب لمرة واحدة مع الوصول إلى جميع الألعاب المتاحة.",
                     )}
                   </p>
                   {game && (
                     <p className="dd-selected-game">
                       <Gamepad2 size={18} />
-                      {t("Selected game", "اللعبة المختارة")}: {ar ? game.titleAr : game.title}
+                      {t("Selected game", "اللعبة المختارة")}:{" "}
+                      {ar ? game.titleAr : game.title}
                     </p>
                   )}
                   <p className="dd-host-note">
                     <Users />
                     {t(
-                      "Participants join games for free. Only the host purchases hosting time.",
-                      "المشاركون ينضمون للألعاب مجاناً. المضيف فقط يشتري وقت الاستضافة.",
+                      "Your friends join for free. Only the person starting the game needs a game pass.",
+                      "أصدقاؤك ينضمون مجاناً. فقط من يبدأ اللعبة يحتاج إلى باقة لعب.",
                     )}
                   </p>
                   <Link className="dd-text-link" href="/pricing">
@@ -693,28 +740,41 @@ export function Purchase() {
                     <h2 id="customer-details-title">
                       {t("Customer details", "بيانات العميل")}
                     </h2>
-                    <div className="dd-form-grid">
-                      <label>
-                        {t("Full name", "الاسم الكامل")}
-                        <input type="text" autoComplete="name" />
-                      </label>
-                      <label>
-                        {t("Email address", "البريد الإلكتروني")}
-                        <input
-                          type="email"
-                          autoComplete="email"
-                          inputMode="email"
-                        />
-                      </label>
-                      <label>
-                        {t("Mobile number", "رقم الهاتف")}
-                        <input
-                          type="tel"
-                          autoComplete="tel"
-                          inputMode="tel"
-                        />
-                      </label>
-                    </div>
+                    {account.data ? (
+                      <div className="dd-form-grid">
+                        <label>
+                          {t("Full name", "الاسم الكامل")}
+                          <input
+                            type="text"
+                            value={account.data.fullName}
+                            readOnly
+                          />
+                        </label>
+                        <label>
+                          {t("Email address", "البريد الإلكتروني")}
+                          <input
+                            type="email"
+                            value={account.data.email}
+                            readOnly
+                          />
+                        </label>
+                        <label>
+                          {t("Mobile number", "رقم الهاتف")}
+                          <input
+                            type="tel"
+                            value={account.data.phone}
+                            readOnly
+                          />
+                        </label>
+                      </div>
+                    ) : (
+                      <p>
+                        {t(
+                          "Log in to confirm your account and continue securely.",
+                          "سجّل الدخول لتأكيد حسابك والمتابعة بأمان.",
+                        )}
+                      </p>
+                    )}
                     <p>
                       {t(
                         "Payment will be completed securely on MyFatoorah. Dordor Games does not collect or store card details.",
@@ -751,23 +811,35 @@ export function Purchase() {
                       )}
                     </span>
                   </div>
-                  {selected.provisional && (
-                    <p className="dd-notice">
-                      {t(
-                        "Provisional price. Confirmation required before publication.",
-                        "سعر مبدئي. يلزم تأكيده قبل النشر.",
-                      )}
-                    </p>
+                  {account.isLoading ? (
+                    <button className="dd-button" disabled>
+                      {t("CHECKING ACCOUNT...", "جارٍ التحقق من الحساب...")}
+                    </button>
+                  ) : account.data ? (
+                    <button
+                      className="dd-button"
+                      onClick={beginPayment}
+                      disabled={payment.isPending}
+                    >
+                      <CreditCard size={18} />
+                      {payment.isPending
+                        ? t("OPENING PAYMENT...", "جارٍ فتح الدفع...")
+                        : t("PAY SECURELY", "ادفع بأمان")}
+                    </button>
+                  ) : (
+                    <Link
+                      className="dd-button"
+                      href={`/account?returnTo=${encodeURIComponent(returnTo)}`}
+                    >
+                      {t("LOG IN TO CONTINUE", "سجّل الدخول للمتابعة")}
+                    </Link>
                   )}
-                  <button className="dd-button" disabled>
-                    <CreditCard size={18} />
-                    {t("PAY SECURELY", "ادفع بأمان")}
-                  </button>
                   <p className="dd-payment-state" role="status">
-                    {t(
-                      "Secure payment will be available after payment gateway activation.",
-                      "سيتوفر الدفع الآمن بعد تفعيل بوابة الدفع.",
-                    )}
+                    {paymentError ??
+                      t(
+                        "You will complete payment securely on MyFatoorah.",
+                        "ستكمل الدفع بأمان عبر ماي فاتورة.",
+                      )}
                   </p>
                   <nav
                     className="dd-policy-links"
@@ -801,7 +873,11 @@ export function Purchase() {
                 ],
                 ["privacy", "Privacy Policy", "سياسة الخصوصية"],
                 ["support", "Customer Support", "دعم العملاء"],
-                ["merchant", "Merchant contact details", "بيانات التواصل مع التاجر"],
+                [
+                  "merchant",
+                  "Merchant contact details",
+                  "بيانات التواصل مع التاجر",
+                ],
               ].map(([id, en, arabic]) => (
                 <details id={id} key={id}>
                   <summary>{t(en, arabic)}</summary>
@@ -821,3 +897,96 @@ export function Purchase() {
   );
 }
 
+export function PaymentResult() {
+  const orderId =
+    new URLSearchParams(window.location.search).get("order") ?? "";
+  const order = useGetPaymentOrder(orderId, {
+    query: {
+      queryKey: ["payment-order", orderId],
+      enabled: Boolean(orderId),
+      retry: false,
+      refetchInterval: (query) =>
+        query.state.data?.status === "pending" ? 3_000 : false,
+    },
+  });
+
+  return (
+    <PublicLayout>
+      {(ar) => {
+        const t = (en: string, arabic: string) => (ar ? arabic : en);
+        const status = order.data?.status;
+        const creditedMinutes = order.data?.minutes;
+        const title =
+          status === "paid"
+            ? t("PAYMENT SUCCESSFUL", "تم الدفع بنجاح")
+            : status === "failed" || status === "cancelled"
+              ? t("PAYMENT NOT COMPLETED", "لم تكتمل عملية الدفع")
+              : t("CHECKING YOUR PAYMENT", "جارٍ التحقق من الدفع");
+        return (
+          <section className="dd-section dd-container dd-payment-result">
+            <div className="dd-order">
+              <ShieldCheck size={38} />
+              <h1>{title}</h1>
+              {!orderId && (
+                <p>
+                  {t(
+                    "We could not identify this payment. Please check your account before trying again.",
+                    "تعذر تحديد عملية الدفع. تحقق من حسابك قبل المحاولة مرة أخرى.",
+                  )}
+                </p>
+              )}
+              {order.isLoading && (
+                <p>
+                  {t(
+                    "Please wait while we confirm the result with MyFatoorah.",
+                    "يرجى الانتظار بينما نؤكد النتيجة مع ماي فاتورة.",
+                  )}
+                </p>
+              )}
+              {status === "paid" && creditedMinutes !== undefined && (
+                <p>
+                  {t(
+                    `${creditedMinutes} minutes were added to your account.`,
+                    `تمت إضافة ${creditedMinutes} دقيقة إلى حسابك.`,
+                  )}
+                </p>
+              )}
+              {(status === "failed" || status === "cancelled") && (
+                <p>
+                  {t(
+                    "You were not credited. You can safely try again.",
+                    "لم تتم إضافة وقت إلى حسابك. يمكنك المحاولة مرة أخرى بأمان.",
+                  )}
+                </p>
+              )}
+              {status === "pending" && (
+                <p>
+                  {t(
+                    "Your payment is still pending. This page will update automatically.",
+                    "عملية الدفع لا تزال قيد الانتظار. سيتم تحديث الصفحة تلقائياً.",
+                  )}
+                </p>
+              )}
+              {order.isError && (
+                <p>
+                  {t(
+                    "Log in with the account that started this payment to view the result.",
+                    "سجّل الدخول بالحساب الذي بدأ عملية الدفع لعرض النتيجة.",
+                  )}
+                </p>
+              )}
+              <div className="dd-result-actions">
+                <Link className="dd-button" href="/account">
+                  {t("VIEW ACCOUNT", "عرض الحساب")}
+                </Link>
+                <Link className="dd-text-link" href="/pricing">
+                  {t("VIEW GAME PASSES", "عرض باقات اللعب")}
+                </Link>
+              </div>
+            </div>
+          </section>
+        );
+      }}
+    </PublicLayout>
+  );
+}
