@@ -70,7 +70,11 @@ function PublicLayout({ children }: { children: (ar: boolean) => ReactNode }) {
             <span aria-hidden="true" className="dd-account-avatar">
               {account.data?.fullName?.trim().charAt(0).toUpperCase() || "?"}
             </span>
-            <span>{account.data?.fullName || t("Log in", "تسجيل الدخول")}</span>
+            <span>
+              {account.isLoading
+                ? t("Checking…", "جارٍ التحقق…")
+                : account.data?.fullName || t("Log in", "تسجيل الدخول")}
+            </span>
           </Link>
         </nav>
         <button
@@ -900,10 +904,17 @@ export function Purchase() {
 export function PaymentResult() {
   const orderId =
     new URLSearchParams(window.location.search).get("order") ?? "";
+  const account = useGetAuthMe({
+    query: {
+      queryKey: getGetAuthMeQueryKey(),
+      retry: false,
+      refetchOnWindowFocus: false,
+    },
+  });
   const order = useGetPaymentOrder(orderId, {
     query: {
       queryKey: ["payment-order", orderId],
-      enabled: Boolean(orderId),
+      enabled: Boolean(orderId && account.data),
       retry: false,
       refetchInterval: (query) =>
         query.state.data?.status === "pending" ? 3_000 : false,
@@ -935,7 +946,7 @@ export function PaymentResult() {
                   )}
                 </p>
               )}
-              {order.isLoading && (
+              {(account.isLoading || order.isLoading) && (
                 <p>
                   {t(
                     "Please wait while we confirm the result with MyFatoorah.",
@@ -967,11 +978,19 @@ export function PaymentResult() {
                   )}
                 </p>
               )}
-              {order.isError && (
+              {account.isError && (
                 <p>
                   {t(
                     "Log in with the account that started this payment to view the result.",
                     "سجّل الدخول بالحساب الذي بدأ عملية الدفع لعرض النتيجة.",
+                  )}
+                </p>
+              )}
+              {account.data && order.isError && (
+                <p>
+                  {t(
+                    "We could not load the payment result. Check your account for the updated game time.",
+                    "تعذر تحميل نتيجة الدفع. تحقق من حسابك لمعرفة وقت اللعب المحدث.",
                   )}
                 </p>
               )}
