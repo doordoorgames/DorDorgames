@@ -110,7 +110,6 @@ router.post("/checkout/pay", requireHostIdentity, async (req, res) => {
   try {
     const gateway = await createMyFatoorahPayment({
       amountFils: selected.amountFils,
-      customer: { name: host.fullName, email: host.email, mobile: host.phone },
     });
     await paymentStore.attachInvoice(order.id, gateway.invoiceId);
     req.log.info(

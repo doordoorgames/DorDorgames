@@ -40,26 +40,13 @@ test("creates a hosted card payment using the V3 request contract", async () => 
   try {
     await createMyFatoorahPayment({
       amountFils: 2_000,
-      customer: {
-        name: "Test Host",
-        email: "host@example.com",
-        mobile: "+96550000000",
-      },
     });
     assert.deepEqual(requestBody, {
       PaymentMethod: "CARD",
       Order: { Amount: 2 },
-      Customer: {
-        Name: "Test Host",
-        Email: "host@example.com",
-        Mobile: "+96550000000",
-      },
       IntegrationUrls: {
         Redirection: "https://api.example.com/api/checkout/callback",
       },
-      Language: "EN",
-      OperationType: "PAY",
-      NotificationOption: "LINK",
     });
 
     globalThis.fetch = async () =>
@@ -76,11 +63,6 @@ test("creates a hosted card payment using the V3 request contract", async () => 
     await assert.rejects(
       createMyFatoorahPayment({
         amountFils: 2_000,
-        customer: {
-          name: "Test Host",
-          email: "host@example.com",
-          mobile: "+96550000000",
-        },
       }),
       /MyFatoorah: Customer\.Mobile: Invalid mobile number/,
     );

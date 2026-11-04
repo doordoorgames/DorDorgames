@@ -129,7 +129,6 @@ async function request(path: string, init?: RequestInit): Promise<unknown> {
 
 export async function createMyFatoorahPayment(input: {
   amountFils: number;
-  customer: { name: string; email: string; mobile: string };
 }): Promise<{ invoiceId: string; paymentUrl: string }> {
   const { apiUrl } = configuration();
   const raw = await request("/v3/payments", {
@@ -137,17 +136,9 @@ export async function createMyFatoorahPayment(input: {
     body: JSON.stringify({
       PaymentMethod: "CARD",
       Order: { Amount: input.amountFils / 1_000 },
-      Customer: {
-        Name: input.customer.name,
-        Email: input.customer.email,
-        Mobile: input.customer.mobile,
-      },
       IntegrationUrls: {
         Redirection: `${apiUrl}/api/checkout/callback`,
       },
-      Language: "EN",
-      OperationType: "PAY",
-      NotificationOption: "LINK",
     }),
   });
   const parsed = createPaymentResponse.parse(raw);
