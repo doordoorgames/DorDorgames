@@ -26,7 +26,15 @@ setBaseUrl(
     "https://dordorgames-production.up.railway.app",
 );
 
-const queryClient = new QueryClient();
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      retry: false,
+      staleTime: 30_000,
+      refetchOnWindowFocus: false,
+    },
+  },
+});
 
 function Router() {
   return (

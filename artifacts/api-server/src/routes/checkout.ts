@@ -127,12 +127,17 @@ router.post("/checkout/pay", requireHostIdentity, async (req, res) => {
       error instanceof Error ? error.message : "Payment service is unavailable";
     await paymentStore.markFailed(order.id, message);
     req.log.error(
-      { orderId: order.id, error },
+      { orderId: order.id, err: error, errorMessage: message },
       "Unable to create MyFatoorah payment",
+    );
+    const sandbox = process.env.MYFATOORAH_API_BASE_URL?.includes(
+      "apitest.myfatoorah.com",
     );
     res.status(502).json({
       success: false,
-      message: "The payment page could not be opened. Please try again.",
+      message: sandbox
+        ? `Sandbox payment error: ${message}`
+        : "The payment page could not be opened. Please try again.",
     });
   }
 });

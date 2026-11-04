@@ -61,6 +61,29 @@ test("creates a hosted card payment using the V3 request contract", async () => 
       OperationType: "PAY",
       NotificationOption: "LINK",
     });
+
+    globalThis.fetch = async () =>
+      new Response(
+        JSON.stringify({
+          IsSuccess: false,
+          Message: null,
+          ValidationErrors: [
+            { Name: "Customer.Mobile", Error: "Invalid mobile number" },
+          ],
+        }),
+        { status: 400, headers: { "content-type": "application/json" } },
+      );
+    await assert.rejects(
+      createMyFatoorahPayment({
+        amountFils: 2_000,
+        customer: {
+          name: "Test Host",
+          email: "host@example.com",
+          mobile: "+96550000000",
+        },
+      }),
+      /MyFatoorah: Customer\.Mobile: Invalid mobile number/,
+    );
   } finally {
     globalThis.fetch = previousFetch;
     const restore = (name: string, value: string | undefined) => {

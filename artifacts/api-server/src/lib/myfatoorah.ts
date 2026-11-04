@@ -95,12 +95,32 @@ async function request(path: string, init?: RequestInit): Promise<unknown> {
     );
   }
   if (!response.ok) {
-    const message = z
-      .object({ Message: z.string().optional() })
+    const parsedError = z
+      .object({
+        Message: z.string().nullish(),
+        ValidationErrors: z
+          .array(
+            z.object({
+              Name: z.string().nullish(),
+              Error: z.string().nullish(),
+            }),
+          )
+          .nullish(),
+      })
       .safeParse(data);
+    const validationMessage = parsedError.success
+      ? parsedError.data.ValidationErrors?.map(({ Name, Error }) =>
+          [Name, Error].filter(Boolean).join(": "),
+        )
+          .filter(Boolean)
+          .join("; ")
+      : "";
+    const gatewayMessage = parsedError.success
+      ? parsedError.data.Message || validationMessage
+      : "";
     throw new Error(
-      message.success && message.data.Message
-        ? `MyFatoorah: ${message.data.Message}`
+      gatewayMessage
+        ? `MyFatoorah: ${gatewayMessage}`
         : `MyFatoorah request failed (${response.status})`,
     );
   }
