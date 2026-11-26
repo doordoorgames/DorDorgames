@@ -17,6 +17,7 @@ import {
 import { useToast } from "@/hooks/use-toast";
 import { QRCodeSVG } from "qrcode.react";
 import { motion, AnimatePresence } from "framer-motion";
+import { getGameByRoute } from "@/games-config";
 
 function BuyTimePanel({
   open,
@@ -108,6 +109,8 @@ export default function HostDashboard() {
   const logout = useAuthLogout();
 
   const activeRoom = rooms?.find((r) => r.hostPhone === host?.phone && r.open);
+  const activeGameRoute = games?.find((game) => game.id === activeRoom?.activeGameId)?.route;
+  const activeGame = activeGameRoute ? getGameByRoute(activeGameRoute) : undefined;
 
   const { data: roomData } = useGetRoom(activeRoom?.code || "", {
     query: {
@@ -228,11 +231,17 @@ export default function HostDashboard() {
       });
       return;
     }
+    const selectedGame = games?.find((game) => game.id === selectedGameId);
+    const playableGame = selectedGame?.route ? getGameByRoute(selectedGame.route) : undefined;
+    if (!playableGame || playableGame.status !== "active" || playableGame.launchMode === "coming_soon") {
+      toast({ title: "GAME UNAVAILABLE", description: "Please choose an available game.", variant: "destructive" });
+      return;
+    }
     createRoom.mutate(
       { data: { gameId: selectedGameId } },
       {
         onSuccess: () => {
-          toast({ title: "ROOM CREATED" });
+          window.location.assign(playableGame.externalUrl);
         },
         onError: (err: any) => {
           const msg =
@@ -396,6 +405,14 @@ export default function HostDashboard() {
                   </div>
                 </div>
 
+                {activeGame?.status === "active" && activeGame.launchMode !== "coming_soon" && (
+                  <a
+                    href={activeGame.externalUrl}
+                    className="w-full text-center bg-primary text-primary-foreground border-2 border-primary py-3 font-mono hover:bg-transparent hover:text-primary transition-colors"
+                  >
+                    OPEN GAME / افتح اللعبة
+                  </a>
+                )}
                 <button
                   onClick={handleCloseRoom}
                   disabled={closeRoom.isPending}
