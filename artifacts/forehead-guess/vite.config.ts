@@ -1,4 +1,4 @@
-import { defineConfig } from "vite";
+import { defineConfig, loadEnv } from "vite";
 import react from "@vitejs/plugin-react";
 import tailwindcss from "@tailwindcss/vite";
 import path from "path";
@@ -14,7 +14,12 @@ if (Number.isNaN(port) || port <= 0) {
 
 const basePath = process.env.BASE_PATH ?? "/";
 
-export default defineConfig({
+export default defineConfig(async ({ command, mode }) => {
+  const env = { ...loadEnv(mode, import.meta.dirname, "VITE_"), ...process.env };
+  if (command === "build" && (!env.VITE_SUPABASE_URL || !env.VITE_SUPABASE_ANON_KEY)) {
+    throw new Error("Word-game builds require VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY. Configure the public Supabase settings before deploying.");
+  }
+  return {
   base: basePath,
   plugins: [
     react(),
@@ -60,4 +65,5 @@ export default defineConfig({
     host: "0.0.0.0",
     allowedHosts: true,
   },
+  };
 });
