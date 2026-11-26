@@ -1341,3 +1341,34 @@
     scroll-behavior: auto !important;
   }
 }
+
+/* Keep pricing choices and their actions visible before the detailed explanation. */
+.dd-pricing { padding-block: 32px 40px; max-width: 1120px; }
+.dd-pricing .dd-page-intro { max-width: 780px; margin-bottom: 24px; }
+.dd-pricing .dd-page-intro h1 { font-size: clamp(26px, 3.2vw, 40px); line-height: 1.15; margin-block: 10px 12px; }
+.dd-pricing .dd-page-intro p { font-size: 15px; line-height: 1.6; margin-bottom: 0; }
+.dd-pricing .dd-packages { gap: 18px; margin: 24px 0 20px; }
+.dd-pricing .dd-package { padding: 22px; }
+.dd-pricing .dd-package-top { margin-bottom: 14px; }
+.dd-pricing .dd-package-icon { width: 32px; height: 32px; }
+.dd-pricing .dd-package-icon svg { width: 20px; height: 20px; }
+.dd-pricing .dd-package-label { min-height: 0; margin-bottom: 6px; }
+.dd-pricing .dd-package h2 { font-size: 23px; margin-bottom: 12px; }
+.dd-pricing .dd-package .dd-price { font-size: 29px; margin-bottom: 8px; }
+.dd-pricing .dd-package .dd-hours { font-size: 32px; margin-bottom: 14px; }
+.dd-pricing .dd-hours span { font-size: 13px; }
+.dd-pricing .dd-block-visual { padding-block: 10px; margin-bottom: 14px; }
+.dd-pricing .dd-block-tokens { gap: 4px; }
+.dd-pricing .dd-block-tokens > span { width: 24px; height: 25px; }
+.dd-pricing .dd-package .dd-bonus { margin-bottom: 14px; font-size: 11px; }
+.dd-pricing .dd-package .dd-button { min-height: 44px; padding: 12px; font-size: 12px; }
+.dd-pricing-note { max-width: 720px; margin: 0 auto; text-align: center; }
+.dd-pricing-note strong { color: #ffca36; font-size: 16px; }
+.dd-pricing-note p { color: #b8b4cc; font-size: 14px; line-height: 1.7; margin-top: 8px; }
+@media (max-width: 700px) {
+  .dd-pricing { padding-block: 24px 32px; }
+  .dd-pricing .dd-page-intro { text-align: center; }
+  .dd-pricing .dd-packages { grid-template-columns: 1fr; }
+  .dd-pricing .dd-package.ultimate { grid-column: auto; }
+  .dd-pricing .dd-package { padding: 20px; }
+}

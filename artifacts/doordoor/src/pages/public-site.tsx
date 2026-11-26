@@ -144,7 +144,7 @@ function BlockVisual({
   );
 }
 
-function Packages({ ar, game }: { ar: boolean; game?: string | null }) {
+function Packages({ ar, game, compact = false }: { ar: boolean; game?: string | null; compact?: boolean }) {
   const reduced = useReducedMotion();
   const t = (en: string, arabic: string) => (ar ? arabic : en);
   return (
@@ -193,7 +193,7 @@ function Packages({ ar, game }: { ar: boolean; game?: string | null }) {
               {t(p.bonus === 1 ? "FREE BLOCK" : "FREE BLOCKS", "بلوك مجاني")}
             </strong>
           )}
-          <ul>
+          {!compact && <ul>
             <li>
               <Check />
               {t(
@@ -221,7 +221,7 @@ function Packages({ ar, game }: { ar: boolean; game?: string | null }) {
               <Check />
               {t("Invite friends for free", "ادعُ أصدقاءك مجاناً")}
             </li>
-          </ul>
+          </ul>}
           {p.provisional && (
             <p className="dd-notice">
               {t(
@@ -570,7 +570,7 @@ export function Pricing() {
     <PublicLayout>
       {(ar) => (
         <>
-          <section className="dd-section dd-container">
+          <section className="dd-section dd-container dd-pricing">
             <div className="dd-page-intro">
               <p className="dd-eyebrow">
                 {ar ? "باقات استضافة دور دور" : "DORDOR HOSTING PASSES"}
@@ -585,18 +585,12 @@ export function Pricing() {
                   ? "اختر باقة الاستضافة واستمتع بليالي ألعاب لا تُنسى مع أصدقائك."
                   : "Choose your hosting package and enjoy unforgettable game nights with your friends."}
               </p>
-              <strong>
-                {ar
-                  ? "المضيف فقط يدفع. الجميع ينضم مجاناً."
-                  : "ONLY THE HOST PAYS. EVERYONE ELSE JOINS FREE."}
-              </strong>
-              <p>
-                {ar
-                  ? "نبيع وقت استضافة، وليس ألعاباً منفردة. البلوك الواحد يساوي ساعتين."
-                  : "We sell hosting time, not individual games. One block equals two hours."}
-              </p>
             </div>
-            <Packages ar={ar} game={game} />
+            <Packages ar={ar} game={game} compact />
+              <div className="dd-pricing-note">
+                <strong>{ar ? "المضيف فقط يدفع. أصدقاؤك ينضمون مجاناً." : "One host pays. Everyone plays."}</strong>
+                <p>{ar ? "كل باقة تشمل الألعاب المتاحة أثناء الاستضافة. البلوك الواحد يساوي ساعتين، والبلوكات المجانية مشمولة في إجمالي الساعات أعلاه." : "Every pass includes the available games while hosting. Each block gives you 2 hours. Bonus blocks are included in the hours shown above."}</p>
+              </div>
           </section>
           <HostingBlocks ar={ar} />
           <Faq ar={ar} />
