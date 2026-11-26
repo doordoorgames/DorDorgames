@@ -229,7 +229,7 @@ export function AccountPortal({ redirectHostToDashboard = false }: { redirectHos
 
           {mode === "login" ? (
             <form onSubmit={submitLogin} className="space-y-3">
-              <input className={inputClass} placeholder="Email or phone" value={identifier} onChange={(event) => setIdentifier(event.target.value)} autoComplete="username" />
+              <input className={inputClass} placeholder="Username, email or phone" value={identifier} onChange={(event) => setIdentifier(event.target.value)} autoComplete="username" />
               <input type="password" className={inputClass} placeholder="Password" value={password} onChange={(event) => setPassword(event.target.value)} autoComplete="current-password" />
               <button className="w-full rounded-xl bg-gradient-to-r from-fuchsia-500 to-purple-600 text-white font-black py-3.5 shadow-[0_8px_30px_rgba(217,70,239,0.28)] disabled:opacity-50" disabled={login.isPending || !identifier || !password}>{login.isPending ? "SIGNING IN..." : "SIGN IN / دخول"}</button>
             </form>

@@ -216,6 +216,8 @@ export async function ensureDatabaseSchema(): Promise<void> {
         ADD COLUMN IF NOT EXISTS full_access BOOLEAN NOT NULL DEFAULT FALSE;
 
       ALTER TABLE public.hosts ADD COLUMN IF NOT EXISTS permanent_test_access BOOLEAN NOT NULL DEFAULT FALSE;
+      ALTER TABLE public.hosts ADD COLUMN IF NOT EXISTS login_alias TEXT;
+      CREATE UNIQUE INDEX IF NOT EXISTS hosts_login_alias_key ON public.hosts (LOWER(login_alias));
       UPDATE public.hosts SET permanent_test_access = TRUE, updated_at = NOW()
         WHERE LOWER(email) = 'host1.dordor@example.com' AND permanent_test_access = FALSE;
       ALTER TABLE forehead.rooms ADD COLUMN IF NOT EXISTS permanent_test_access BOOLEAN NOT NULL DEFAULT FALSE;

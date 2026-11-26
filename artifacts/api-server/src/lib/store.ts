@@ -173,6 +173,13 @@ const hostsStore = {
     return result.rows[0] ? rowToHost(result.rows[0]) : undefined;
   },
   async getByIdentifier(identifier: string): Promise<Host | undefined> {
+    if (/^[a-z][a-z0-9_]{2,31}$/i.test(identifier)) {
+      const result = await pool.query<HostRow>(
+        "SELECT * FROM public.hosts WHERE LOWER(login_alias) = LOWER($1)",
+        [identifier],
+      );
+      return result.rows[0] ? rowToHost(result.rows[0]) : undefined;
+    }
     const byEmail = await this.getByEmail(identifier);
     if (byEmail) return byEmail;
     return this.getByPhone(identifier);
