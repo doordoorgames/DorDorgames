@@ -119,7 +119,7 @@ export default function Home({ mode }: { mode: 'forehead' | 'character' | 'chara
   }, [tutorial]);
 
   const requestCreateAccess = async () => {
-    type AccountAccess = { role?: string; remainingMinutes?: number; activeSessionEndsAt?: string | null };
+    type AccountAccess = { permanentTestAccess?: boolean; role?: string; remainingMinutes?: number; activeSessionEndsAt?: string | null };
     let account = (window as typeof window & { DordorAccount?: AccountAccess }).DordorAccount;
     try {
       const authOrigin = apiBaseUrl.replace(/\/forehead$/, '');
@@ -154,7 +154,7 @@ export default function Home({ mode }: { mode: 'forehead' | 'character' | 'chara
     }
 
     const active = !!account?.activeSessionEndsAt && new Date(account.activeSessionEndsAt).getTime() > Date.now();
-    if (account?.role === 'host' && (active || (account.remainingMinutes ?? 0) > 0)) return true;
+    if (account?.role === 'host' && (account.permanentTestAccess === true || active || (account.remainingMinutes ?? 0) > 0)) return true;
     if (account?.role !== 'host') {
       const message = lang === 'ar'
         ? 'أول 30 دقيقة علينا.\n\nينضم أصدقاؤك مجاناً باستخدام رمز الغرفة.'

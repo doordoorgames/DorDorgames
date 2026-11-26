@@ -686,6 +686,7 @@ components:
           type: string
         expiresAt:
           type: string
+          nullable: true
         open:
           type: boolean
 
@@ -747,6 +748,8 @@ components:
           type: boolean
         remainingMinutes:
           type: integer
+        permanentTestAccess:
+          type: boolean
         fullAccess:
           type: boolean
         trialStartedAt:

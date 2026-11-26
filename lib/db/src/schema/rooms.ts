@@ -11,6 +11,7 @@ export const roomsTable = foreheadSchema.table("rooms", {
   mode: text("mode").notNull().default("forehead"), // "forehead" | "character" | "charades"
   lang: text("lang").notNull().default("en"), // "en" | "ar"
   categoryId: integer("category_id").references(() => categoriesTable.id),
+  permanentTestAccess: boolean("permanent_test_access").notNull().default(false),
   fullAccess: boolean("full_access").notNull().default(false),
   accessEndsAt: timestamp("access_ends_at", { withTimezone: true }),
   turnDuration: integer("turn_duration").notNull().default(60),

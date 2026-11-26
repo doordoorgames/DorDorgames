@@ -73,7 +73,7 @@ export interface Room {
   activeGameId: string;
   guests: string[];
   createdAt: string;
-  expiresAt: string;
+  expiresAt: string | null;
   open: boolean;
 }
 
@@ -87,6 +87,7 @@ export interface Host {
   trialUsed: boolean;
   remainingMinutes: number;
   fullAccess: boolean;
+  permanentTestAccess?: boolean;
   trialStartedAt: string | null;
   trialEndsAt: string | null;
   activeSessionEndsAt: string | null;
@@ -115,6 +116,7 @@ interface HostRow {
   trial_used: boolean;
   remaining_minutes: number;
   full_access: boolean;
+  permanent_test_access: boolean;
   trial_started_at: string | null;
   trial_ends_at: string | null;
   active_session_ends_at: string | null;
@@ -133,6 +135,7 @@ function rowToHost(row: HostRow): Host {
     trialUsed: row.trial_used,
     remainingMinutes: row.remaining_minutes,
     fullAccess: row.full_access,
+    permanentTestAccess: row.permanent_test_access === true,
     trialStartedAt: row.trial_started_at,
     trialEndsAt: row.trial_ends_at,
     activeSessionEndsAt: row.active_session_ends_at,
@@ -304,7 +307,7 @@ export const store = {
     list(): Room[] {
       const rooms = readJson<Room[]>("rooms.json", []);
       const now = new Date().toISOString();
-      return rooms.filter((r) => r.open && r.expiresAt > now);
+      return rooms.filter((r) => r.open && (r.expiresAt === null || r.expiresAt > now));
     },
     listAll(): Room[] {
       return readJson<Room[]>("rooms.json", []);
@@ -312,7 +315,7 @@ export const store = {
     get(code: string): Room | undefined {
       const now = new Date().toISOString();
       return readJson<Room[]>("rooms.json", []).find(
-        (r) => r.code === code && r.open && r.expiresAt > now,
+        (r) => r.code === code && r.open && (r.expiresAt === null || r.expiresAt > now),
       );
     },
     closeExpired(): number {
@@ -320,7 +323,7 @@ export const store = {
       const now = new Date().toISOString();
       let count = 0;
       for (const room of rooms) {
-        if (room.open && room.expiresAt <= now) {
+        if (room.open && room.expiresAt !== null && room.expiresAt <= now) {
           room.open = false;
           count++;
         }
@@ -330,7 +333,7 @@ export const store = {
       }
       return count;
     },
-    create(hostPhone: string, gameId: string, expiresAt: string): Room {
+    create(hostPhone: string, gameId: string, expiresAt: string | null): Room {
       const rooms = readJson<Room[]>("rooms.json", []);
       const code = generateRoomCode();
       const now = new Date();

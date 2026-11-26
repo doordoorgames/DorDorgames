@@ -16,6 +16,7 @@ export interface AccountProfile {
   phoneVerified: boolean;
   trialUsed: boolean;
   remainingMinutes: number;
+  permanentTestAccess?: boolean;
   fullAccess: boolean;
   trialStartedAt: string | null;
   trialEndsAt: string | null;

@@ -58,7 +58,7 @@ router.post("/rooms", requireHostIdentity, async (req, res) => {
   }
 
   const activeHost = await ensureHostSession(req.hostAccount!);
-  if (!activeHost?.activeSessionEndsAt) {
+  if (!activeHost) {
     res.status(403).json({ error: "No hosting time remaining. Please purchase more time." });
     return;
   }
@@ -79,7 +79,8 @@ router.post("/rooms", requireHostIdentity, async (req, res) => {
     lang,
     categoryId: body.data.categoryId ?? null,
     fullAccess: true,
-    accessEndsAt: new Date(activeHost.activeSessionEndsAt),
+    permanentTestAccess: activeHost.permanentTestAccess === true,
+    accessEndsAt: activeHost.permanentTestAccess ? null : new Date(activeHost.activeSessionEndsAt!),
     turnDuration: body.data.turnDuration ?? 60,
     roundCount: body.data.roundCount ?? 1,
   }).returning();

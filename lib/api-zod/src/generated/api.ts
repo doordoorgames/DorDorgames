@@ -144,7 +144,7 @@ export const ListRoomsResponseItem = zod.object({
     .optional(),
   guests: zod.array(zod.string()),
   createdAt: zod.string(),
-  expiresAt: zod.string(),
+  expiresAt: zod.string().nullable(),
   open: zod.boolean(),
 });
 export const ListRoomsResponse = zod.array(ListRoomsResponseItem);
@@ -187,7 +187,7 @@ export const GetRoomResponse = zod.object({
     .optional(),
   guests: zod.array(zod.string()),
   createdAt: zod.string(),
-  expiresAt: zod.string(),
+  expiresAt: zod.string().nullable(),
   open: zod.boolean(),
 });
 
@@ -233,7 +233,7 @@ export const SwitchRoomGameResponse = zod.object({
     .optional(),
   guests: zod.array(zod.string()),
   createdAt: zod.string(),
-  expiresAt: zod.string(),
+  expiresAt: zod.string().nullable(),
   open: zod.boolean(),
 });
 
@@ -272,7 +272,7 @@ export const JoinRoomResponse = zod.object({
     .optional(),
   guests: zod.array(zod.string()),
   createdAt: zod.string(),
-  expiresAt: zod.string(),
+  expiresAt: zod.string().nullable(),
   open: zod.boolean(),
 });
 
@@ -331,7 +331,8 @@ export const AuthLoginResponse = zod.object({
     phoneVerified: zod.boolean(),
     trialUsed: zod.boolean(),
     remainingMinutes: zod.number(),
-    fullAccess: zod.boolean(),
+    permanentTestAccess: zod.boolean().optional(),
+  fullAccess: zod.boolean(),
     trialStartedAt: zod.string().nullable(),
     trialEndsAt: zod.string().nullable(),
     activeSessionEndsAt: zod.string().nullable(),
@@ -352,6 +353,7 @@ export const GetAuthMeResponse = zod.object({
   phoneVerified: zod.boolean(),
   trialUsed: zod.boolean(),
   remainingMinutes: zod.number(),
+  permanentTestAccess: zod.boolean().optional(),
   fullAccess: zod.boolean(),
   trialStartedAt: zod.string().nullable(),
   trialEndsAt: zod.string().nullable(),
@@ -373,7 +375,8 @@ export const AuthRefreshResponse = zod.object({
     phoneVerified: zod.boolean(),
     trialUsed: zod.boolean(),
     remainingMinutes: zod.number(),
-    fullAccess: zod.boolean(),
+    permanentTestAccess: zod.boolean().optional(),
+  fullAccess: zod.boolean(),
     trialStartedAt: zod.string().nullable(),
     trialEndsAt: zod.string().nullable(),
     activeSessionEndsAt: zod.string().nullable(),
@@ -404,6 +407,7 @@ export const UpdateAuthProfileResponse = zod.object({
   phoneVerified: zod.boolean(),
   trialUsed: zod.boolean(),
   remainingMinutes: zod.number(),
+  permanentTestAccess: zod.boolean().optional(),
   fullAccess: zod.boolean(),
   trialStartedAt: zod.string().nullable(),
   trialEndsAt: zod.string().nullable(),

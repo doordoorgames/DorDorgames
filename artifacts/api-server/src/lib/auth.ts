@@ -16,7 +16,7 @@ declare global {
     interface Request {
       account?: Account;
       hostAccount?: Extract<Account, { role: "host" }>;
-      hostSessionEndsAt?: string;
+      hostSessionEndsAt?: string | null;
       authSessionId?: string;
     }
   }
@@ -170,7 +170,7 @@ export const requireHost: RequestHandler = async (req, res, next) => {
     return;
   }
   const activeHost = await ensureHostSession(account);
-  if (!activeHost?.activeSessionEndsAt) {
+  if (!activeHost) {
     res.status(403).json({ error: "No hosting time remaining. Please purchase more time." });
     return;
   }
@@ -186,7 +186,7 @@ export const requireActiveHostSession: RequestHandler = async (req, res, next) =
     res.status(403).json({ error: "Host account required" });
     return;
   }
-  if (!hasActiveSession(account) || !account.activeSessionEndsAt) {
+  if (!hasActiveSession(account)) {
     res.status(403).json({ error: "Your hosting session has ended. Please activate a new block." });
     return;
   }
@@ -203,6 +203,7 @@ export function safeAccount(account: Account) {
         trialUsed: false,
         remainingMinutes: 0,
         fullAccess: false,
+        permanentTestAccess: false,
         trialStartedAt: null,
         trialEndsAt: null,
         activeSessionEndsAt: null,

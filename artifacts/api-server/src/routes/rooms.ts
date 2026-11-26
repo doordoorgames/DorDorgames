@@ -48,12 +48,12 @@ router.post("/rooms", requireHostIdentity, async (req, res) => {
   }
 
   const activeHost = await ensureHostSession(host);
-  if (!activeHost?.activeSessionEndsAt) {
+  if (!activeHost) {
     res.status(403).json({ error: "No hosting time remaining. Please purchase more time." });
     return;
   }
 
-  const room = store.rooms.create(host.phone, gameId, activeHost.activeSessionEndsAt);
+  const room = store.rooms.create(host.phone, gameId, activeHost.permanentTestAccess ? null : activeHost.activeSessionEndsAt!);
   res.status(201).json(roomWithGame(room));
 });
 

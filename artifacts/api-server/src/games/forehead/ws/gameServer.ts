@@ -104,7 +104,8 @@ function sendTo(ws: WebSocket, message: object) {
   }
 }
 
-function rejectExpiredSession(ws: WebSocket, room: { accessEndsAt: Date | null }): boolean {
+function rejectExpiredSession(ws: WebSocket, room: { accessEndsAt: Date | null; permanentTestAccess?: boolean }): boolean {
+  if (room.permanentTestAccess === true) return false;
   if (room.accessEndsAt && room.accessEndsAt.getTime() > Date.now()) return false;
   sendTo(ws, {
     type: "error",

@@ -15,6 +15,6 @@ export interface Room {
   activeGame?: Game;
   guests: string[];
   createdAt: string;
-  expiresAt: string;
+  expiresAt: string | null;
   open: boolean;
 }

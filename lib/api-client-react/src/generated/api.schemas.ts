@@ -89,7 +89,7 @@ export interface Room {
   activeGame?: Game;
   guests: string[];
   createdAt: string;
-  expiresAt: string;
+  expiresAt: string | null;
   open: boolean;
 }
 
@@ -122,6 +122,7 @@ export interface AccountProfile {
   phoneVerified: boolean;
   trialUsed: boolean;
   remainingMinutes: number;
+  permanentTestAccess?: boolean;
   fullAccess: boolean;
   trialStartedAt: string | null;
   trialEndsAt: string | null;

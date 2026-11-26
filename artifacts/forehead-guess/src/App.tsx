@@ -21,6 +21,7 @@ const queryClient = new QueryClient();
 interface DordorAccount {
   fullName: string;
   role: "host" | "participant";
+  permanentTestAccess?: boolean;
   remainingMinutes: number;
   activeSessionEndsAt: string | null;
 }
@@ -43,12 +44,12 @@ function AccountChip({ account }: { account: DordorAccount }) {
 function SessionStatus({ account }: { account: DordorAccount | null }) {
   if (account?.role !== "host") return null;
   const active = !!account.activeSessionEndsAt && new Date(account.activeSessionEndsAt).getTime() > Date.now();
-  const label = active
+  const label = account.permanentTestAccess === true ? "Unlimited test access" : active
     ? `Session ends at ${new Intl.DateTimeFormat(undefined, { hour: "numeric", minute: "2-digit" }).format(new Date(account.activeSessionEndsAt!))}`
     : account.remainingMinutes > 0
       ? `${account.remainingMinutes} purchased minutes available`
       : "Session ended";
-  return <div role="status" className="fixed top-3 left-1/2 -translate-x-1/2 z-[100] rounded-full border border-white/40 bg-black/85 px-4 py-2 text-sm font-bold text-white shadow-xl whitespace-nowrap">{label}{!active && account.remainingMinutes <= 0 && <> · <a className="text-yellow-300 underline" href="https://www.dordor.games/pricing">Buy a plan</a></>}</div>;
+  return <div role="status" className="fixed top-3 left-1/2 -translate-x-1/2 z-[100] rounded-full border border-white/40 bg-black/85 px-4 py-2 text-sm font-bold text-white shadow-xl whitespace-nowrap">{label}{account.permanentTestAccess !== true && !active && account.remainingMinutes <= 0 && <> · <a className="text-yellow-300 underline" href="https://www.dordor.games/pricing">Buy a plan</a></>}</div>;
 }
 
 function AccountGate({ children }: { children: ReactNode }) {

@@ -255,7 +255,7 @@ async function submitNewGame() {
     return;
   }
   const active = account.activeSessionEndsAt && new Date(account.activeSessionEndsAt).getTime() > Date.now();
-  if (!active && Number(account.remainingMinutes || 0) <= 0) {
+  if (account.permanentTestAccess !== true && !active && Number(account.remainingMinutes || 0) <= 0) {
     const isArabic = currentLanguage() === "ar";
     const wantsTime = await window.beautifulAlert.confirm(
       isArabic ? "احصل على وقت لعب إضافي لبدء لعبة جديدة." : "Get more game time to start a new game.",

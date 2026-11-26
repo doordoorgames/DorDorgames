@@ -68,7 +68,7 @@ router.post("/games", requireHostIdentity, async (req: Request, res: Response) =
   }
 
   const activeHost = await ensureHostSession(req.hostAccount!);
-  if (!activeHost?.activeSessionEndsAt) {
+  if (!activeHost) {
     sendError(res, 403, "No hosting time remaining. Please purchase more time.");
     return;
   }

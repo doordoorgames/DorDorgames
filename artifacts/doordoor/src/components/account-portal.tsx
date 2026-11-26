@@ -177,7 +177,7 @@ export function AccountPortal({ redirectHostToDashboard = false }: { redirectHos
 
             <div className="grid gap-3 text-sm mb-6 sm:grid-cols-2">
               <div className="rounded-xl border border-white/10 bg-white/5 p-4"><span className="text-white/45">Phone</span><p className="text-white mt-1">{account.phone}</p></div>
-              {account.role === "host" && <div className="rounded-xl border border-cyan-300/25 bg-cyan-300/5 p-4"><span className="text-white/45">Game time</span><p className="text-cyan-200 text-xl font-black mt-1">{account.activeSessionEndsAt && new Date(account.activeSessionEndsAt).getTime() > Date.now() ? `Session ends at ${formatEndTime(account.activeSessionEndsAt)}` : `${account.remainingMinutes} purchased minutes available`}</p></div>}
+              {account.role === "host" && <div className="rounded-xl border border-cyan-300/25 bg-cyan-300/5 p-4"><span className="text-white/45">Game time</span><p className="text-cyan-200 text-xl font-black mt-1">{account.permanentTestAccess === true ? "Unlimited test access" : account.activeSessionEndsAt && new Date(account.activeSessionEndsAt).getTime() > Date.now() ? `Session ends at ${formatEndTime(account.activeSessionEndsAt)}` : `${account.remainingMinutes} purchased minutes available`}</p></div>}
             </div>
 
             <div className="grid gap-3 sm:grid-cols-2 sm:gap-4">

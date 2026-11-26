@@ -137,7 +137,8 @@ export default function HostDashboard() {
   const roomMinutesLeft = sessionIsActive
     ? Math.max(0, Math.ceil((new Date(sessionEndsAt!).getTime() - now) / 60000))
     : null;
-  const displayMinutes = sessionIsActive
+  const permanentTestAccess = host?.permanentTestAccess === true;
+  const displayMinutes = permanentTestAccess ? Infinity : sessionIsActive
     ? (roomMinutesLeft ?? 0)
     : (host?.remainingMinutes ?? 0);
 
@@ -201,7 +202,7 @@ export default function HostDashboard() {
             </p>
           </div>
           <div className="w-full max-w-sm">
-            <BuyTimePanel open={buyTimeOpen} onOpenChange={setBuyTimeOpen} />
+            {!permanentTestAccess && <BuyTimePanel open={buyTimeOpen} onOpenChange={setBuyTimeOpen} />}
           </div>
           <button
             onClick={handleLogout}
@@ -294,16 +295,16 @@ export default function HostDashboard() {
                       : "border-yellow-500 text-yellow-500"
               }`}
             >
-              {sessionIsActive && sessionEndsAt
+              {permanentTestAccess ? "UNLIMITED TEST ACCESS" : sessionIsActive && sessionEndsAt
                 ? `SESSION ENDS AT ${formatSessionEnd(sessionEndsAt)}`
                 : `⏱ ${minutesDisplay} AVAILABLE`}
             </motion.div>
-            <button
+            {!permanentTestAccess && <button
               onClick={() => setBuyTimeOpen((v) => !v)}
               className="text-xs font-mono text-accent border border-accent/60 px-2 py-1 hover:bg-accent hover:text-black transition-colors"
             >
               + BUY TIME
-            </button>
+            </button>}
             <button
               onClick={handleLogout}
               className="text-xs font-mono text-destructive border border-destructive px-2 py-1 hover:bg-destructive hover:text-destructive-foreground transition-colors"
@@ -353,7 +354,7 @@ export default function HostDashboard() {
           </motion.div>
         )}
 
-        <BuyTimePanel open={buyTimeOpen} onOpenChange={setBuyTimeOpen} />
+        {!permanentTestAccess && <BuyTimePanel open={buyTimeOpen} onOpenChange={setBuyTimeOpen} />}
 
         {activeRoom ? (
           <div className="space-y-8">
