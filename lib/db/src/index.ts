@@ -203,6 +203,10 @@ export async function ensureDatabaseSchema(): Promise<void> {
         paid_at TIMESTAMPTZ
       );
 
+      ALTER TABLE public.payments
+        ADD COLUMN IF NOT EXISTS checkout_expires_at TIMESTAMPTZ,
+        ADD COLUMN IF NOT EXISTS checkout_url TEXT;
+
       CREATE INDEX IF NOT EXISTS payments_host_created_idx
         ON public.payments (host_id, created_at DESC);
 

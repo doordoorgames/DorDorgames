@@ -129,12 +129,15 @@ async function request(path: string, init?: RequestInit): Promise<unknown> {
 
 export async function createMyFatoorahPayment(input: {
   amountFils: number;
+  orderId: string;
+  expiresAt: Date;
 }): Promise<{ invoiceId: string; paymentUrl: string }> {
   const { apiUrl } = configuration();
   const raw = await request("/v3/payments", {
     method: "POST",
+    headers: { "Idempotency-Key": input.orderId },
     body: JSON.stringify({
-      PaymentMethod: "CARD",
+      PaymentExpiry: input.expiresAt.toISOString(),
       Order: { Amount: input.amountFils / 1_000 },
       IntegrationUrls: {
         Redirection: `${apiUrl}/api/checkout/callback`,

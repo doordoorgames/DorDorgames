@@ -49,6 +49,7 @@ async function reconcilePayment(
     details.Invoice.Status === "PAID" &&
     details.Transaction.Status === "SUCCESS";
   if (!successful) {
+    if (details.Invoice.Status === "PAID") return order;
     if (details.Transaction.Status === "CANCELED") {
       return paymentStore.markGatewayStatus(order.id, "cancelled");
     }
@@ -100,43 +101,48 @@ router.post("/checkout/pay", requireHostIdentity, async (req, res) => {
     return;
   }
 
-  const order = await paymentStore.create({
+  const order = await paymentStore.beginCheckout({
     hostId: host.id,
     packageId: selected.id,
     amountFils: selected.amountFils,
     minutes: selected.minutes,
   });
 
-  try {
-    const gateway = await createMyFatoorahPayment({
-      amountFils: selected.amountFils,
-    });
-    await paymentStore.attachInvoice(order.id, gateway.invoiceId);
-    req.log.info(
-      { orderId: order.id, invoiceId: gateway.invoiceId },
-      "MyFatoorah payment created",
-    );
-    res.status(201).json({
-      success: true,
-      orderId: order.id,
-      paymentUrl: gateway.paymentUrl,
-    });
-  } catch (error) {
-    const message =
-      error instanceof Error ? error.message : "Payment service is unavailable";
-    await paymentStore.markFailed(order.id, message);
-    req.log.error(
-      { orderId: order.id, err: error, errorMessage: message },
-      "Unable to create MyFatoorah payment",
-    );
-    const sandbox = process.env.MYFATOORAH_API_BASE_URL?.includes(
-      "apitest.myfatoorah.com",
-    );
-    res.status(502).json({
+  if (order.status === "paid") {
+    res.status(409).json({
       success: false,
-      message: sandbox
-        ? `Sandbox payment error: ${message}`
-        : "The payment page could not be opened. Please try again.",
+      message: "This game pass was just paid. Check your balance before starting another checkout.",
+    });
+    return;
+  }
+
+  const expiresAt = order.checkoutExpiresAt;
+  if (!expiresAt || expiresAt.getTime() <= Date.now() + 30_000) {
+    res.status(409).json({
+      success: false,
+      message: "Your previous checkout has expired. Check your payment result and try again in a few minutes.",
+    });
+    return;
+  }
+
+  try {
+    let paymentUrl = order.checkoutUrl;
+    if (!paymentUrl) {
+      const gateway = await createMyFatoorahPayment({
+        amountFils: order.amountFils,
+        orderId: order.id,
+        expiresAt,
+      });
+      await paymentStore.attachInvoice(order.id, gateway.invoiceId, gateway.paymentUrl);
+      paymentUrl = gateway.paymentUrl;
+      req.log.info({ orderId: order.id, invoiceId: gateway.invoiceId }, "MyFatoorah checkout saved");
+    }
+    res.status(201).json({ success: true, orderId: order.id, paymentUrl });
+  } catch (error) {
+    req.log.error({ orderId: order.id, err: error }, "MyFatoorah checkout could not be confirmed");
+    res.status(503).json({
+      success: false,
+      message: "Checkout could not be confirmed. Try again to resume the same checkout.",
     });
   }
 });
@@ -217,7 +223,7 @@ router.post("/checkout/webhook", async (req, res) => {
         { invoiceId: details.Invoice.Id },
         "Webhook received for unknown invoice",
       );
-      res.sendStatus(200);
+      res.sendStatus(503);
       return;
     }
     const reconciled = await reconcilePayment(order, details);

@@ -8,7 +8,7 @@ import {
   verifyMyFatoorahWebhookSignature,
 } from "./myfatoorah.js";
 
-test("creates a hosted card payment using the V3 request contract", async () => {
+test("reuses the V3 idempotency key and request payload across retries", async () => {
   const previousFetch = globalThis.fetch;
   const previousEnvironment = {
     token: process.env.MYFATOORAH_API_TOKEN,
@@ -21,9 +21,10 @@ test("creates a hosted card payment using the V3 request contract", async () => 
   process.env.PAYMENT_APP_URL = "https://www.dordor.games";
   process.env.PAYMENT_API_URL = "https://api.example.com";
 
-  let requestBody: unknown;
+  const requests: Array<{ key: string | null; body: unknown }> = [];
+  const checkout = { amountFils: 2_000, orderId: "order-1", expiresAt: new Date("2026-11-28T00:00:00Z") };
   globalThis.fetch = async (_input, init) => {
-    requestBody = JSON.parse(String(init?.body));
+    requests.push({ key: new Headers(init?.headers).get("Idempotency-Key"), body: JSON.parse(String(init?.body)) });
     return new Response(
       JSON.stringify({
         IsSuccess: true,
@@ -38,11 +39,13 @@ test("creates a hosted card payment using the V3 request contract", async () => 
   };
 
   try {
-    await createMyFatoorahPayment({
-      amountFils: 2_000,
-    });
-    assert.deepEqual(requestBody, {
-      PaymentMethod: "CARD",
+    const first = await createMyFatoorahPayment(checkout);
+    const retry = await createMyFatoorahPayment(checkout);
+    assert.deepEqual(first, retry);
+    assert.deepEqual(requests[0], requests[1]);
+    assert.equal(requests[0].key, checkout.orderId);
+    assert.deepEqual(requests[0].body, {
+      PaymentExpiry: checkout.expiresAt.toISOString(),
       Order: { Amount: 2 },
       IntegrationUrls: {
         Redirection: "https://api.example.com/api/checkout/callback",
@@ -61,9 +64,7 @@ test("creates a hosted card payment using the V3 request contract", async () => 
         { status: 400, headers: { "content-type": "application/json" } },
       );
     await assert.rejects(
-      createMyFatoorahPayment({
-        amountFils: 2_000,
-      }),
+      createMyFatoorahPayment(checkout),
       /MyFatoorah: Customer\.Mobile: Invalid mobile number/,
     );
   } finally {
