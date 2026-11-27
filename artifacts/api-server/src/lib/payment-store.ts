@@ -16,6 +16,8 @@ interface PaymentRow {
   failure_message: string | null;
   created_at: string;
   paid_at: string | null;
+  checkout_expires_at: Date | null;
+  checkout_url: string | null;
 }
 
 export interface PaymentOrder {
@@ -32,6 +34,8 @@ export interface PaymentOrder {
   failureMessage: string | null;
   createdAt: string;
   paidAt: string | null;
+  checkoutExpiresAt: Date | null;
+  checkoutUrl: string | null;
 }
 
 function rowToPayment(row: PaymentRow): PaymentOrder {
@@ -49,41 +53,62 @@ function rowToPayment(row: PaymentRow): PaymentOrder {
     failureMessage: row.failure_message,
     createdAt: row.created_at,
     paidAt: row.paid_at,
+    checkoutExpiresAt: row.checkout_expires_at,
+    checkoutUrl: row.checkout_url,
   };
 }
 
 export const paymentStore = {
-  async create(input: {
+  async beginCheckout(input: {
     hostId: string;
     packageId: string;
     amountFils: number;
     minutes: number;
   }): Promise<PaymentOrder> {
-    const result = await pool.query<PaymentRow>(
-      `INSERT INTO public.payments (host_id, package_id, amount_fils, currency, minutes)
-       VALUES ($1, $2, $3, 'KWD', $4)
-       RETURNING *`,
-      [input.hostId, input.packageId, input.amountFils, input.minutes],
-    );
-    return rowToPayment(result.rows[0]);
+    const client = await pool.connect();
+    try {
+      await client.query("BEGIN");
+      await client.query(
+        "SELECT pg_advisory_xact_lock(hashtextextended($1, 0))",
+        [`checkout:${input.hostId}:${input.packageId}`],
+      );
+      const existing = await client.query<PaymentRow>(
+        `SELECT * FROM public.payments
+         WHERE host_id = $1 AND package_id = $2
+           AND (
+             (status <> 'paid' AND checkout_expires_at > NOW() - INTERVAL '5 minutes')
+             OR (status = 'paid' AND paid_at > NOW() - INTERVAL '1 minute')
+           )
+         ORDER BY (status = 'paid' AND paid_at > NOW() - INTERVAL '1 minute') DESC NULLS LAST,
+                  created_at DESC
+         LIMIT 1`,
+        [input.hostId, input.packageId],
+      );
+      const order = existing.rows[0] ?? (await client.query<PaymentRow>(
+        `INSERT INTO public.payments
+           (host_id, package_id, amount_fils, currency, minutes, checkout_expires_at)
+         VALUES ($1, $2, $3, 'KWD', $4, NOW() + INTERVAL '30 minutes')
+         RETURNING *`,
+        [input.hostId, input.packageId, input.amountFils, input.minutes],
+      )).rows[0];
+      await client.query("COMMIT");
+      return rowToPayment(order);
+    } catch (error) {
+      await client.query("ROLLBACK");
+      throw error;
+    } finally {
+      client.release();
+    }
   },
 
-  async attachInvoice(id: string, invoiceId: string): Promise<void> {
-    await pool.query(
+  async attachInvoice(id: string, invoiceId: string, paymentUrl: string): Promise<void> {
+    const result = await pool.query(
       `UPDATE public.payments
-       SET myfatoorah_invoice_id = $2, updated_at = NOW()
-       WHERE id = $1 AND status = 'pending'`,
-      [id, invoiceId],
+       SET myfatoorah_invoice_id = $2, checkout_url = $3, updated_at = NOW()
+       WHERE id = $1 AND (myfatoorah_invoice_id IS NULL OR myfatoorah_invoice_id = $2)`,
+      [id, invoiceId, paymentUrl],
     );
-  },
-
-  async markFailed(id: string, message: string): Promise<void> {
-    await pool.query(
-      `UPDATE public.payments
-       SET status = 'failed', failure_message = $2, updated_at = NOW()
-       WHERE id = $1 AND status = 'pending'`,
-      [id, message.slice(0, 500)],
-    );
+    if (result.rowCount !== 1) throw new Error("Unable to persist payment invoice");
   },
 
   async markGatewayStatus(
@@ -141,7 +166,7 @@ export const paymentStore = {
       if (!row) throw new Error("Payment order not found");
 
       if (row.status !== "paid") {
-        await client.query(
+        const credited = await client.query(
           `UPDATE public.hosts
            SET remaining_minutes = remaining_minutes + $2,
                full_access = TRUE,
@@ -149,6 +174,7 @@ export const paymentStore = {
            WHERE id = $1`,
           [row.host_id, row.minutes],
         );
+        if (credited.rowCount !== 1) throw new Error("Payment host not found");
         const updated = await client.query<PaymentRow>(
           `UPDATE public.payments
            SET status = 'paid', myfatoorah_payment_id = $2,
@@ -162,6 +188,9 @@ export const paymentStore = {
         return rowToPayment(updated.rows[0]);
       }
 
+      if (row.myfatoorah_payment_id !== input.paymentId) {
+        throw new Error("A different transaction already fulfilled this order");
+      }
       await client.query("COMMIT");
       return rowToPayment(row);
     } catch (error) {
