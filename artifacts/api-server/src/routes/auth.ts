@@ -6,17 +6,14 @@ import {
   accountExists,
   consumeRateLimit,
   createSession,
-  deletePendingRegistration,
   findAccount,
   findAccountByIdentifier,
-  getPendingRegistration,
   normalizeEmail,
   normalizePhone,
   participants,
   revokeAllSessions,
   revokeSession,
   rotateSession,
-  savePendingRegistration,
 } from "../lib/accounts.js";
 import {
   REFRESH_COOKIE,
@@ -30,7 +27,7 @@ import {
   safeAccount,
   setSessionCookies,
 } from "../lib/auth.js";
-import { sendVerification, checkVerification, isMockVerification } from "../lib/twilio.js";
+import { verifyTurnstileToken } from "../lib/turnstile.js";
 
 const router: IRouter = Router();
 const RoleSchema = z.enum(["host", "participant"]);
@@ -41,17 +38,13 @@ const PasswordSchema = z
   .regex(/[A-Za-z]/, "Password must contain a letter")
   .regex(/\d/, "Password must contain a number");
 
-const SignupRequestOtpSchema = z.object({
+const SignupSchema = z.object({
   role: z.literal("host"),
   fullName: z.string().trim().min(2).max(80),
   email: z.string().trim().email().max(254),
   phone: z.string().transform(normalizePhone).pipe(z.string().regex(/^\+[1-9]\d{7,14}$/, "Use international format, for example +96550000000")),
   password: PasswordSchema,
-});
-
-const SignupVerifyOtpSchema = z.object({
-  phone: z.string().transform(normalizePhone),
-  otp: z.string().regex(/^\d{6}$/, "OTP must be exactly 6 digits"),
+  turnstileToken: z.string().min(1).max(2048),
 });
 
 const LoginSchema = z.object({
@@ -103,17 +96,27 @@ function refreshSessionId(req: Request): string | undefined {
   return separator > 0 ? value!.slice(0, separator) : undefined;
 }
 
-router.post("/auth/signup/request-otp", async (req, res) => {
-  const result = SignupRequestOtpSchema.safeParse(req.body);
+router.post("/auth/signup", async (req, res) => {
+  const result = SignupSchema.safeParse(req.body);
   if (!result.success) {
     res.status(400).json({ error: "Invalid input", details: result.error.issues.map((issue) => issue.message) });
     return;
   }
-  const { role, fullName, password } = result.data;
+  const { fullName, password } = result.data;
   const email = normalizeEmail(result.data.email);
   const phone = normalizePhone(result.data.phone);
 
-  if (!(await enforceRateLimit(req, res, "signup", phone, 5, 60 * 60))) return;
+  if (!(await enforceRateLimit(req, res, "signup", "host", 10, 60 * 60))) return;
+  try {
+    if (!(await verifyTurnstileToken(result.data.turnstileToken, requestIp(req)))) {
+      res.status(400).json({ error: "Security check failed. Please try again." });
+      return;
+    }
+  } catch (error) {
+    req.log.error({ err: error }, "Signup security check unavailable");
+    res.status(503).json({ error: "Signup is temporarily unavailable." });
+    return;
+  }
   if (await accountExists(email, phone)) {
     res.status(409).json({ error: "Email or phone is already registered" });
     return;
@@ -121,84 +124,21 @@ router.post("/auth/signup/request-otp", async (req, res) => {
 
   const passwordHash = await hashPassword(password);
   try {
-    await sendVerification(phone);
-  } catch (error) {
-    req.log.error({ error }, "Failed to send signup OTP");
-    res.status(502).json({ error: "Failed to send OTP. Please try again." });
-    return;
-  }
-
-  await savePendingRegistration({
-    role,
-    fullName,
-    email,
-    phone,
-    passwordHash,
-    expiresAt: new Date(Date.now() + 10 * 60 * 1000).toISOString(),
-  });
-  res.json({ success: true, message: "Verification code sent" });
-});
-
-router.post("/auth/signup/verify-otp", async (req, res) => {
-  const result = SignupVerifyOtpSchema.safeParse(req.body);
-  if (!result.success) {
-    res.status(400).json({ error: "Invalid input", details: result.error.issues.map((issue) => issue.message) });
-    return;
-  }
-  const { phone, otp } = result.data;
-  if (!(await enforceRateLimit(req, res, "verify", phone, 8, 15 * 60))) return;
-
-  const pending = await getPendingRegistration(phone);
-  if (!pending) {
-    res.status(400).json({ error: "Signup expired. Please start again." });
-    return;
-  }
-
-  let approved = false;
-  try {
-    approved = await checkVerification(phone, otp);
-  } catch (error) {
-    req.log.error({ error }, "OTP verification failed");
-    res.status(502).json({ error: "Failed to verify OTP. Please try again." });
-    return;
-  }
-  if (!approved) {
-    res.status(400).json({ error: "Invalid or expired OTP" });
-    return;
-  }
-  if (await accountExists(pending.email, pending.phone)) {
-    await deletePendingRegistration(phone);
-    res.status(409).json({ error: "Email or phone is already registered" });
-    return;
-  }
-
-  try {
-    const phoneVerified = !isMockVerification(phone);
     const trialStartedAt = new Date();
     const trialEndsAt = new Date(trialStartedAt.getTime() + FREE_TRIAL_MINUTES * 60 * 1000);
-    const account = pending.role === "host"
-      ? { ...await store.hosts.create({
-          fullName: pending.fullName,
-          email: pending.email,
-          phone: pending.phone,
-          passwordHash: pending.passwordHash,
-          phoneVerified,
-          trialUsed: true,
-          remainingMinutes: 0,
-          fullAccess: true,
-          trialStartedAt: trialStartedAt.toISOString(),
-          trialEndsAt: trialEndsAt.toISOString(),
-          activeSessionEndsAt: trialEndsAt.toISOString(),
-        }), role: "host" as const }
-      : { ...await participants.create({
-          fullName: pending.fullName,
-          email: pending.email,
-          phone: pending.phone,
-          passwordHash: pending.passwordHash,
-          phoneVerified,
-        }), role: "participant" as const };
-
-    await deletePendingRegistration(phone);
+    const account = { ...await store.hosts.create({
+      fullName,
+      email,
+      phone,
+      passwordHash,
+      phoneVerified: false,
+      trialUsed: true,
+      remainingMinutes: 0,
+      fullAccess: true,
+      trialStartedAt: trialStartedAt.toISOString(),
+      trialEndsAt: trialEndsAt.toISOString(),
+      activeSessionEndsAt: trialEndsAt.toISOString(),
+    }), role: "host" as const };
     const grant = await createSession(account.id, account.role, req.get("user-agent"));
     setSessionCookies(res, grant);
     res.status(201).json({ account: safeAccount(account) });
@@ -222,7 +162,7 @@ router.post("/auth/login", async (req, res) => {
 
   const account = await findAccountByIdentifier(role, normalizedIdentifier);
   const valid = account ? await comparePassword(password, account.passwordHash) : false;
-  if (!account || !valid || (!account.phoneVerified && !isMockVerification(account.phone))) {
+  if (!account || !valid) {
     res.status(401).json({ error: "Invalid credentials" });
     return;
   }
