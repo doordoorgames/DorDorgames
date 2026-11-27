@@ -6,9 +6,10 @@ interface LayoutProps {
   children: ReactNode;
   showHeader?: boolean;
   headerTitle?: string;
+  wide?: boolean;
 }
 
-export function Layout({ children, showHeader = true, headerTitle }: LayoutProps) {
+export function Layout({ children, showHeader = true, headerTitle, wide = false }: LayoutProps) {
   const [location] = useLocation();
   const isHome = location === "/";
 
@@ -26,7 +27,7 @@ export function Layout({ children, showHeader = true, headerTitle }: LayoutProps
       <div
         style={{
           width: "100%",
-          maxWidth: "430px",
+          maxWidth: wide ? "1040px" : "430px",
           height: "100%",
           display: "flex",
           flexDirection: "column",
@@ -35,7 +36,7 @@ export function Layout({ children, showHeader = true, headerTitle }: LayoutProps
           boxShadow: "0 0 60px rgba(120,0,180,0.12)",
         }}
       >
-        {/* Top header — hidden on home, shown on inner pages */}
+        {/* Top header - hidden on home, shown on inner pages */}
         {showHeader && !isHome && (
           <header
             style={{
@@ -86,7 +87,7 @@ export function Layout({ children, showHeader = true, headerTitle }: LayoutProps
         <main
           style={{
             flex: 1,
-            overflowY: "auto",
+            overflowY: wide ? "visible" : "auto",
             overflowX: "hidden",
             paddingBottom: "100px",
             WebkitOverflowScrolling: "touch",

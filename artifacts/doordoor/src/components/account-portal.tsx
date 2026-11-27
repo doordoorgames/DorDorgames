@@ -1,14 +1,14 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
+import { TurnstileWidget, type TurnstileWidgetHandle } from "./turnstile-widget";
 import { useLocation } from "wouter";
 import { useQueryClient } from "@tanstack/react-query";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   getGetAuthMeQueryKey,
   useAuthLogin,
+  useAuthSignup,
   useAuthLogout,
   useAuthLogoutAll,
-  useAuthSignupRequestOtp,
-  useAuthSignupVerifyOtp,
   useChangeAuthPassword,
   useGetAuthMe,
   useUpdateAuthProfile,
@@ -50,13 +50,11 @@ export function AccountPortal({ redirectHostToDashboard = false }: { redirectHos
   const { toast } = useToast();
   const role: Role = "host";
   const [mode, setMode] = useState<Mode>("login");
-  const [otpStep, setOtpStep] = useState(false);
   const [fullName, setFullName] = useState("");
   const [email, setEmail] = useState("");
   const [phone, setPhone] = useState("");
   const [password, setPassword] = useState("");
   const [identifier, setIdentifier] = useState("");
-  const [otp, setOtp] = useState("");
   const [editingProfile, setEditingProfile] = useState(false);
   const [profileName, setProfileName] = useState("");
   const [changingPassword, setChangingPassword] = useState(false);
@@ -71,8 +69,6 @@ export function AccountPortal({ redirectHostToDashboard = false }: { redirectHos
     },
   });
   const login = useAuthLogin();
-  const requestOtp = useAuthSignupRequestOtp();
-  const verifyOtp = useAuthSignupVerifyOtp();
   const updateProfile = useUpdateAuthProfile();
   const changePassword = useChangeAuthPassword();
   const logout = useAuthLogout();
@@ -113,21 +109,15 @@ export function AccountPortal({ redirectHostToDashboard = false }: { redirectHos
     );
   };
 
+  const signup = useAuthSignup();
+  const [turnstileToken, setTurnstileToken] = useState("");
+  const turnstile = useRef<TurnstileWidgetHandle>(null);
+
   const submitSignup = (event: React.FormEvent) => {
     event.preventDefault();
-    requestOtp.mutate(
-      { data: { role, fullName, email, phone, password } },
-      {
-        onSuccess: () => setOtpStep(true),
-        onError: (error) => toast({ title: "SIGNUP FAILED", description: errorMessage(error, "Please check your details"), variant: "destructive" }),
-      },
-    );
-  };
-
-  const submitOtp = (event: React.FormEvent) => {
-    event.preventDefault();
-    verifyOtp.mutate(
-      { data: { phone, otp } },
+    if (!turnstileToken) return;
+    signup.mutate(
+      { data: { role: "host", fullName, email, phone, password, turnstileToken } },
       {
         onSuccess: async ({ account }) => {
           await refreshProfile();
@@ -140,7 +130,10 @@ export function AccountPortal({ redirectHostToDashboard = false }: { redirectHos
           });
           continueAfterAuth(account.role);
         },
-        onError: (error) => toast({ title: "INVALID CODE", description: errorMessage(error, "Try the latest verification code"), variant: "destructive" }),
+        onError: (error) => {
+          turnstile.current?.reset();
+          toast({ title: "SIGNUP FAILED", description: errorMessage(error, "Please check your details"), variant: "destructive" });
+        },
       },
     );
   };
@@ -218,28 +211,20 @@ export function AccountPortal({ redirectHostToDashboard = false }: { redirectHos
       <div className="min-h-[calc(100dvh-150px)] flex items-center justify-center px-4 py-6 sm:px-6 sm:py-10">
         <motion.section initial={{ opacity: 0, scale: 0.97 }} animate={{ opacity: 1, scale: 1 }} className="w-full max-w-lg border border-fuchsia-400/45 bg-black/70 backdrop-blur-xl rounded-3xl p-5 sm:p-8 shadow-[0_0_55px_rgba(217,70,239,0.18)]">
           <div className="text-center mb-7">
-            <p className="text-xs font-mono tracking-[0.3em] text-cyan-300">ONE ACCOUNT · EVERY GAME</p>
+            <p className="text-xs font-mono tracking-[0.3em] text-cyan-300">ONE ACCOUNT � EVERY GAME</p>
             <h1 className="text-3xl font-black text-white mt-3">{mode === "login" ? "Welcome back" : "Create your Dordor ID"}</h1>
             <p className="text-white/45 text-sm mt-2">Start games and manage your game time. Your friends join for free with a room code.</p>
           </div>
 
           <div className="grid grid-cols-2 border-b border-white/10 mb-6">
-            {(["login", "signup"] as Mode[]).map((value) => <button key={value} type="button" onClick={() => { setMode(value); setOtpStep(false); }} className={`py-3 text-sm font-bold uppercase border-b-2 transition ${mode === value ? "border-cyan-300 text-cyan-200" : "border-transparent text-white/40"}`}>{value}</button>)}
+            {(["login", "signup"] as Mode[]).map((value) => <button key={value} type="button" onClick={() => { setMode(value); setTurnstileToken(""); }} className={`py-3 text-sm font-bold uppercase border-b-2 transition ${mode === value ? "border-cyan-300 text-cyan-200" : "border-transparent text-white/40"}`}>{value}</button>)}
           </div>
 
           {mode === "login" ? (
             <form onSubmit={submitLogin} className="space-y-3">
               <input className={inputClass} placeholder="Username, email or phone" value={identifier} onChange={(event) => setIdentifier(event.target.value)} autoComplete="username" />
               <input type="password" className={inputClass} placeholder="Password" value={password} onChange={(event) => setPassword(event.target.value)} autoComplete="current-password" />
-              <button className="w-full rounded-xl bg-gradient-to-r from-fuchsia-500 to-purple-600 text-white font-black py-3.5 shadow-[0_8px_30px_rgba(217,70,239,0.28)] disabled:opacity-50" disabled={login.isPending || !identifier || !password}>{login.isPending ? "SIGNING IN..." : "SIGN IN / دخول"}</button>
-            </form>
-          ) : otpStep ? (
-            <form onSubmit={submitOtp} className="space-y-4">
-              <p className="text-center text-sm text-white/55">Enter the six-digit code sent to <span className="text-cyan-200">{phone}</span></p>
-              <p className="rounded-xl border border-yellow-300/40 bg-yellow-300/10 p-3 text-center text-sm font-semibold text-yellow-100">Your first 30 minutes are free and start immediately when you verify this code.<br /><span lang="ar" dir="rtl">أول 30 دقيقة مجانية وتبدأ فور تأكيد الرمز.</span></p>
-              <input className={`${inputClass} text-center text-3xl tracking-[0.35em]`} inputMode="numeric" placeholder="000000" value={otp} onChange={(event) => setOtp(event.target.value.replace(/\D/g, "").slice(0, 6))} autoComplete="one-time-code" />
-              <button className="w-full rounded-xl bg-cyan-300 text-black font-black py-3.5 disabled:opacity-50" disabled={verifyOtp.isPending || otp.length !== 6}>{verifyOtp.isPending ? "VERIFYING..." : "VERIFY & CONTINUE"}</button>
-              <button type="button" onClick={() => setOtpStep(false)} className="w-full text-sm text-white/45">Change details</button>
+              <button className="w-full rounded-xl bg-gradient-to-r from-fuchsia-500 to-purple-600 text-white font-black py-3.5 shadow-[0_8px_30px_rgba(217,70,239,0.28)] disabled:opacity-50" disabled={login.isPending || !identifier || !password}>{login.isPending ? "SIGNING IN..." : "SIGN IN / ????"}</button>
             </form>
           ) : (
             <form onSubmit={submitSignup} className="space-y-3">
@@ -247,7 +232,8 @@ export function AccountPortal({ redirectHostToDashboard = false }: { redirectHos
               <input type="email" className={inputClass} placeholder="Email" value={email} onChange={(event) => setEmail(event.target.value)} autoComplete="email" />
               <input type="tel" className={inputClass} placeholder="Phone (+965...)" value={phone} onChange={(event) => setPhone(event.target.value)} autoComplete="tel" />
               <input type="password" className={inputClass} placeholder="Password (10+ characters, letter + number)" value={password} onChange={(event) => setPassword(event.target.value)} autoComplete="new-password" />
-              <button className="w-full rounded-xl bg-gradient-to-r from-fuchsia-500 to-purple-600 text-white font-black py-3.5 disabled:opacity-50" disabled={requestOtp.isPending}>{requestOtp.isPending ? "SENDING CODE..." : "CREATE ACCOUNT"}</button>
+              <TurnstileWidget ref={turnstile} onToken={setTurnstileToken} />
+              <button className="w-full rounded-xl bg-gradient-to-r from-fuchsia-500 to-purple-600 text-white font-black py-3.5 disabled:opacity-50" disabled={signup.isPending || !turnstileToken}>{signup.isPending ? "CREATING ACCOUNT..." : "CREATE ACCOUNT"}</button>
             </form>
           )}
 

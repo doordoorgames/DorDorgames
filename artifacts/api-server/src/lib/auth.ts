@@ -8,7 +8,6 @@ import {
   type AccountRole,
   type SessionGrant,
 } from "./accounts.js";
-import { isMockVerification } from "./twilio.js";
 import { ensureHostSession, hasActiveSession } from "./host-access.js";
 
 declare global {
@@ -136,7 +135,7 @@ async function resolveAccount(
     return null;
   }
   const account = await findAccount(payload.role, payload.sub);
-  if (!account || (!account.phoneVerified && !isMockVerification(account.phone))) {
+  if (!account) {
     res.status(401).json({ error: "Account is unavailable" });
     return null;
   }
