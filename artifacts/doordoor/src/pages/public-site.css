@@ -718,6 +718,30 @@
   padding-top: 50px;
   margin-top: 64px;
 }
+.dd-compact-checkout {
+  max-width: 640px;
+  padding-block: clamp(24px, 5vw, 48px);
+}
+.dd-compact-checkout .dd-purchase-title {
+  margin-block: 0 18px;
+}
+.dd-checkout-summary.dd-order {
+  padding: clamp(18px, 5vw, 28px);
+}
+.dd-checkout-summary p {
+  margin-block: 4px;
+  overflow-wrap: anywhere;
+}
+.dd-checkout-summary details {
+  margin-top: 12px;
+}
+.dd-checkout-summary .dd-button {
+  margin-top: 16px;
+}
+.dd-compact-checkout .dd-purchase-information {
+  margin-top: 28px;
+  padding-top: 20px;
+}
 .dd-package-top {
   display: flex;
   align-items: center;

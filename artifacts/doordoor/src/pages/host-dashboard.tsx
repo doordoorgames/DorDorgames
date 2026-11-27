@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect } from "react";
 import { Link, useLocation } from "wouter";
 import { useQueryClient } from "@tanstack/react-query";
 import { Layout } from "@/components/layout";
@@ -16,56 +16,18 @@ import {
 } from "@workspace/api-client-react";
 import { useToast } from "@/hooks/use-toast";
 import { QRCodeSVG } from "qrcode.react";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion } from "framer-motion";
 import { getGameByRoute } from "@/games-config";
 
-function BuyTimePanel({
-  open,
-  onOpenChange,
-}: {
-  open: boolean;
-  onOpenChange: (v: boolean) => void;
-}) {
+function BuyTimeLink() {
   return (
-    <div className="border-2 border-accent/60 bg-accent/5">
-      <button
-        onClick={() => onOpenChange(!open)}
-        className="w-full flex items-center justify-between p-4 font-mono text-sm text-accent hover:bg-accent/10 transition-colors"
-      >
-        <span>+ BUY MORE TIME / شراء وقت إضافي</span>
-        <span className="text-lg">{open ? "▲" : "▼"}</span>
-      </button>
-
-      <AnimatePresence>
-        {open && (
-          <motion.div
-            initial={{ height: 0, opacity: 0 }}
-            animate={{ height: "auto", opacity: 1 }}
-            exit={{ height: 0, opacity: 0 }}
-            transition={{ duration: 0.2 }}
-            className="overflow-hidden"
-          >
-            <div className="px-4 pb-4 space-y-4">
-              <div className="text-center space-y-1 py-2 border-t border-border">
-                <p className="font-mono text-xs text-muted-foreground">
-                  CHOOSE A GAME PASS
-                </p>
-                <p className="font-mono text-lg text-accent">FROM 2 KD</p>
-                <p className="arabic-text text-xs text-muted-foreground">
-                  اختر باقة اللعب المناسبة
-                </p>
-              </div>
-              <Link
-                href="/pricing"
-                className="w-full py-3 bg-primary/10 border-2 border-primary text-primary font-mono text-sm hover:bg-primary hover:text-primary-foreground transition-colors disabled:opacity-50 shadow-[0_0_8px_rgba(255,0,255,0.2)]"
-              >
-                VIEW GAME PASSES / عرض الباقات
-              </Link>
-            </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
-    </div>
+    <Link href="/pricing" className="flex min-h-12 w-full items-center justify-between gap-3 rounded-lg border border-accent/50 bg-accent/5 px-4 py-2 font-sans text-sm font-semibold text-accent hover:bg-accent/10">
+      <span>
+        Buy more time
+        <span className="arabic-text block text-xs" lang="ar" dir="rtl">شراء وقت إضافي</span>
+      </span>
+      <span aria-hidden="true">→</span>
+    </Link>
   );
 }
 
@@ -121,9 +83,7 @@ export default function HostDashboard() {
   });
 
   const [selectedGameId, setSelectedGameId] = useState("");
-  const [buyTimeOpen, setBuyTimeOpen] = useState(false);
   const [now, setNow] = useState(() => Date.now());
-  const autoOpenedRef = useRef(false);
 
   useEffect(() => {
     const id = setInterval(() => setNow(Date.now()), 30_000);
@@ -144,16 +104,6 @@ export default function HostDashboard() {
   const displayMinutes = permanentTestAccess ? Infinity : sessionIsActive
     ? (roomMinutesLeft ?? 0)
     : (host?.remainingMinutes ?? 0);
-
-  useEffect(() => {
-    if (activeRoom && displayMinutes <= 0 && !autoOpenedRef.current) {
-      autoOpenedRef.current = true;
-      setBuyTimeOpen(true);
-    }
-    if (displayMinutes > 0) {
-      autoOpenedRef.current = false;
-    }
-  }, [activeRoom, displayMinutes]);
 
   const handleLogout = () => {
     logout.mutate(undefined, {
@@ -192,7 +142,7 @@ export default function HostDashboard() {
   if (!activeRoom && isNoTime) {
     return (
       <Layout>
-        <div className="flex flex-col items-center justify-center min-h-[60vh] space-y-6">
+        <div className="flex flex-col items-center justify-center min-h-[60vh] space-y-6 px-4">
           <div className="border-2 border-destructive p-6 text-center space-y-3 w-full max-w-sm">
             <p className="font-mono text-destructive text-xl">
               NO TIME REMAINING
@@ -205,7 +155,7 @@ export default function HostDashboard() {
             </p>
           </div>
           <div className="w-full max-w-sm">
-            {!permanentTestAccess && <BuyTimePanel open={buyTimeOpen} onOpenChange={setBuyTimeOpen} />}
+            {!permanentTestAccess && <BuyTimeLink />}
           </div>
           <button
             onClick={handleLogout}
@@ -269,9 +219,9 @@ export default function HostDashboard() {
       <motion.div
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
-        className="space-y-8 pb-8"
+        className="min-w-0 space-y-5 px-4 pt-5 pb-8"
       >
-        <div className="flex items-start justify-between border-b border-border pb-4">
+        <div className="flex flex-wrap items-start justify-between gap-3 border-b border-border pb-4">
           <div>
             <h1 className="font-mono text-xl text-secondary">DASHBOARD</h1>
             <p className="text-xs text-muted-foreground arabic-text">
@@ -308,12 +258,6 @@ export default function HostDashboard() {
                 ? `SESSION ENDS AT ${formatSessionEnd(sessionEndsAt)}`
                 : `⏱ ${minutesDisplay} AVAILABLE`}
             </motion.div>
-            {!permanentTestAccess && <button
-              onClick={() => setBuyTimeOpen((v) => !v)}
-              className="text-xs font-mono text-accent border border-accent/60 px-2 py-1 hover:bg-accent hover:text-black transition-colors"
-            >
-              + BUY TIME
-            </button>}
             <button
               onClick={handleLogout}
               className="text-xs font-mono text-destructive border border-destructive px-2 py-1 hover:bg-destructive hover:text-destructive-foreground transition-colors"
@@ -363,7 +307,7 @@ export default function HostDashboard() {
           </motion.div>
         )}
 
-        {!permanentTestAccess && <BuyTimePanel open={buyTimeOpen} onOpenChange={setBuyTimeOpen} />}
+        {!permanentTestAccess && <BuyTimeLink />}
 
         {activeRoom ? (
           <div className="space-y-8">
@@ -449,21 +393,21 @@ export default function HostDashboard() {
         ) : (
           <div className="space-y-6">
             <div className="space-y-4">
-              <h2 className="font-mono text-primary text-xl">SELECT GAME</h2>
-              <div className="grid grid-cols-1 gap-4">
+              <h2 className="font-sans font-bold text-primary text-xl">Select a game</h2>
+              <div className="grid grid-cols-1 gap-2">
                 {games
                   ?.filter((g) => g.status === "active")
                   .map((game) => (
                     <div
                       key={game.id}
                       onClick={() => setSelectedGameId(game.id)}
-                      className={`cursor-pointer border-2 p-4 flex items-center gap-4 transition-all ${
+                      className={`w-full text-start cursor-pointer rounded-lg border p-3 flex items-center gap-3 transition-all ${
                         selectedGameId === game.id
                           ? "border-secondary bg-secondary/10 shadow-[0_0_15px_rgba(0,255,65,0.3)]"
                           : "border-muted hover:border-muted-foreground"
                       }`}
                     >
-                      <div className="w-12 h-12 bg-muted border border-border flex items-center justify-center">
+                      <div className="w-10 h-10 shrink-0 bg-muted border border-border flex items-center justify-center">
                         {game.logoUrl ? (
                           <img
                             src={game.logoUrl}
@@ -475,7 +419,7 @@ export default function HostDashboard() {
                         )}
                       </div>
                       <div>
-                        <h3 className="font-mono text-sm">{game.title}</h3>
+                        <h3 className="font-sans text-sm font-semibold">{game.title}</h3>
                         <p className="arabic-text text-xs text-muted-foreground">
                           {game.titleAr}
                         </p>

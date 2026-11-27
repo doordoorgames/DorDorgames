@@ -638,13 +638,8 @@ export function Purchase() {
       {(ar) => {
         const t = (en: string, arabic: string) => (ar ? arabic : en);
         return (
-          <section className="dd-section dd-container">
-            <p className="dd-eyebrow">
-              {t("YOUR NEXT GAME NIGHT", "ليلة ألعابك القادمة")}
-            </p>
-            <h1 className="dd-purchase-title">
-              {t("SECURE YOUR GAME NIGHT", "احجز ليلة ألعابك")}
-            </h1>
+          <section className="dd-section dd-container dd-compact-checkout">
+            <h1 className="dd-purchase-title">{t("Checkout", "إتمام الشراء")}</h1>
             {!selected ? (
               <div className="dd-empty">
                 <p>
@@ -660,155 +655,20 @@ export function Purchase() {
                 </Link>
               </div>
             ) : (
-              <div className="dd-purchase-grid">
-                <div className="dd-purchase-details">
-                  <div className="dd-pass-label">
-                    <Layers3 size={20} />
-                    {t("YOUR ALL-IN GAME PASS", "باقتك للوناسة")}
-                  </div>
-                  <p className="dd-eyebrow">
-                    {t("MERCHANT: DORDOR GAMES", "التاجر: دور دور للألعاب")}
-                  </p>
-                  <h2>
-                    {ar
-                      ? selected.nameAr
-                      : `DORDOR ${selected.name.toUpperCase()} PASS`}
-                  </h2>
-                  <p className="dd-hours">
-                    {(selected.paid + selected.bonus) * HOURS_PER_BLOCK}{" "}
-                    <span>{t("hours of game play", "ساعات من وقت اللعب")}</span>
-                  </p>
-                  <BlockVisual
-                    paid={selected.paid}
-                    bonus={selected.bonus}
-                    ar={ar}
-                  />
-                  <dl className="dd-facts dd-pass-facts">
-                    {[
-                      [
-                        t("Paid game pass blocks", "بلوكات اللعب المدفوعة"),
-                        selected.paid,
-                      ],
-                      [
-                        t("Bonus game pass blocks", "بلوكات اللعب الإضافية"),
-                        selected.bonus,
-                      ],
-                      [
-                        t("Total game pass blocks", "إجمالي بلوكات اللعب"),
-                        selected.paid + selected.bonus,
-                      ],
-                      [
-                        t("Total game-play hours", "إجمالي ساعات اللعب"),
-                        (selected.paid + selected.bonus) * HOURS_PER_BLOCK,
-                      ],
-                    ].map(([label, value]) => (
-                      <div key={label}>
-                        <dt>{label}</dt>
-                        <dd>{value}</dd>
-                      </div>
-                    ))}
-                  </dl>
-                  <p>
-                    {t(
-                      "One-time purchase of game time with access to all available games.",
-                      "شراء وقت لعب لمرة واحدة مع الوصول إلى جميع الألعاب المتاحة.",
-                    )}
-                  </p>
-                  {game && (
-                    <p className="dd-selected-game">
-                      <Gamepad2 size={18} />
-                      {t("Selected game", "اللعبة المختارة")}:{" "}
-                      {ar ? game.titleAr : game.title}
-                    </p>
+              <div className="dd-order dd-checkout-summary">
+                  <h2>{ar ? selected.nameAr : selected.name}</h2>
+                  <p>{(selected.paid + selected.bonus) * HOURS_PER_BLOCK} {t("hours of game time", "ساعات لعب")}</p>
+                  <p dir="auto"><strong>{packagePrice(selected.price, ar)}</strong> · {t("One-time payment", "دفعة واحدة")}</p>
+                  {game && <p>{ar ? game.titleAr : game.title}</p>}
+                  <Link className="dd-text-link" href="/pricing">{t("Change package", "تغيير الباقة")}</Link>
+                  {account.data && (
+                    <details>
+                      <summary>{t("Billing details", "بيانات الفوترة")}</summary>
+                      <p>{account.data.fullName}</p>
+                      <p dir="auto">{account.data.email}</p>
+                      <p dir="auto">{account.data.phone}</p>
+                    </details>
                   )}
-                  <p className="dd-host-note">
-                    <Users />
-                    {t(
-                      "Your friends join for free. Only the person starting the game needs a game pass.",
-                      "أصدقاؤك ينضمون مجاناً. فقط من يبدأ اللعبة يحتاج إلى باقة لعب.",
-                    )}
-                  </p>
-                  <Link className="dd-text-link" href="/pricing">
-                    {t("Change package", "تغيير الباقة")}
-                  </Link>
-                  <div
-                    className="dd-customer-form"
-                    aria-labelledby="customer-details-title"
-                  >
-                    <h2 id="customer-details-title">
-                      {t("Customer details", "بيانات العميل")}
-                    </h2>
-                    {account.data ? (
-                      <div className="dd-form-grid">
-                        <label>
-                          {t("Full name", "الاسم الكامل")}
-                          <input
-                            type="text"
-                            value={account.data.fullName}
-                            readOnly
-                          />
-                        </label>
-                        <label>
-                          {t("Email address", "البريد الإلكتروني")}
-                          <input
-                            type="email"
-                            value={account.data.email}
-                            readOnly
-                          />
-                        </label>
-                        <label>
-                          {t("Mobile number", "رقم الهاتف")}
-                          <input
-                            type="tel"
-                            value={account.data.phone}
-                            readOnly
-                          />
-                        </label>
-                      </div>
-                    ) : (
-                      <p>
-                        {t(
-                          "Log in to confirm your account and continue securely.",
-                          "سجّل الدخول لتأكيد حسابك والمتابعة بأمان.",
-                        )}
-                      </p>
-                    )}
-                    <p>
-                      {t(
-                        "Payment will be completed securely on MyFatoorah. Dordor Games does not collect or store card details.",
-                        "سيتم الدفع بأمان عبر ماي فاتورة. دور دور لا تجمع أو تخزن بيانات البطاقة.",
-                      )}
-                    </p>
-                  </div>
-                </div>
-                <aside className="dd-order">
-                  <ShieldCheck size={28} />
-                  <h2>{t("Order summary", "ملخص الطلب")}</h2>
-                  <p className="dd-order-caption">
-                    {t(
-                      "One purchase. A whole lot of good times.",
-                      "شراء واحد. ووقت مليان وناسة.",
-                    )}
-                  </p>
-                  <dl className="dd-facts">
-                    <div>
-                      <dt>{ar ? selected.nameAr : selected.name}</dt>
-                      <dd dir="auto">{packagePrice(selected.price, ar)}</dd>
-                    </div>
-                    <div className="dd-total">
-                      <dt>{t("Total payable", "إجمالي المبلغ")}</dt>
-                      <dd dir="auto">{packagePrice(selected.price, ar)}</dd>
-                    </div>
-                  </dl>
-                  <div className="dd-order-meta">
-                    <span>{t("One-time payment", "دفعة واحدة")}</span>
-                    <span>
-                      {t(
-                        "Additional fees: none shown",
-                        "رسوم إضافية: لا يوجد مبلغ معروض",
-                      )}
-                    </span>
-                  </div>
                   {account.isLoading ? (
                     <button className="dd-button" disabled>
                       {t("CHECKING ACCOUNT...", "جارٍ التحقق من الحساب...")}
@@ -833,7 +693,7 @@ export function Purchase() {
                     </Link>
                   )}
                   <p className="dd-payment-state" role="status">
-                    {paymentError ??
+                    {paymentError?.replace(/^HTTP \d+\s*:\s*/i, "") ??
                       t(
                         "You will complete payment securely on MyFatoorah.",
                         "ستكمل الدفع بأمان عبر ماي فاتورة.",
@@ -848,7 +708,6 @@ export function Purchase() {
                     <a href="#refunds">{t("Refunds", "الاسترداد")}</a>
                     <a href="#support">{t("Support", "الدعم")}</a>
                   </nav>
-                </aside>
               </div>
             )}
             <section
